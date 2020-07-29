@@ -1,0 +1,96 @@
+﻿
+@if (Model?.Status > 0)
+{
+    var xhr = Model;
+    var headers = xhr.Headers;
+    var isHtml = Model.IsHtmlResponse;
+    var statusSuccess = xhr.IsSuccessStatusCode ? "success" : "error";
+    <CascadingValue Value="this">
+        <div class="blazor-form-manager-debug-info">
+            <hr />
+            <div class="xhr-status-code-@xhr.Status xhr-status-@statusSuccess">
+                <h3>HTTP Response</h3>
+                @if (headers.Any())
+                {
+                    <div class="xhr-response-headers">
+                        <span class="d-block">Headers:</span>
+                        <ul>
+                            @foreach (var kvp in headers)
+                            {
+                                <li>@kvp.Key: @kvp.Value</li>
+                            }
+                        </ul>
+                    </div>
+                }
+                <div class="xhr-status">
+                    <span class="d-block">Status Code: @xhr.Status</span>
+                    @if (!string.IsNullOrWhiteSpace(xhr.StatusText))
+                    {
+                        <span class="d-block">Status Text: @xhr.StatusText</span>
+                    }
+                </div>
+                @if (xhr.Response != null)
+                {
+                    <div class="xhr-response@(isHtml ? " content-type-html" : "")">
+                        <span class="d-block">Response: @(!isHtml ? xhr.Response.ToString() : "")</span>
+                        @if (isHtml)
+                        {
+                            <FormDebugOptionsView />
+                            <div class="xhr-response-html">
+                                @if (true == Options?.HtmlDocViewEnabled)
+                                {
+                                    <IFrameSourceDocument Html="@xhr.Response.ToString()" />
+                                }
+                                else
+                                {
+                                    @xhr.Response.ToString()
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(xhr.ResponseText))
+                {
+                    <div class="xhr-response-text@(isHtml ? " content-type-html" : "")">
+                        <span class="d-block">Response Text: @(!isHtml ? xhr.ResponseText : "")</span>
+                        @if (isHtml)
+                        {
+                            <FormDebugOptionsView />
+                            <div class="xhr-response-html">
+                                @if (true == Options?.HtmlDocViewEnabled)
+                                {
+                                    <IFrameSourceDocument Html="@xhr.ResponseText" />
+                                }
+                                else
+                                {
+                                    @xhr.ResponseText
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(xhr.ResponseXML))
+                {
+                    <div class="xhr-response-xml">
+                        <span class="d-block">XML: </span>
+                        <IFrameSourceDocument Html="@xhr.ResponseXML" />
+                    </div>
+                }
+            </div>
+        </div>
+    </CascadingValue>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the form manager XHR result.
+    /// </summary>
+    [Parameter] public FormManagerXhrResult Model { get; set; }
+
+    /// <summary>
+    /// Gets or sets the debug options.
+    /// </summary>
+    [Parameter] public FormManagerXhrDebug Options { get; set; } = new FormManagerXhrDebug();
+
+    internal void RefreshState() => StateHasChanged();
+}

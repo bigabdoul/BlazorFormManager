@@ -1,0 +1,30 @@
+﻿@if (Model?.Count > 0)
+{
+    <div class="ajax-upload-not-supported">
+        @if (!HideAjaxNotSupportedMessage)
+        {
+            <h4 class="alert alert-danger">AJAX Upload Not Supported!</h4>
+            <p>Asynchronous JavaScript and XML (AJAX) upload with progress report is not supported by your browser.</p>
+        }
+        <div class="browser-info">
+            <ul>
+                @foreach (var kvp in Model)
+                {
+                    <li>@kvp.Key: @kvp.Value</li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets a collection of key-value pairs of browser properties.
+    /// </summary>
+    [Parameter] public IDictionary<string, object> Model { get; set; }
+
+    /// <summary>
+    /// Indicates whether to hide the message 'AJAX Upload Not Supported!...'.
+    /// </summary>
+    [Parameter] public bool HideAjaxNotSupportedMessage { get; set; }
+}

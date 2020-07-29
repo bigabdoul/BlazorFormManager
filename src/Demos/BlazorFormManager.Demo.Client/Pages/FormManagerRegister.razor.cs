@@ -1,5 +1,5 @@
 ﻿using BlazorFormManager.Components;
-using BlazorFormManager.Debug;
+using BlazorFormManager.Debugging;
 using BlazorFormManager.Demo.Client.Models;
 using Microsoft.AspNetCore.Components;
 using System;

@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using BlazorFormManager.Components;
-using BlazorFormManager.Debug;
+using BlazorFormManager.Debugging;
 using Microsoft.JSInterop;
 using System;
 using System.Threading.Tasks;

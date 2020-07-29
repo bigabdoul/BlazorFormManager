@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.Debug;
+﻿using BlazorFormManager.Debugging;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;

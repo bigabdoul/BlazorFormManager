@@ -1,0 +1,24 @@
+﻿@if (Parent?.Options != null)
+{
+    <div class="xhr-debug-options">
+        <input type="checkbox" id="@CheckboxId" @onchange="HtmlDocViewEnabledChanged"
+               checked="@Parent.Options.HtmlDocViewEnabled" />
+        <label for="@CheckboxId">Enable HTML View</label>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the parent container.
+    /// </summary>
+    [CascadingParameter] public FormDebugInfo Parent { get; set; }
+
+    private const string CheckboxId = nameof(FormManagerXhrDebug.HtmlDocViewEnabled);
+
+    private void HtmlDocViewEnabledChanged(ChangeEventArgs e)
+    {
+        Parent.Options.HtmlDocViewEnabled = bool.Parse(e.Value.ToString());
+        StateHasChanged();
+        Parent.RefreshState();
+    }
+}
