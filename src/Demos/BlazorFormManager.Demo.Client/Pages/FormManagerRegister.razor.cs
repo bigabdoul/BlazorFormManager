@@ -38,7 +38,7 @@ namespace BlazorFormManager.Demo.Client.Pages
                         manager.SubmitResult = FormManagerSubmitResult.Success(result, model.Message);
                         if (model.SignedIn)
                         {
-                            NavigationManager.NavigateTo("/form-manager-update", true);
+                            NavigationManager.NavigateTo("/account/update", true);
                         }
                         StateHasChanged();
                     }
