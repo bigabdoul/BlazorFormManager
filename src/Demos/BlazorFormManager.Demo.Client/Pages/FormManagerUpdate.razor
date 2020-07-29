@@ -1,0 +1,28 @@
+﻿@page "/form-manager-update"
+@inherits FormManagerBase<UpdateUserModel>
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
+          id="@FormId" action="api/account/update" enctype="multipart/form-data"
+          @attributes="AdditionalAttributes">
+    <DemoHeader Title="Form Manager Demo: Inheritance" SubTitle="Update User Information"
+                LogLevel="LogLevel" OnLogLevelChanged="level => LogLevel = level" />
+    <div class="row">
+        <div class="col-md-4"><UserModelInputs Model="Model" /></div>
+        <div class="col-md-4"><Base64RemoteImage Src="api/account/photo" @ref="remoteImgRef" /></div>
+    </div>
+    <SubmitButton Manager="this" Text="Save" ForceSubmit />
+    <DataAnnotationsValidator />
+</EditForm>
+<FormSubmitResultView Result="SubmitResult" />
+@if (IsDebug)
+{
+    <FormDebugInfo Model="XhrResult" Options="DebugOptions" />
+    <UnsupportedBrowserProperties Model="AjaxUploadNotSupported?.ExtraProperties" />
+}
+@if (IsUploadingFiles)
+{
+    <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" OnCancelRequested="() => AbortRequested = true" />
+}
+@code {
+    private Base64RemoteImage remoteImgRef;
+}

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RazorLangVersion>3.0</RazorLangVersion>
+    <Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress.</Description>
+    <Copyright>© 2020 Karfamsoft. All rights reserved.</Copyright>
+    <Authors>Abdourahamane Kaba</Authors>
+    <Company>Karfamsoft</Company>
+    <PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>c#, .net, razor, class, library, blazor, form, form manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
+    <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+    <PackageReleaseNotes>This Razor Class Library has been tested with a Blazor WebAssembly App template in Visual Studio 2019 Community. Tests with other project types will be done in future releases. Sample (demo) projects can be found on Github at https://github.com/bigabdoul/BlazorFormManager</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Users\akaba\source\repos\BlazorFormManager\src\BlazorFormManager\BlazorFormManager.xml</DocumentationFile>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.6" />
+  </ItemGroup>
+
+</Project>

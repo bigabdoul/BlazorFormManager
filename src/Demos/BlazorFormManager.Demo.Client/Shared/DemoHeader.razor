@@ -1,0 +1,40 @@
+﻿<div class="row my-3">
+    <div class="col">
+        <h3>
+            <span class="float-left">@Title</span>
+            <span class="float-md-right my-2">
+                <span class="input-group">
+                    <span class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fa fa-terminal"></i>&nbsp;console log:
+                        </span>
+                    </span>
+                    <select class="form-select" value="@LogLevel" @onchange="HandleLogLevelChanged">
+                        @foreach (var name in Enum.GetNames(typeof(ConsoleLogLevel)))
+                        {
+                            <option value="@name">@name</option>
+                        }
+                    </select>
+                </span>
+            </span>
+        </h3>
+    </div>
+</div>
+<h4 class="mb-3 pt-3 border-top">@SubTitle</h4>
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string SubTitle { get; set; }
+    [Parameter] public ConsoleLogLevel LogLevel { get; set; }
+    [Parameter] public EventCallback<ConsoleLogLevel> OnLogLevelChanged { get; set; }
+
+    private async Task HandleLogLevelChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ConsoleLogLevel>(e.Value.ToString(), out var result))
+        {
+            LogLevel = result;
+            if (OnLogLevelChanged.HasDelegate)
+                await OnLogLevelChanged.InvokeAsync(LogLevel);
+        }
+    }
+}

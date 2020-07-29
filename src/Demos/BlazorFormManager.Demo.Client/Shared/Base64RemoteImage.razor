@@ -1,0 +1,33 @@
+﻿@inject HttpClient Http
+ 
+@if (!string.IsNullOrEmpty(base64Photo))
+{
+    <img src="data:image/jpeg;base64, @base64Photo" alt="User's profile picture" class="img-fluid" style="max-height:275px;"/>
+}
+
+@code {
+    private string base64Photo;
+
+    [Parameter] public string Src { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync()
+    {
+        try
+        {
+            var result = await Http.GetAsync(Src);
+            result.EnsureSuccessStatusCode();
+            var bytes = await result.Content.ReadAsByteArrayAsync();
+            base64Photo = Convert.ToBase64String(bytes);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex);
+        }
+    }
+}

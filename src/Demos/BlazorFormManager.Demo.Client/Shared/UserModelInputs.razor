@@ -1,0 +1,66 @@
+﻿<div class="row">
+    <div class="@ColWidth">
+        <div class="form-group">
+            <label class="sr-only" for="@nameof(Model.FirstName)">@FirstNameText</label>
+            <InputText @bind-Value="Model.FirstName" class="form-control" id="@nameof(Model.FirstName)" title="@FirstNameText" placeholder="@FirstNameText" />
+            <ValidationMessage For="() => Model.FirstName" />
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="@nameof(Model.LastName)">@LastNameText</label>
+            <InputText @bind-Value="Model.LastName" class="form-control" id="@nameof(Model.LastName)" title="@LastNameText" placeholder="@LastNameText" />
+            <ValidationMessage For="() => Model.LastName" />
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="@nameof(Model.Email)">@EmailText</label>
+            <InputText @bind-Value="Model.Email" type="email" class="form-control" id="@nameof(Model.Email)" title="@EmailText" placeholder="@EmailText" disabled="@(!IsRegistration)" />
+            <ValidationMessage For="() => Model.Email" />
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="@nameof(Model.PhoneNumber)">@PhoneNumberText</label>
+            <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="@nameof(Model.PhoneNumber)" title="@PhoneNumberText" placeholder="@PhoneNumberText" />
+            <ValidationMessage For="() => Model.PhoneNumber" />
+        </div>
+    </div>
+    @if (Model is RegisterUserModel registerModel)
+    {
+        <div class="@ColWidth">
+            <div class="form-group">
+                <label class="sr-only" for="@nameof(registerModel.Password)">@PasswordText</label>
+                <InputText type="password" @bind-Value="registerModel.Password" class="form-control" id="@nameof(registerModel.Password)" title="@PasswordText" placeholder="@PasswordText" />
+                <ValidationMessage For="() => registerModel.Password" />
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="@nameof(registerModel.ConfirmPassword)">@ConfirmPasswordText</label>
+                <InputText type="password" @bind-Value="registerModel.ConfirmPassword" class="form-control" id="@nameof(registerModel.ConfirmPassword)" title="@ConfirmPasswordText" placeholder="@ConfirmPasswordText" />
+                <ValidationMessage For="() => registerModel.ConfirmPassword" />
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="@ColWidth">
+        <div class="form-group">
+            <div class="custom-file mt-3 mb-3">
+                <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText" @ref="fileInputRef">
+                <label class="custom-file-label" for="@id">@ChoosePhotoText</label>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    private ElementReference fileInputRef;
+    private readonly string id = $"InputFile_{Guid.NewGuid():n}";
+    private bool IsRegistration => (Model is RegisterUserModel);
+    private string ColWidth => IsRegistration ? "col-6" : "col-12";
+
+    public ElementReference FileRef => fileInputRef;
+
+    [Parameter] public UpdateUserModel Model { get; set; }
+    [Parameter] public string FirstNameText { get; set; } = "First name";
+    [Parameter] public string LastNameText { get; set; } = "Last name";
+    [Parameter] public string EmailText { get; set; } = "Email";
+    [Parameter] public string PhoneNumberText { get; set; } = "Your phone number";
+    [Parameter] public string PasswordText { get; set; } = "New password";
+    [Parameter] public string ConfirmPasswordText { get; set; } = "Confirm your new password";
+    [Parameter] public string ChoosePhotoText { get; set; } = "Choose a photo";
+}

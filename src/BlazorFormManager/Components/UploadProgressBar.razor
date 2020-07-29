@@ -1,0 +1,42 @@
+﻿@if (Progress != null)
+{
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <small class="upload-status">
+                @UploadStatusMessage @Progress.ProgressPercentage%
+            </small>
+            <div class="progress mb-3">
+                <div class="progress-bar" role="progressbar" style="@ProgressStyle"
+                     aria-valuenow="@Progress.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
+                <i class="fa fa-ban"></i> @CancelButtonText
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets an object that contains information about the current form submission progress.
+    /// </summary>
+    [Parameter] public UploadProgressChangedEventArgs Progress { get; set; }
+
+    /// <summary>
+    /// Gets or sets the upload status message.
+    /// </summary>
+    [Parameter] public string UploadStatusMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text of the cancel button.
+    /// </summary>
+    [Parameter] public string CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Gets or sets the event callback used to handle a cancellation request.
+    /// </summary>
+    [Parameter] public EventCallback OnCancelRequested { get; set; }
+
+    private string ProgressStyle => $"width: {Progress?.ProgressPercentage ?? 0}%";
+}

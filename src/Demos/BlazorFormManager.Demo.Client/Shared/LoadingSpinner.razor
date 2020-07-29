@@ -1,0 +1,25 @@
+﻿@if (Show)
+{
+    if (Overlay) { <Overlay /> }
+    <div class="lds-spinner@(Inline ? " d-inline" : "")">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+}
+
+@code
+{
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public bool Overlay { get; set; }
+    [Parameter] public bool Inline { get; set; }
+}

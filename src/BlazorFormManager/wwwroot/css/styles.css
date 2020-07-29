@@ -1,0 +1,36 @@
+﻿
+.blazor-form-manager-debug-info {
+    font-family: Consolas;
+    font-size: .8rem;
+    margin-bottom: 2rem;
+}
+
+    .blazor-form-manager-debug-info .xhr-status-success > * {
+        color: green;
+    }
+
+    .blazor-form-manager-debug-info .xhr-status-error > * {
+        color: #b22222;
+    }
+
+    .blazor-form-manager-debug-info .xhr-response-html {
+        max-height: 550px;
+        overflow-y: auto;
+    }
+
+        .blazor-form-manager-debug-info .xhr-response-html iframe {
+            width: 100%;
+            height: 350px;
+            background-color: #fff;
+        }
+
+    .blazor-form-manager-debug-info .xhr-debug-options {
+        margin-top: .75rem;
+        margin-bottom: .75rem;
+        background-color: #e6e6e6;
+        padding: .75rem .5rem 0;
+    }
+
+        .blazor-form-manager-debug-info .xhr-debug-options > * {
+            font-size: 90%;
+        }

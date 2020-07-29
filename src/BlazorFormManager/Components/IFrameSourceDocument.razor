@@ -1,0 +1,23 @@
+﻿@if (!string.IsNullOrWhiteSpace(Html))
+{
+    <iframe srcdoc="@((MarkupString)Html)">@NotSupported</iframe>
+}
+else if (!string.IsNullOrWhiteSpace(Src))
+{
+    <iframe src="@Src">@NotSupported</iframe>
+}
+@code {
+    /// <summary>
+    /// Gets or sets the &lt;iframe>'s srcdoc attribute value.
+    /// If both properties <see cref="Html"/> and <see cref="Src"/>
+    /// are set, this one takes precedence over the latter.
+    /// </summary>
+    [Parameter] public string Html { get; set; }
+
+    /// <summary>
+    /// Gets or sets the &lt;iframe>'s src attribute value.
+    /// </summary>
+    [Parameter] public string Src { get; set; }
+
+    private MarkupString NotSupported => (MarkupString)$"&lt;iframe> is not supported on this device!";
+}
