@@ -41,19 +41,16 @@
     <div class="@ColWidth">
         <div class="form-group">
             <div class="custom-file mt-3 mb-3">
-                <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText" @ref="fileInputRef">
+                <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText">
                 <label class="custom-file-label" for="@id">@ChoosePhotoText</label>
             </div>
         </div>
     </div>
 </div>
 @code {
-    private ElementReference fileInputRef;
     private readonly string id = $"InputFile_{Guid.NewGuid():n}";
     private bool IsRegistration => (Model is RegisterUserModel);
     private string ColWidth => IsRegistration ? "col-6" : "col-12";
-
-    public ElementReference FileRef => fileInputRef;
 
     [Parameter] public UpdateUserModel Model { get; set; }
     [Parameter] public string FirstNameText { get; set; } = "First name";
