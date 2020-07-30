@@ -21,18 +21,18 @@
             <ValidationMessage For="() => Model.PhoneNumber" />
         </div>
     </div>
-    @if (Model is RegisterUserModel registerModel)
+    @if (Model is RegisterUserModel register)
     {
         <div class="@ColWidth">
             <div class="form-group">
-                <label class="sr-only" for="@nameof(registerModel.Password)">@PasswordText</label>
-                <InputText type="password" @bind-Value="registerModel.Password" class="form-control" id="@nameof(registerModel.Password)" title="@PasswordText" placeholder="@PasswordText" />
-                <ValidationMessage For="() => registerModel.Password" />
+                <label class="sr-only" for="@nameof(register.Password)">@PasswordText</label>
+                <InputText type="password" @bind-Value="register.Password" class="form-control" id="@nameof(register.Password)" title="@PasswordText" placeholder="@PasswordText" />
+                <ValidationMessage For="() => register.Password" />
             </div>
             <div class="form-group">
-                <label class="sr-only" for="@nameof(registerModel.ConfirmPassword)">@ConfirmPasswordText</label>
-                <InputText type="password" @bind-Value="registerModel.ConfirmPassword" class="form-control" id="@nameof(registerModel.ConfirmPassword)" title="@ConfirmPasswordText" placeholder="@ConfirmPasswordText" />
-                <ValidationMessage For="() => registerModel.ConfirmPassword" />
+                <label class="sr-only" for="@nameof(register.ConfirmPassword)">@ConfirmPasswordText</label>
+                <InputText type="password" @bind-Value="register.ConfirmPassword" class="form-control" id="@nameof(register.ConfirmPassword)" title="@ConfirmPasswordText" placeholder="@ConfirmPasswordText" />
+                <ValidationMessage For="() => register.ConfirmPassword" />
             </div>
         </div>
     }

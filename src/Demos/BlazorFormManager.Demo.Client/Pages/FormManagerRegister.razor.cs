@@ -22,25 +22,27 @@ namespace BlazorFormManager.Demo.Client.Pages
 
         private void HandleSubmitDone(FormManagerSubmitResult result)
         {
+            // Succeeded means the server responded with a success status code.
+            // But we still have to find out how the action really came out.
             if (result.Succeeded && result.XHR.IsJsonResponse)
             {
                 try
                 {
-                    var model = JsonSerializer.Deserialize<RegisterUserModelResult>(
+                    // Since the response is in JSON format, let's parse it and investigate.
+                    var response = JsonSerializer.Deserialize<RegisterUserModelResult>(
                         result.XHR.ResponseText, CaseInsensitiveJson);
 
-                    if (!model.Success)
+                    if (!response.Success)
                     {
-                        manager.SubmitResult = FormManagerSubmitResult.Failed(result, model.Error);
+                        manager.SubmitResult = FormManagerSubmitResult.Failed(result, response.Error);
                     }
-                    else if (!string.IsNullOrEmpty(model.Message))
+                    else if (!string.IsNullOrEmpty(response.Message))
                     {
-                        manager.SubmitResult = FormManagerSubmitResult.Success(result, model.Message);
-                        if (model.SignedIn)
+                        manager.SubmitResult = FormManagerSubmitResult.Success(result, response.Message);
+                        if (response.SignedIn)
                         {
                             NavigationManager.NavigateTo("/account/update", true);
                         }
-                        StateHasChanged();
                     }
                 }
                 catch (Exception ex)
