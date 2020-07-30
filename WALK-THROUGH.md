@@ -1,22 +1,38 @@
 # Walkthrough: Integrating BlazorFormManager
 
-To integrate BlazorFormManager into your own project, follow the steps below (skip step 1
-if you already have an existing project). The instructions guide you through building a
-set of projects similar to the demo projects found in this repository.
+This walkthrough requires some familarity with the latest version of `Visual Studio 2019`
+or higher. You can also use `Visual Studio Code` or any other code editor that supports
+the `dotnet CLI` but they don't apply to this document.
+
+You can download and install for free the latest version of `Visual Studio 2019 Community`
+here: https://visualstudio.microsoft.com/downloads
+
+To integrate BlazorFormManager into your own project, follow the steps below. Feel free
+to skip Step 1 if you already have an existing project whose layout corresponds to the
+`Blazor WebAssembly App` project template created with the latest version of Visual
+Studio 2019 or higher.
+
+The instructions guide you through building a set of projects similar to the demo
+projects found in this repository.
 
 1. ### Creating a new solution
+
    Create an ASP.NET Core hosted Blazor WebAssembly App with authentication using
-   individual user accounts named `{APP NAMESPACE}`, which is placeholder; replace
-   it with the name (without whitespaces) of your project.
+   individual user accounts named `{APP NAMESPACE}`. {APP NAMESPACE} is a placeholder
+   that you should replace with the name (without whitespaces) of your project
+   (e.g. _BlazorFormManagerWalkthrough_).
+
 2. ### Updating the solution
+
    As a best-practice, in Visual Studio 2019 Community (or higher), update the solution
-   using the `Manage NuGet Packages for Solution...` context menu by right-clicking on
+   using the `Manage NuGet Packages for Solution...` context menu option: right-click on
    the Solution file item. In the `NuGet - Solution` window, click the `Updates` tab,
    wait until Visual Studio is done refreshing all projects to be updated. Check the
    `Select all packages` option and click the `Update` button on the same line. If
-   prompted, read and accept the `License Acceptance` dialog. To install and manage
+   prompted, read and accept the `License Acceptance` in the dialog. To install and manage
    packages using the dotnet CLI (outside Visual Studio), please visit
    https://docs.microsoft.com/en-us/nuget/consume-packages/install-use-packages-dotnet-cli
+
 3. ### Building the solution
 
    After all packages have been restored to their respective latest version, make sure
@@ -28,7 +44,7 @@ set of projects similar to the demo projects found in this repository.
    Add a reference to the BlazorFormManager RCL project. Alternatively, you can install
    the binaries through the NuGet Gallery at https://www.nuget.org/packages/BlazorFormManager.
 
-   In Visual Studio's package manager console: `Install-Package BlazorFormManager`
+   In Visual Studio's package manager console, type: `Install-Package BlazorFormManager`
 
    or:
 
@@ -79,9 +95,15 @@ set of projects similar to the demo projects found in this repository.
    ```
 
    What we did above is embedding and configuring the `<FormManager />` component
-   into the registration "page". The code is pretty simple self-explanatory somehow due
-   the expressive nature of Razor Components. The `@ref` attribute acquires a reference
-   to the rendered DOM element and stores it into the `manager` member variable below.
+   into the registration "page". The code is pretty simple and self-explanatory somehow
+   due the expressive nature of Razor Components.
+
+   The `<DataAnnotationsValidator />` component ensures client-side validation rules are
+   enforced thanks to the data annotation attributes `[Required], [StringLength]` and so
+   on. We'll see them soon when defining the models.
+
+   The `@ref` attribute acquires a reference to the rendered DOM element and stores it
+   into the `manager` member variable below.
 
    Usually, I separate the code from the UI elements by placing it in a "code-behind"
    class file. But for the sake of simplicity, below the above markup, copy and paste
@@ -129,6 +151,11 @@ set of projects similar to the demo projects found in this repository.
      }
    }
    ```
+
+   The `HandleSubmitDone` routine is called an event callback handler. Whenever an
+   instance of the FormManagerBase class finishes submitting the form, and regardless
+   of the outcome (success or failure), the `OnSubmitDone` event callback is triggered,
+   hence executing the aforementioned routine.
 
    Remember to replace **{APP NAMESPACE}** with the namespace of your project (e.g.
    FirstBlazorProject). A couple of steps are ahead before getting a functional
@@ -197,6 +224,12 @@ set of projects similar to the demo projects found in this repository.
 
    #### DemoHeader.razor component:
 
+   This component contains the page's title and subtitle headings. It also contains a
+   selector allowing the user to control the reporting level in the browser's console
+   during debugging. This is useful when you as developer need to figure out problems
+   that might occur during development. Of course, this shouldn't be shipped into
+   production.
+
    ```HTML
    <div class="row my-3">
      <div class="col">
@@ -246,6 +279,18 @@ set of projects similar to the demo projects found in this repository.
 
    #### UserModelInputs.razor component:
 
+   This component will be used both for user registration and editing their personal
+   information. It contains the following fields:
+
+   - FirstName (required)
+   - LastName (required)
+   - Email (required)
+   - PhoneNumber (optional)
+   - Password (required, registration only)
+   - ConfirmPassword (required, registration only)
+
+   A file selector is included at the end to allow users to attach their photo.
+
    ```HTML
    <div class="row">
        <div class="@ColWidth">
@@ -290,7 +335,7 @@ set of projects similar to the demo projects found in this repository.
        <div class="@ColWidth">
            <div class="form-group">
                <div class="custom-file mt-3 mb-3">
-                   <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText" @ref="fileInputRef">
+                   <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText">
                    <label class="custom-file-label" for="@id">@ChoosePhotoText</label>
                </div>
            </div>
@@ -300,12 +345,9 @@ set of projects similar to the demo projects found in this repository.
 
    ```C#
    @code {
-       private ElementReference fileInputRef;
        private readonly string id = $"InputFile_{Guid.NewGuid():n}";
        private bool IsRegistration => (Model is RegisterUserModel);
        private string ColWidth => IsRegistration ? "col-6" : "col-12";
-
-       public ElementReference FileRef => fileInputRef;
 
        [Parameter] public UpdateUserModel Model { get; set; }
        [Parameter] public string FirstNameText { get; set; } = "First name";
@@ -319,6 +361,18 @@ set of projects similar to the demo projects found in this repository.
    ```
 
    #### SubmitButton.razor component:
+
+   This component, as its name suggests, allows submission of the form. It is passed a
+   parameter that holds a reference to an instance of the FormManagerBase class. This
+   makes it possible to get notified about running state changes and disable/enable
+   the button accordingly.
+
+   The `@onclick` event handler, in tandem with the `ForceSubmit` flag, decide whether
+   the FormManagerBase should submit the form or whether the browser should do it. In
+   some situations, as of this writing and for an unknown reason, Blazor won't allow
+   the browser to submit the form even though all validation checks successfully pass.
+   We are then required to "force" the form submission using the `BlazorFormManager.js`
+   script working behind the scenes.
 
    ```HTML
     @if (Manager != null)
@@ -346,9 +400,7 @@ set of projects similar to the demo projects found in this repository.
    }
    ```
 
-   Right now, you are certainly seing error messages like _The type or namespace name
-   'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly
-   reference?)_. Fix these errors by adding the following to the _\_Imports.razor_ file
+   Right now, you are certainly seing error messages like _`The type or namespace name 'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly reference?).`_ Fix these errors by adding the following to the _\_Imports.razor_ file
    located under the _{APP NAMESPACE}.Client_ project's root directory:
 
    ```C#
@@ -370,5 +422,30 @@ set of projects similar to the demo projects found in this repository.
    This means that the resource (API endpoint) to which you tried to send the form does
    not exist.
 
-9. ### Building the Web API endpoint
+   Before moving on to the next step, let's do some cleanup:
+
+   - In the **Pages** folder in the root of _{APP NAMESPACE}.Client_, delete the
+     **Counter** and **FetchData** components.
+   - Under _**Dependencies/Projects**_, remove the reference to the project
+     **{APP NAMESPACE}.Shared** and delete that project altogether from the Solution.
+   - Now go to the **_{APP NAMESPACE}.Client/Shared_** folder and delete _SurveyPrompt.razor_.
+   - In **{APP NAMESPACE}.Shared/Index.razor**, remove the `<SurveyPrompt />` component.
+   - Replace its content with the markup below:
+     ```HTML
+     @page "/"
+     <h3 class="pb-3 border-bottom">Welcome to Blazor Form Manager</h3>
+     <p>Pick up a demo activity to get started.</p>
+     <ul>
+        <li>Composition Demo: <a href="account/register">User registration</a></li>
+        <li>
+            Inheritance Demo: <a href="account/update">Update user info</a>
+            <AuthorizeView>
+                <NotAuthorized>(authentication required)</NotAuthorized>
+            </AuthorizeView>
+        </li>
+     </ul>
+     ```
+
+9. ### Creating the Web API endpoint
+
    Documentation work in progress...
