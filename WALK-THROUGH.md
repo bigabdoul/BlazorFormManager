@@ -501,7 +501,7 @@ command:
 
 `Update-Database` and press the _Enter_ key. This creates the application's database.
 You can view the database by opening the `SQL Server Object Explorer` found in the menu
-_View_. Expand the nodes _SQL Server/(localdb)\MSSQLLocalDB/Databases_.There, you should
+_View_. Expand the nodes _SQL Server/(localdb)\MSSQLLocalDB/Databases_. There, you should
 find a database named something like
 _**aspnet-{APP NAMESPACE}.Server-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX**_ where
 _XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX_ is Guid (Globally Unique Identifier).
@@ -520,9 +520,11 @@ namespace {APP NAMESPACE}.Server.Models
 {
     public class ApplicationUser : IdentityUser
     {
+        [Required]
         [StringLength(100)]
         public string FirstName { get; set; }
 
+        [Required]
         [StringLength(100)]
         public string LastName { get; set; }
 
@@ -531,18 +533,23 @@ namespace {APP NAMESPACE}.Server.Models
 }
 ```
 
-The `[StringLength(100)]` attributes make sure that the columns are not accepting values
-longer than 100 characters. You can make them required (non nullable in the database) by
-adding the `[Required]` attribute. But for now, `[StringLength]` is sufficient.
+By adding the `[Required]` attribute we tell EntityFramework Core to not allow NULL
+values for the properties (columns in the database) that are marked with it.
 
-Make sure that the project builds by pressing _Ctrl+B_ or going to the menu
+The `[StringLength(100)]` attributes make sure that the columns are not accepting values
+longer than 100 characters.
+
+Make sure that the project builds by pressing _Ctrl+B_ or by going to the menu
 _Build > Build {APP NAMESPACE}.Server_.
 
 In the `Package Manager Console`, update the database by typing the following commands:
 
-`Add-Migration CustomizeApplicationUser` (press _Enter_ key)
+`Add-Migration CustomizeApplicationUser` (press **_Enter_** key)
 
-`Update-Database` (press _Enter_ key)
+`Update-Database` (press **_Enter_** key)
+
+Run the application with **Ctrl+F5**. Navigate to `/account/register`, fill in the form
+and submit it. You'll still get a 404 HTTP error. Let's fix that now.
 
 ## Step 11: Creating the Web API endpoint
 
