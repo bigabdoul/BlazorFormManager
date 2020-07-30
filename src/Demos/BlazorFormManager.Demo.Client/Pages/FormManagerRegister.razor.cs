@@ -16,7 +16,7 @@ namespace BlazorFormManager.Demo.Client.Pages
         protected FormManager<RegisterUserModel> manager;
 
         private ConsoleLogLevel LogLevel => manager?.LogLevel ?? ConsoleLogLevel.None;
-        private readonly RegisterUserModel Model = new RegisterUserModel();
+        private RegisterUserModel Model = new RegisterUserModel();
 
         [Inject] NavigationManager NavigationManager { get; set; }
 
@@ -42,6 +42,12 @@ namespace BlazorFormManager.Demo.Client.Pages
                         if (response.SignedIn)
                         {
                             NavigationManager.NavigateTo("/account/update", true);
+                        }
+                        else
+                        {
+                            // invalidate the form by setting a new model
+                            Model = new RegisterUserModel();
+                            StateHasChanged();
                         }
                     }
                 }

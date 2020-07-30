@@ -79,14 +79,14 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     PhoneNumber = model.PhoneNumber,
                 };
 
-                bool success;
-                (success, message) = await SetPhotoAsync(user);
-                if (!success) return Ok(new { success, error = message });
+                var (success, photoMessage) = await SetPhotoAsync(user);
+                if (!success) return Ok(new { success, error = photoMessage });
 
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
+                    message = "Your account has been successfully created. ";
                     _logger.LogInformation("User created a new account with password.");
                     var signedIn = false;
 
@@ -95,12 +95,17 @@ namespace BlazorFormManager.Demo.Server.Controllers
                         await signInManager.SignInAsync(user, isPersistent: false);
                         signedIn = true;
 
-                        message += " You have been automatically signed in because " +
-                            "account confirmation is disabled.";
-                        
+                        message += "You have been automatically signed in because " +
+                            "account confirmation is disabled. ";
+
                         _logger.LogInformation(message);
                     }
+                    else
+                    {
+                        message += "You must confirm your email address before you can log in.  ";
+                    }
 
+                    message += photoMessage;
                     return Ok(new { success = true, message, signedIn });
                 }
 
@@ -109,7 +114,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 foreach (var error in result.Errors)
                     sb.AppendLine(error.Description);
 
-                message += sb.ToString();
+                message = sb.ToString();
             }
             catch (DbUpdateException ex)
             {
