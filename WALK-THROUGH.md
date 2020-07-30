@@ -458,7 +458,37 @@ Before moving on to the next step, let's do some cleanup:
   **Counter** and **FetchData** components.
 - Under _**Dependencies/Projects**_, remove the reference to the project
   **{APP NAMESPACE}.Shared** and delete that project altogether from the Solution.
-- Now go to the **_{APP NAMESPACE}.Client/Shared_** folder and delete _SurveyPrompt.razor_.
+- Now go to the **_{APP NAMESPACE}.Client/Shared_** folder and delete the file
+  _**SurveyPrompt.razor**_.
+- Open up the _**NavMenu.razor**_ file and change the content of this
+  `<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">` to ressemble this:
+  ```HTML
+  <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+      <ul class="nav flex-column">
+          <li class="nav-item px-3">
+              <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                  <span class="oi oi-home" aria-hidden="true"></span> Home
+              </NavLink>
+          </li>
+          <AuthorizeView>
+              <NotAuthorized>
+                  <li class="nav-item px-3">
+                      <NavLink class="nav-link" href="account/register">
+                          <span class="fa fa-user"></span> User Registration
+                      </NavLink>
+                  </li>
+              </NotAuthorized>
+              <Authorized>
+                  <li class="nav-item px-3">
+                      <NavLink class="nav-link" href="account/update">
+                          <span class="fa fa-user"></span> Update User Info
+                      </NavLink>
+                  </li>
+              </Authorized>
+          </AuthorizeView>
+      </ul>
+  </div>
+  ```
 - In **{APP NAMESPACE}.Shared/Index.razor**, remove the `<SurveyPrompt />` component.
 - Replace its content with the markup below:
   ```HTML
