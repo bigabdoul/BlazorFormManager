@@ -21,6 +21,8 @@ more about it here: https://blazor.net.
 Note: Developement was done on Windows so instructions like keyboard combinations are
 specific to that environment.
 
+_Warning: This document is a work in progress! Expect it to be frequently updated._
+
 ## What you will learn in this walkthrough:
 
 - How to create a (client-side) Blazor WebAssembly Application using Visual Studio
@@ -591,7 +593,9 @@ In the `Package Manager Console`, update the database by typing the following co
 Run the application with **Ctrl+F5**. Navigate to `/account/register`, fill in the form
 and submit it. You'll still get a 404 HTTP error. Let's fix that now.
 
-## Step 11: Creating the Web API endpoint
+## Step 11: Creating the Web API endpoints
+
+### 11.1 Creating the user registration Web API endpoint
 
 In the project _{APP NAMESPACE}.Server_, right-click on the **Controllers** folder and
 add an empty API Controller (_Add > Controller... > API Controller - Empty_). In the
@@ -696,6 +700,8 @@ namespace {APP NAMESPACE}.Server.Controllers
 
         private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
         {
+            bool success = true;
+            string message = null;
             if (Request.Form.Files.Any())
             {
                 var file = Request.Form.Files.First();
@@ -708,14 +714,14 @@ namespace {APP NAMESPACE}.Server.Controllers
                     ms.Position = 0L;
                     var content = ms.ToArray();
                     user.Photo = content;
-                    return (true, $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n");
+                    (success, message) = (true, $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n");
                 }
                 else
                 {
-                    return (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                    (success, message) = (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
                 }
             }
-            return (true, null);
+            return (success, message);
         }
     }
 }
@@ -763,5 +769,318 @@ The rest of the code is straight forward:
   - If the user creation was successful, check if email confirmation is required; if not,
     sign the user in.
   - If the registration was not successful, report errors back to the user.
+
+Try creating a user again at `/account/register`. This time, everything should work as
+expected but we won't be able to sign in after creating a new account. For one reason:
+
+By default, the template we used to create the Solution requires account confirmation.
+Take a look at the `{APP NAMESPACE}.Server/Startup.cs` file, in the method where
+services are configured:
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    // rest of the code omitted
+
+    services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    // rest of the code omitted
+}
+```
+
+Let's move this hard-coded configuration option to the application's configuration file
+`appsettings.json`. Since we're in developer mode, let's rather put this in the file
+`appsettings.Development.json`. This application settings file is a JSON file that looks
+like the one below:
+
+```JSON
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "IdentityServer": {
+    "Key": {
+      "Type": "Development"
+    }
+  }
+}
+```
+
+Let's add a new key to this file named `RequireConfirmedAccount` and set its value to
+`false`, like so:
+
+```JSON
+{
+    "RequireConfirmedAccount": false
+}
+```
+
+The resulting file should be similar to:
+
+```JSON
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "IdentityServer": {
+    "Key": {
+      "Type": "Development"
+    }
+  },
+  "RequireConfirmedAccount": false
+}
+```
+
+Now, let's retrieve this value in the `Startup.ConfigureServices` method:
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    // rest of the code omitted
+
+    // Get the configuration value for new account confirmation
+    // requirement; fallback to true by default should it be missing.
+    var requireConfirmation = Configuration.GetValue("RequireConfirmedAccount", true);
+
+    services.AddDefaultIdentity<ApplicationUser>(options =>
+        options.SignIn.RequireConfirmedAccount = requireConfirmation)
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    // rest of the code omitted
+}
+```
+
+Hit `Ctrl+F5` and navigate to `/account/register`. Try registering a new user with a
+different email address. It works like a charm and you're immediately signed in and
+redirected to `/account/update`. You'll be disappointed to see that there's nothing at
+this address. At least for the moment.
+
+### 11.2 Creating the user update Web API endpoint
+
+To make the page component at `/account/update` work, we'll start with the endpoint that
+will allow users to update their account information.
+
+In the `AccountController.cs` file, add a new HTTP GET method named `Update` with the
+following implementation:
+
+```C#
+using System.Security.Claims; // <- This goes to the top of the file
+
+[HttpPost("Update")]
+public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
+{
+    string message;
+    try
+    {
+        var user = await _userManager.FindByNameAsync(GetUserName());
+
+        if (user != null)
+        {
+            var (success, photoMessage) = await SetPhotoAsync(user);
+            if (!success) return Ok(new { success, error = photoMessage });
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.PhoneNumber = model.PhoneNumber;
+
+            await _userManager.UpdateAsync(user);
+
+            _logger.LogInformation("User updated account information.");
+            message = $"Your account information has been updated. {photoMessage}";
+
+            return Ok(new { success = true, message });
+        }
+        else
+        {
+            message = "User not found!";
+        }
+    }
+    catch (Exception ex)
+    {
+        message = $"An unexpected error of type {ex.GetType().FullName} occurred while updating the user.";
+    }
+
+    return Ok(new { success = false, error = message });
+}
+
+private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimTypes.Name);
+```
+
+### 11.3 Putting it all together
+
+The whole `AccountController.cs` file should ressemble a variation of the following:
+
+```C#
+using {APP NAMESPACE}.Client.Models;
+using {APP NAMESPACE}.Server.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Server.Controllers
+{
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register
+        (
+            [FromForm] RegisterUserModel model,
+            [FromServices] SignInManager<ApplicationUser> signInManager
+        )
+        {
+            string message;
+            try
+            {
+                var emailConfirmed = !_userManager.Options.SignIn.RequireConfirmedAccount;
+                var user = new ApplicationUser
+                {
+                    Email = model.Email,
+                    EmailConfirmed = emailConfirmed,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    UserName = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                };
+
+                var (success, photoMessage) = await SetPhotoAsync(user);
+                if (!success) return Ok(new { success, error = photoMessage });
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    message = "Your account has been successfully created. ";
+                    _logger.LogInformation("User created a new account with password.");
+                    var signedIn = false;
+
+                    if (emailConfirmed)
+                    {
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        signedIn = true;
+
+                        message += "You have been automatically signed in because " +
+                            "account confirmation is disabled. ";
+
+                        _logger.LogInformation(message);
+                    }
+                    else
+                    {
+                        message += "You must confirm your email address before you can log in.  ";
+                    }
+
+                    message += photoMessage;
+                    return Ok(new { success = true, message, signedIn });
+                }
+
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var error in result.Errors)
+                    sb.AppendLine(error.Description);
+
+                message = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                message = $"An unexpected error of type {ex.GetType().FullName} occurred while creating the user.";
+                _logger.LogError(message);
+            }
+            return Ok(new { success = false, error = message });
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
+        {
+            string message;
+            try
+            {
+                var user = await _userManager.FindByNameAsync(GetUserName());
+
+                if (user != null)
+                {
+                    var (success, photoMessage) = await SetPhotoAsync(user);
+                    if (!success) return Ok(new { success, error = photoMessage });
+
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                    user.PhoneNumber = model.PhoneNumber;
+
+                    await _userManager.UpdateAsync(user);
+
+                    _logger.LogInformation("User updated account information.");
+                    message = $"Your account information has been updated. {photoMessage}";
+
+                    return Ok(new { success = true, message });
+                }
+                else
+                {
+                    message = "User not found!";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"An unexpected error of type {ex.GetType().FullName} occurred while updating the user.";
+            }
+
+            return Ok(new { success = false, error = message });
+        }
+
+        private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
+        {
+            bool success = true;
+            string message = null;
+            if (Request.Form.Files.Any())
+            {
+                var file = Request.Form.Files.First();
+
+                if (string.Equals("image/jpeg", file.ContentType, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("image/jpg", file.ContentType, StringComparison.OrdinalIgnoreCase))
+                {
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    ms.Position = 0L;
+                    var content = ms.ToArray();
+                    user.Photo = content;
+                    message = $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n";
+                }
+                else
+                {
+                    (success, message) = (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                }
+            }
+            return (success, message);
+        }
+
+        private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimTypes.Name);
+    }
+}
+```
 
 Documentation work in progress...
