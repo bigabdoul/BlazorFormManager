@@ -21,14 +21,24 @@ namespace BlazorFormManager.Demo.Server.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        #region fields
+
         // 5MB max for photos
         private const long PHOTO_SIZE_LIMIT = 5242880L;
         private const long BIG_FILE_SIZE_LIMIT = Startup.BIG_FILE_SIZE_LIMIT;
         private const string UPDATE_ERROR = " An update error occurred in the database while creating the user.";
         private const string GENERIC_ERROR = " An unexpected error of type {0} occurred while {1}.";
+        private const string AUTO_SIGNED_IN = "You have been automatically signed in because account confirmation is disabled. ";
+        private const string EMAIL_CONFIRMATION_REQUIRED = "You must confirm your email address before you can log in. ";
+        private const string ACCOUNT_CREATED = "Your account has been successfully created. ";
+        private const string ACCOUNT_CREATED_WITH_PASSWORD = "User created a new account with password.";
+        private const string ACCOUNT_UPDATED = "User updated account information.";
+        private const string JPEG_ONLY_SUPPORTED = "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n";
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<AccountController> _logger; 
+
+        #endregion
 
         public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
         {
@@ -86,23 +96,20 @@ namespace BlazorFormManager.Demo.Server.Controllers
 
                 if (result.Succeeded)
                 {
-                    message = "Your account has been successfully created. ";
-                    _logger.LogInformation("User created a new account with password.");
+                    message = ACCOUNT_CREATED;
+                    _logger.LogInformation(ACCOUNT_CREATED_WITH_PASSWORD);
                     var signedIn = false;
 
                     if (emailConfirmed)
                     {
                         await signInManager.SignInAsync(user, isPersistent: false);
                         signedIn = true;
-
-                        message += "You have been automatically signed in because " +
-                            "account confirmation is disabled. ";
-
+                        message += AUTO_SIGNED_IN;
                         _logger.LogInformation(message);
                     }
                     else
                     {
-                        message += "You must confirm your email address before you can log in.  ";
+                        message += EMAIL_CONFIRMATION_REQUIRED;
                     }
 
                     message += photoMessage;
@@ -160,7 +167,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
 
                     await _userManager.UpdateAsync(user);
 
-                    _logger.LogInformation("User updated account information.");
+                    _logger.LogInformation(ACCOUNT_UPDATED);
                     return Ok(new { success = true, message });
                 }
                 else
@@ -246,7 +253,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 }
                 else
                 {
-                    return (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                    return (false, JPEG_ONLY_SUPPORTED);
                 }
             }
             return (true, null);
