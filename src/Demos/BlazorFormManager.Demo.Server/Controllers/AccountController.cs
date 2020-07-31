@@ -150,16 +150,15 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [RequestFormLimits(MultipartBodyLengthLimit = PHOTO_SIZE_LIMIT)]
         public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
         {
-            string message = null;
+            string message;
             try
             {
                 var user = await _userManager.FindByNameAsync(GetUserName());
 
                 if (user != null)
                 {
-                    bool success;
-                    (success, message) = await SetPhotoAsync(user);
-                    if (!success) return Ok(new { success, error = message });
+                    var (success, photoMessage) = await SetPhotoAsync(user);
+                    if (!success) return Ok(new { success, error = photoMessage });
 
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
@@ -168,11 +167,13 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     await _userManager.UpdateAsync(user);
 
                     _logger.LogInformation(ACCOUNT_UPDATED);
+                    message = $"Your account information has been updated. {photoMessage}";
+
                     return Ok(new { success = true, message });
                 }
                 else
                 {
-                    message = "User not found!";
+                    message = "User account not found!";
                 }
             }
             catch (Exception ex)
@@ -180,9 +181,9 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 var genericMessage = GetGenericErrorMessage(ex, "updating the user");
                 _logger.LogError(ex, genericMessage);
 #if TRACE
-                message += ex.ToString();
+                message = ex.ToString();
 #else
-                message += genericMessage;
+                message = genericMessage;
 #endif
             }
 
@@ -237,6 +238,8 @@ namespace BlazorFormManager.Demo.Server.Controllers
 
         private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
         {
+            bool success = true;
+            string message = null;
             if (Request.Form.Files.Any())
             {
                 var file = Request.Form.Files.First();
@@ -249,14 +252,14 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     ms.Position = 0L;
                     var content = ms.ToArray();
                     user.Photo = content;
-                    return (true, $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n");
+                    message = $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n";
                 }
                 else
                 {
-                    return (false, JPEG_ONLY_SUPPORTED);
+                    (success, message) = (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
                 }
             }
-            return (true, null);
+            return (success, message);
         }
 
         private async Task<(string filename, long length)> CopyFileToTempLocationAsync(IWebHostEnvironment env)
