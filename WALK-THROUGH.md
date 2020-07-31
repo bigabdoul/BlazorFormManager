@@ -115,19 +115,21 @@ followed by this HTML-like markup:
 </FormManager>
 ```
 
-What we did above is embedding and configuring the `<FormManager />` component into the
-registration component. The form will be submitted to the `api/account/register` API
-endpoint, as indicated by the `FormAction` attribute.
+The `@page` C# directive configures routing for the component: it allows navigation to
+the component using the relative `/account/register` URL.
 
-The `@page` C# directive configures routing for the component:
-it allows navigation to the component using the relative `/account/register` URL.
+`<FormManager />` is a Razor component defined in the `BlazorFormManager` package that we
+referenced earlier. We are using composition instead of inheritance to build this
+registration component by embedding `<FormManager />` into another component. The form
+will be submitted to the `api/account/register` API endpoint as indicated by the
+`FormAction` attribute.
 
-The code is pretty simple and self-explanatory somehow due the expressive nature of Razor
-Components.
+The code seems pretty simple and self-explanatory somehow due the expressive nature of
+Razor components.
 
 The `<DataAnnotationsValidator />` component ensures client-side validation rules are
 enforced thanks to the data annotation attributes `[Required], [StringLength]` and so
-on. We'll see them soon when defining the models.
+on. We'll see them soon when defining the domain models.
 
 The `EnableProgressBar` attribute allows a progress bar to show up during form submissions
 containing at least one file.
@@ -135,9 +137,12 @@ containing at least one file.
 The `@ref` attribute acquires a reference to the rendered DOM element and stores it
 into the `manager` member variable below.
 
-Usually, I separate the code from the UI elements by placing it in a "code-behind"
-class file. But for the sake of simplicity, below the above markup, copy and paste
-the following C# code block:
+The other components such as `<DemoHeader/>`, `<UserModelInputs/>`, and `<SubmitButton/>`
+will be explained in more detail a bit later when we create them.
+
+Usually, when the code starts to get too long it's a good idea to separate it from the UI
+elements by placing it in a "code-behind" class file. But for the sake of simplicity,
+copy and paste the following C# code block below the above markup:
 
 ```C#
 @code {
@@ -195,15 +200,15 @@ of the outcome (success or failure), the `OnSubmitDone` event callback is trigge
 hence executing the aforementioned routine.
 
 Remember to replace **{APP NAMESPACE}** with the namespace of your project (e.g.
-FirstBlazorProject). A couple of steps are ahead before getting a functional
+BlazorFormManagerWalkthrough). A couple of steps are ahead before getting a functional
 application using the above code.
 
-## Step 7: Creating the models
+## Step 7: Creating the domain models
 
-In the **{APP NAMESPACE}.Client** root directory (in the same directory as the
+In the _**{APP NAMESPACE}.Client**_ root directory (in the same directory as the
 **Pages** folder), create the **Models** folder then create a C# class file named
-`UserModels.cs`. Copy-paste the following code (and replace {APP NAMESPACE}
-appropriately):
+`UserModels.cs`. Copy and paste the following code into this file (and replace
+{APP NAMESPACE} appropriately):
 
 ```C#
  using System.ComponentModel.DataAnnotations;
@@ -250,8 +255,13 @@ appropriately):
  }
 ```
 
-At this point the Solution no longer builds. Don't worry, we're going to fix
-everything shortly.
+These class models will be used to submit a user's registration data and update their
+information. The properties of the first class, `UpdateUserModel`, are common to both
+registering and updating a user's personal information. It serves as the base class for
+`RegisterUserModel`.
+
+At this point the Solution no longer builds. Don't worry, we're going to fix everything
+shortly.
 
 ## Step 8: Creating more components
 
@@ -437,8 +447,7 @@ script working behind the scenes.
 }
 ```
 
-Right now, you are certainly seing error messages like _`The type or namespace name`
-`'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly`
+Right now, you are certainly seing error messages like _`The type or namespace name 'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly`
 `reference?).`_ Fix these errors by adding the following to the _\_Imports.razor_ file
 located under the _{APP NAMESPACE}.Client_ project's root directory:
 
@@ -518,7 +527,7 @@ Before moving on to the next step, let's do some cleanup:
 ## Step 9: Creating the database
 
 The ASP.NET Core hosted `Blazor WebAssembly App` template with individual user accounts
-authentication had generated 3 projects:
+authentication generates 3 projects:
 
 - {APP NAMESPACE}.Client
 - {APP NAMESPACE}.Server
@@ -548,7 +557,7 @@ _XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX_ is Guid (Globally Unique Identifier).
 If you can't find the database, make sure to add the server by clicking the
 `Add SQL Server` icon at the top left corner of the `SQL Server Object Explorer` window.
 
-## Step 10: Customization of the `ApplicationUser` class
+## Step 10: Customizing the `ApplicationUser` class
 
 In the _{APP NAMESPACE}.Server/Models_ folder you'll find the `ApplicationUser.cs` file.
 Open it up in the editor. We're going to customize this class by adding _FirstName_,
@@ -1086,7 +1095,192 @@ namespace {APP NAMESPACE}.Server.Controllers
 ## Step 12: Building a user account update component
 
 This is the part where things are getting tricky. This is because authentication is now
-involved, which is not an easy task getting the implementation done right. But don't
-worry! Since this is a walkthrough, by the end of day we'll get safely to our destination.
+involved, which is not an easy task getting the implementation done right. Especially
+when using a JavaScript client to send HTTP requests. But don't worry! Since this is a
+walkthrough, by the end of day we'll eventually get to our destination.
+
+Back to the client application, in the folder _{APP NAMESPACE}.Client/Pages_, create a
+new Razor component named `UserEditor.razor`. Put the following markup code into it:
+
+```HTML
+@page "/account/update"
+@inherits FormManagerBase<UpdateUserModel>
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
+          id="@FormId" action="api/account/update" enctype="multipart/form-data"
+          @attributes="AdditionalAttributes">
+    <DemoHeader Title="Form Manager Demo: Inheritance" SubTitle="Update User Information"
+                LogLevel="LogLevel" OnLogLevelChanged="level => LogLevel = level" />
+    <div class="row">
+        <div class="col-md-4"><UserModelInputs Model="Model" /></div>
+        <div class="col-md-4"><Base64RemoteImage Src="api/account/photo" @ref="remoteImgRef" /></div>
+    </div>
+    <SubmitButton Manager="this" Text="Save" ForceSubmit />
+    <DataAnnotationsValidator />
+</EditForm>
+<FormSubmitResultView Result="SubmitResult" />
+@if (IsDebug)
+{
+    <FormDebugInfo Model="XhrResult" Options="DebugOptions" />
+    <UnsupportedBrowserProperties Model="AjaxUploadNotSupported?.ExtraProperties" />
+}
+@if (IsUploadingFiles)
+{
+    <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" OnCancelRequested="() => AbortRequested = true" />
+}
+
+@code {
+    private Base64RemoteImage remoteImgRef;
+}
+```
+
+This time we are implementing our component using inheritance instead of composition as
+we did within the `Register.razor` file. As you can see, the HTML markup is a bit more
+verbose than the `Register` component. Because this is exactly the markup the component
+`<FormManager />` contains less what's in between the `<EditForm></EditForm>` tags.
+
+We can see at the beginning of the markup above that our `<UserEditor />` component
+inherits from the strongly-typed generic `FormManagerBase<TModel>` class, where TModel
+is `UpdateUserModel`. We then have the same `DemoHeader`, `UserModelInputs`, and
+`SubmitButton` components as in the registration component.
+
+However, there's a new `<Base64RemoteImage />` component that the `<EditForm />`
+component contains. Before continuing with the code-behind let's create this one now.
+In the `{APP NAMESPACE}.Client/Shared` folder, create a new Razor component file named
+`Base64RemoteImage.razor` and put the following markup into it:
+
+```HTML
+@inject HttpClient Http
+
+@if (!string.IsNullOrEmpty(base64Photo))
+{
+    <img src="data:image/jpeg;base64, @base64Photo" alt="User's profile picture"
+         class="img-fluid" style="max-height:275px;"/>
+}
+```
+
+followed by this C# code block:
+
+```C#
+@code {
+    private string base64Photo;
+
+    [Parameter] public string Src { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync()
+    {
+        try
+        {
+            var result = await Http.GetAsync(Src);
+            result.EnsureSuccessStatusCode();
+            var bytes = await result.Content.ReadAsByteArrayAsync();
+            base64Photo = Convert.ToBase64String(bytes);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine(ex);
+        }
+    }
+}
+```
+
+What this component does is retrieve a user's photo from an API endpoint defined by the
+parameterized `Src` property using a dependency-injected `HttpClient` instance. When the
+component is initialized, the asynchronous `RefreshAsync` method is called, which makes
+an API call to the server using the specified `Src` property's value.
+
+When the server responds successfully, the content is read into a one-dimensional array
+of type `byte[]` and then converted into a [base64-encoded](https://en.wikipedia.org/wiki/Base64)
+string. This string represents an in-memory image defined on the `src` attribute of an
+`<img />` tag. This is not ideal but for now it'll do the job: display the currently
+logged-in user's photo.
+
+Let's get back to making the `<UserEditor />` component more useful.
+
+In the same **Pages** folder, create a new **class** named `UserEditor.razor.cs`. After
+adding this file, it should open up in an editor window with content similar to this:
+
+```C#
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Client.Pages
+{
+    public class UserEditor
+    {
+    }
+}
+```
+
+You'll notice that the `Error List` window displays the following message:
+`Missing partial modifier on declaration of type 'UserEditor'; another partial declaration of this type exists`.
+This is because we now have two declarations of the same class: one that was generated
+by Visual Studio when we created the `UserEditor.razor` file, and one that we just
+created. Since both these files contain a declaration of the `UserEditor class`, we have
+to add the `partial` modifier to ours.
+
+Because of auto-generated code by design-time tools in Visual Studio, the `partial`
+modifier allows us to define a same type multiple times in different files.
+
+To correct this error, add the `partial` modifier to the new _UserEditor_ class. We also
+seize the opportunity to initialize the component's `Model` property. Change the file's
+content to this:
+
+```C#
+using {APP NAMESPACE}.Client.Models;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Client.Pages
+{
+    public partial class UserEditor
+    {
+        protected override Task OnInitializedAsync()
+        {
+            Model = new UpdateUserModel();
+            return base.OnInitializedAsync();
+        }
+    }
+}
+```
+
+Let's continue with the implementation of the component. From its markup we know that it
+has a model of type `UpdateUserModel`. Since the purpose of the component is to update
+the details of an existing user, we need a way to retrieve some of the information of the
+currently logged-in user. Let's put the implementation of this class on hold for a
+moment and focus on the creation of the API endpoint for this new requirement.
+
+### Step 12.1: Implementing token-based authentication
+
+Back to the **{APP NAMESPACE}.Server** project where we're going to add a new method to
+the `AccountController` class. The purpose of this method is to return user information
+for the currently logged-in user. Copy and paste the following `GetInfo` method into the
+`AccountController` class, preferrably above the `Update` method we defined earlier.
+
+```C#
+// ...code omitted for brevity
+public class AccountController : ControllerBase
+{
+    // ...code omitted for brevity
+    [HttpGet("info")]
+    public async Task<IActionResult> GetInfo()
+    {
+        var user = await _userManager.FindByNameAsync(GetUserName());
+        if (user != null)
+        {
+            return Ok(new { user.FirstName, user.LastName, user.Email, user.PhoneNumber });
+        }
+        return NotFound();
+    }
+    // ...code omitted for brevity
+}
+```
 
 Documentation work in progress...
