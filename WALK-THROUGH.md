@@ -32,7 +32,8 @@ specific to that environment.
 - How to create domain models for the user registration component
 - How to create modular, reusable Razor Components
 - How to create a database with EntityFramework Core migrations
-- How to customize the `ApplicationUser class` and update the database
+- How to customize the `ApplicationUser class` with personal information
+- How to update the database's structure with the customization.
 - How to create an ASP.NET Core Web API endpoint for user management
 - How to configure services required to run the server.
 
@@ -142,7 +143,7 @@ the following C# code block:
    new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
   private FormManager<RegisterUserModel> manager;
   private ConsoleLogLevel LogLevel => manager?.LogLevel ?? ConsoleLogLevel.None;
-  private readonly RegisterUserModel Model = new RegisterUserModel();
+  private RegisterUserModel Model = new RegisterUserModel();
 
   [Inject] NavigationManager NavigationManager { get; set; }
 
@@ -168,6 +169,12 @@ the following C# code block:
                   if (response.SignedIn)
                   {
                       NavigationManager.NavigateTo("/account/update", true);
+                  }
+                  else
+                  {
+                      // invalidate the form by setting a new model
+                      Model = new RegisterUserModel();
+                      StateHasChanged();
                   }
               }
           }
@@ -536,6 +543,9 @@ find a database named something like
 _**aspnet-{APP NAMESPACE}.Server-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX**_ where
 _XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX_ is Guid (Globally Unique Identifier).
 
+If you can't find the database, make sure to add the server by clicking the
+`Add SQL Server` icon at the top left corner of the `SQL Server Object Explorer` window.
+
 ## Step 10: Customization the `ApplicationUser` class
 
 In the _{APP NAMESPACE}.Server/Models_ folder you'll find the `ApplicationUser.cs` file.
@@ -582,5 +592,176 @@ Run the application with **Ctrl+F5**. Navigate to `/account/register`, fill in t
 and submit it. You'll still get a 404 HTTP error. Let's fix that now.
 
 ## Step 11: Creating the Web API endpoint
+
+In the project _{APP NAMESPACE}.Server_, right-click on the **Controllers** folder and
+add an empty API Controller (_Add > Controller... > API Controller - Empty_). In the
+**Add New Item** dialog, enter **_AccountController.cs_** for the controller's name.
+Click _Add_. This will add an empty ApiController to the project. Make changes to the
+_AccountController_ class to make it ressemble a variation of the following:
+
+```C#
+using {APP NAMESPACE}.Client.Models;
+using {APP NAMESPACE}.Server.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Server.Controllers
+{
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register
+        (
+            [FromForm] RegisterUserModel model,
+            [FromServices] SignInManager<ApplicationUser> signInManager
+        )
+        {
+            string message;
+            try
+            {
+                var emailConfirmed = !_userManager.Options.SignIn.RequireConfirmedAccount;
+                var user = new ApplicationUser
+                {
+                    Email = model.Email,
+                    EmailConfirmed = emailConfirmed,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    UserName = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                };
+
+                var (success, photoMessage) = await SetPhotoAsync(user);
+                if (!success) return Ok(new { success, error = photoMessage });
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    message = "Your account has been successfully created. ";
+                    _logger.LogInformation("User created a new account with password.");
+                    var signedIn = false;
+
+                    if (emailConfirmed)
+                    {
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        signedIn = true;
+
+                        message += "You have been automatically signed in because " +
+                            "account confirmation is disabled. ";
+
+                        _logger.LogInformation(message);
+                    }
+                    else
+                    {
+                        message += "You must confirm your email address before you can log in. ";
+                    }
+
+                    message += photoMessage;
+                    return Ok(new { success = true, message, signedIn });
+                }
+
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var error in result.Errors)
+                    sb.AppendLine(error.Description);
+
+                message = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                message = $"An unexpected error of type {ex.GetType().FullName} occurred while creating the user.";
+                _logger.LogError(message);
+            }
+            return Ok(new { success = false, error = message });
+        }
+
+        private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
+        {
+            if (Request.Form.Files.Any())
+            {
+                var file = Request.Form.Files.First();
+
+                if (string.Equals("image/jpeg", file.ContentType, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("image/jpg", file.ContentType, StringComparison.OrdinalIgnoreCase))
+                {
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    ms.Position = 0L;
+                    var content = ms.ToArray();
+                    user.Photo = content;
+                    return (true, $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n");
+                }
+                else
+                {
+                    return (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                }
+            }
+            return (true, null);
+        }
+    }
+}
+```
+
+Wow! That's a lot of code at once. Let's explain the essential parts.
+
+We start by securing our controller by adding the `[Authorize]` attribute, which makes
+accessible to only authenticated users. The `[Route("api/[controller]")]` attribute
+specifies the URL pattern of the API endpoint. In other words, to reach this controller,
+client applications must make API calls beginning with `api/account`. The text casing
+isn't important: it can be `api/Account` or `API/ACCOUNT`, it makes no difference.
+
+It's important to note that we can change this URL pattern for our API endpoints. It
+doesn't have to be necessarily `api/[controller]`. To find out more about routing in
+ASP.NET Core Web APIs, search for _**`asp.net core web api routing`**_ on the web.
+
+We then inject some dependencies into the `AccountController` class that will allow us
+to perform user registration, namely the `UserManager<ApplicationUser>` class. This class
+is a feature of the `Microsoft.AspNetCore.Identity` package that makes it possible to
+manage application users in the database we created earlier.
+
+The `Register` method is the API endpoint our form is pointing to as defined in the
+`<FormManager>` component's declaration: `FormAction="api/account/register"`. Since we
+secured our `AccountController` with the `[Authorize]` attribute, we must make this
+method accessible to anyone with the `[AllowAnonymous]` because we're registering new
+(**unauthenticated** and **unauthorized**) users through this API.
+
+The `Register` method accepts 2 parameters:
+
+1. `[FromForm] RegisterUserModel model`: This is the model we submit via our registration
+   form. That's why it's decorated with the `[FromForm]` attribute.
+2. `[FromServices] SignInManager<ApplicationUser> signInManager`: This is a
+   dependency-injected parameter which will allow us to sign the user automatically in if
+   the current user registration policy allows it.
+
+The rest of the code is straight forward:
+
+- Create and initialize a new `ApplicationUser` instance with the received form model.
+- Check if the user attached a valid photo (.jpg or .jpeg file); if so, retrieve the
+  content of the uploaded file and assign it to the `ApplicationUser.Photo` property.
+- Create the user in the database using an instance of the `UserManager<ApplicationUser>`
+  class.
+- Check the result:
+  - If the user creation was successful, check if email confirmation is required; if not,
+    sign the user in.
+  - If the registration was not successful, report errors back to the user.
 
 Documentation work in progress...
