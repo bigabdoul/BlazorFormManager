@@ -548,7 +548,7 @@ _XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX_ is Guid (Globally Unique Identifier).
 If you can't find the database, make sure to add the server by clicking the
 `Add SQL Server` icon at the top left corner of the `SQL Server Object Explorer` window.
 
-## Step 10: Customization the `ApplicationUser` class
+## Step 10: Customization of the `ApplicationUser` class
 
 In the _{APP NAMESPACE}.Server/Models_ folder you'll find the `ApplicationUser.cs` file.
 Open it up in the editor. We're going to customize this class by adding _FirstName_,
@@ -730,7 +730,7 @@ namespace {APP NAMESPACE}.Server.Controllers
 Wow! That's a lot of code at once. Let's explain the essential parts.
 
 We start by securing our controller by adding the `[Authorize]` attribute, which makes
-accessible to only authenticated users. The `[Route("api/[controller]")]` attribute
+it accessible to only authenticated users. The `[Route("api/[controller]")]` attribute
 specifies the URL pattern of the API endpoint. In other words, to reach this controller,
 client applications must make API calls beginning with `api/account`. The text casing
 isn't important: it can be `api/Account` or `API/ACCOUNT`, it makes no difference.
@@ -747,8 +747,8 @@ manage application users in the database we created earlier.
 The `Register` method is the API endpoint our form is pointing to as defined in the
 `<FormManager>` component's declaration: `FormAction="api/account/register"`. Since we
 secured our `AccountController` with the `[Authorize]` attribute, we must make this
-method accessible to anyone with the `[AllowAnonymous]` because we're registering new
-(**unauthenticated** and **unauthorized**) users through this API.
+method accessible to everybody using the `[AllowAnonymous]` attribute because we're
+registering new (**unauthenticated** and **unauthorized**) users through this API.
 
 The `Register` method accepts 2 parameters:
 
@@ -1082,5 +1082,11 @@ namespace {APP NAMESPACE}.Server.Controllers
     }
 }
 ```
+
+## Step 12: Building a user account update component
+
+This is the part where things are getting tricky. This is because authentication is now
+involved, which is not an easy task getting the implementation done right. But don't
+worry! Since this is a walkthrough, by the end of day we'll get safely to our destination.
 
 Documentation work in progress...
