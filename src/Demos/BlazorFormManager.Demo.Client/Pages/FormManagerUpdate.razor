@@ -1,4 +1,5 @@
-﻿@page "/account/update"
+﻿@attribute [Authorize]
+@page "/account/update"
 @inherits FormManagerBase<UpdateUserModel>
 
 <EditForm Model="Model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
