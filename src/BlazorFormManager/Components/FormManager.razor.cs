@@ -212,31 +212,28 @@ namespace BlazorFormManager.Components
         /// <returns></returns>
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
+            if (!_scriptInitialized)
             {
-                if (!_scriptInitialized)
+                var options = new
                 {
-                    var options = new
-                    {
-                        FormId,
-                        LogLevel,
-                        // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
-                        OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
-                        OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
-                        OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
-                        OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
-                        OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
-                        OnUploadChanged = nameof(FormManagerBaseJSInvokable.OnUploadChanged),
-                        OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
-                    };
+                    FormId,
+                    LogLevel,
+                    // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
+                    OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
+                    OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
+                    OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
+                    OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
+                    OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
+                    OnUploadChanged = nameof(FormManagerBaseJSInvokable.OnUploadChanged),
+                    OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
+                };
 
-                    _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
-                    _scriptInitialized = await JS.InvokeAsync<bool>("BlazorFormManager.init", options, _thisObjRef);
-                    AjaxUploadNotSupported = null;
+                _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
+                _scriptInitialized = await JS.InvokeAsync<bool>("BlazorFormManager.init", options, _thisObjRef);
+                AjaxUploadNotSupported = null;
 
-                    if (_scriptInitialized && OnAfterScriptInitialized.HasDelegate)
-                        await OnAfterScriptInitialized.InvokeAsync(this);
-                }
+                if (_scriptInitialized && OnAfterScriptInitialized.HasDelegate)
+                    await OnAfterScriptInitialized.InvokeAsync(this);
             }
             await base.OnAfterRenderAsync(firstRender);
         }
