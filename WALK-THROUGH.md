@@ -35,9 +35,9 @@ _Warning: This document is a work in progress! Expect it to be frequently update
 - How to create modular, reusable Razor Components
 - How to create a database with EntityFramework Core migrations
 - How to customize the `ApplicationUser class` with personal information
-- How to update the database's structure with the customization.
-- How to create an ASP.NET Core Web API endpoint for user management
-- How to configure services required to run the server.
+- How to update the database's structure with the customization
+- How to create ASP.NET Core Web API endpoints for user management
+- How to customize application settings when configuring services
 
 ## Step 1: Creating a new Solution
 
@@ -96,6 +96,8 @@ In your `{APP NAMESPACE}.Client` project, under the `Pages` folder, create a Raz
 Component named `Register.razor`, for instance. Replace the content of the created
 .razor file with the following C# code:
 
+_File: {APP NAMESPACE}.Client/Pages/Register.razor_
+
 ```C#
 @page "/account/register"
 @using System.Text.Json;
@@ -132,7 +134,7 @@ enforced thanks to the data annotation attributes `[Required], [StringLength]` a
 on. We'll see them soon when defining the domain models.
 
 The `EnableProgressBar` attribute allows a progress bar to show up during form submissions
-containing at least one file.
+when there is at least one file to upload.
 
 The `@ref` attribute acquires a reference to the rendered DOM element and stores it
 into the `manager` member variable below.
@@ -143,6 +145,8 @@ will be explained in more detail a bit later when we create them.
 Usually, when the code starts to get too long it's a good idea to separate it from the UI
 elements by placing it in a "code-behind" class file. But for the sake of simplicity,
 copy and paste the following C# code block below the above markup:
+
+_File: {APP NAMESPACE}.Client/Pages/Register.razor_
 
 ```C#
 @code {
@@ -209,6 +213,8 @@ In the _**{APP NAMESPACE}.Client**_ root directory (in the same directory as the
 **Pages** folder), create the **Models** folder then create a C# class file named
 `UserModels.cs`. Copy and paste the following code into this file (and replace
 {APP NAMESPACE} appropriately):
+
+_File: {APP NAMESPACE}.Client/Models/UpdateUserModel.cs_
 
 ```C#
  using System.ComponentModel.DataAnnotations;
@@ -277,6 +283,8 @@ when debugging. This is useful when you as developer need to figure out problems
 that might occur during development. Of course, this shouldn't be shipped into
 production.
 
+_File: {APP NAMESPACE}.Client/Pages/Shared/DemoHeader.razor_
+
 ```HTML
 <div class="row my-3">
   <div class="col">
@@ -337,6 +345,8 @@ information. It contains the following fields:
 - ConfirmPassword (required, registration only)
 
 A file selector is included at the end to allow users to attach their photo.
+
+_File: {APP NAMESPACE}.Client/Pages/Shared/UserModelInputs.razor_
 
 ```HTML
 <div class="row">
@@ -421,6 +431,8 @@ the browser to submit the form even though all validation checks successfully pa
 We are then required to "force" the form submission using the `BlazorFormManager.js`
 script working behind the scenes.
 
+_File: {APP NAMESPACE}.Client/Pages/Shared/SubmitButton.razor_
+
 ```HTML
  @if (Manager != null)
  {
@@ -447,9 +459,9 @@ script working behind the scenes.
 }
 ```
 
-Right now, you are certainly seing error messages like _`The type or namespace name 'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly`
-`reference?).`_ Fix these errors by adding the following to the _\_Imports.razor_ file
-located under the _{APP NAMESPACE}.Client_ project's root directory:
+Right now, you are certainly seing error messages like _`The type or namespace name 'ConsoleLogLevel' could not be found (are you missing a using directive or an assembly reference?).`_
+Fix these errors by adding the following to the _\_Imports.razor_ file located under the
+_{APP NAMESPACE}.Client_ project's root directory:
 
 ```C#
  @using {APP NAMESPACE}.Client.Models
@@ -492,14 +504,14 @@ Before moving on to the next step, let's do some cleanup:
               <NotAuthorized>
                   <li class="nav-item px-3">
                       <NavLink class="nav-link" href="account/register">
-                          <span class="fa fa-user"></span> User Registration
+                          <i class="fa fa-user"></i>&nbsp;User Registration
                       </NavLink>
                   </li>
               </NotAuthorized>
               <Authorized>
                   <li class="nav-item px-3">
                       <NavLink class="nav-link" href="account/update">
-                          <span class="fa fa-user"></span> Update User Info
+                          <i class="fa fa-user"></i>&nbsp;Update User Info
                       </NavLink>
                   </li>
               </Authorized>
@@ -507,8 +519,8 @@ Before moving on to the next step, let's do some cleanup:
       </ul>
   </div>
   ```
-- In **{APP NAMESPACE}.Shared/Index.razor**, remove the `<SurveyPrompt />` component.
-- Replace its content with the markup below:
+- In **{APP NAMESPACE}.Client/Pages/Index.razor**, replace the content with the markup
+  below:
   ```HTML
   @page "/"
   <h3 class="pb-3 border-bottom">Welcome to Blazor Form Manager</h3>
@@ -563,6 +575,8 @@ In the _{APP NAMESPACE}.Server/Models_ folder you'll find the `ApplicationUser.c
 Open it up in the editor. We're going to customize this class by adding _FirstName_,
 _LastName_, and _Photo_ properties. Make changes to have something like this:
 
+_File: {APP NAMESPACE}.Server/Models/ApplicationUser.cs_
+
 ```C#
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
@@ -612,6 +626,8 @@ add an empty API Controller (_Add > Controller... > API Controller - Empty_). In
 Click _Add_. This will add an empty ApiController to the project. Make changes to the
 _AccountController_ class to make it ressemble a variation of the following:
 
+_File: {APP NAMESPACE}.Server/Controllers/AccountController.cs_
+
 ```C#
 using {APP NAMESPACE}.Client.Models;
 using {APP NAMESPACE}.Server.Models;
@@ -626,7 +642,7 @@ using System.Threading.Tasks;
 
 namespace {APP NAMESPACE}.Server.Controllers
 {
-    [Authorize]
+    // [Authorize] // TODO: Uncomment later this AuthorizeAttribute
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -739,10 +755,12 @@ namespace {APP NAMESPACE}.Server.Controllers
 Wow! That's a lot of code at once. Let's explain the essential parts.
 
 We start by securing our controller by adding the `[Authorize]` attribute, which makes
-it accessible to only authenticated users. The `[Route("api/[controller]")]` attribute
-specifies the URL pattern of the API endpoint. In other words, to reach this controller,
-client applications must make API calls beginning with `api/account`. The text casing
-isn't important: it can be `api/Account` or `API/ACCOUNT`, it makes no difference.
+it accessible to only authenticated users. It's currently commented out to allow testing.
+
+The `[Route("api/[controller]")]` attribute defines the URL pattern of the API endpoint.
+In other words, to reach this controller, client applications must make API calls
+beginning with `api/account`. The text casing isn't important: it can be `api/Account` or
+`API/ACCOUNT`, it makes no difference.
 
 It's important to note that we can change this URL pattern for our API endpoints. It
 doesn't have to be necessarily `api/[controller]`. To find out more about routing in
@@ -786,6 +804,8 @@ By default, the template we used to create the Solution requires account confirm
 Take a look at the `{APP NAMESPACE}.Server/Startup.cs` file, in the method where
 services are configured:
 
+_File: {APP NAMESPACE}.Server/Startup.cs_
+
 ```C#
 public void ConfigureServices(IServiceCollection services)
 {
@@ -802,6 +822,8 @@ Let's move this hard-coded configuration option to the application's configurati
 `appsettings.json`. Since we're in developer mode, let's rather put this in the file
 `appsettings.Development.json`. This application settings file is a JSON file that looks
 like the one below:
+
+_File: {APP NAMESPACE}.Server/appsettings.Development.json_
 
 ```JSON
 {
@@ -823,6 +845,8 @@ like the one below:
 Let's add a new key to this file named `RequireConfirmedAccount` and set its value to
 `false`, like so:
 
+_File: {APP NAMESPACE}.Server/appsettings.Development.json_
+
 ```JSON
 {
     "RequireConfirmedAccount": false
@@ -830,6 +854,8 @@ Let's add a new key to this file named `RequireConfirmedAccount` and set its val
 ```
 
 The resulting file should be similar to:
+
+_File: {APP NAMESPACE}.Server/appsettings.Development.json_
 
 ```JSON
 {
@@ -850,6 +876,8 @@ The resulting file should be similar to:
 ```
 
 Now, let's retrieve this value in the `Startup.ConfigureServices` method:
+
+_File: {APP NAMESPACE}.Server/Startup.cs_
 
 ```C#
 public void ConfigureServices(IServiceCollection services)
@@ -880,6 +908,8 @@ will allow users to update their account information.
 
 In the `AccountController.cs` file, add a new HTTP GET method named `Update` with the
 following implementation:
+
+_File: {APP NAMESPACE}.Server/Controllers/AccountController.cs_
 
 ```C#
 using System.Security.Claims; // <- This goes to the top of the file
@@ -928,6 +958,8 @@ private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimT
 
 The whole `AccountController.cs` file should ressemble a variation of the following:
 
+_File: {APP NAMESPACE}.Server/Controllers/AccountController.cs_
+
 ```C#
 using {APP NAMESPACE}.Client.Models;
 using {APP NAMESPACE}.Server.Models;
@@ -943,7 +975,7 @@ using System.Threading.Tasks;
 
 namespace {APP NAMESPACE}.Server.Controllers
 {
-    [Authorize]
+    // [Authorize] // TODO: Uncomment later this AuthorizeAttribute
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -1102,13 +1134,15 @@ walkthrough, by the end of day we'll eventually get to our destination.
 Back to the client application, in the folder _{APP NAMESPACE}.Client/Pages_, create a
 new Razor component named `UserEditor.razor`. Put the following markup code into it:
 
+_File: {APP NAMESPACE}.Client/Pages/UserEditor.razor_
+
 ```HTML
 @page "/account/update"
 @inherits FormManagerBase<UpdateUserModel>
 
 <EditForm Model="Model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
-          id="@FormId" action="api/account/update" enctype="multipart/form-data"
-          @attributes="AdditionalAttributes">
+            id="@FormId" action="api/account/update" enctype="multipart/form-data"
+            @attributes="AdditionalAttributes">
     <DemoHeader Title="Form Manager Demo: Inheritance" SubTitle="Update User Information"
                 LogLevel="LogLevel" OnLogLevelChanged="level => LogLevel = level" />
     <div class="row">
@@ -1148,6 +1182,8 @@ However, there's a new `<Base64RemoteImage />` component that the `<EditForm />`
 component contains. Before continuing with the code-behind let's create this one now.
 In the `{APP NAMESPACE}.Client/Shared` folder, create a new Razor component file named
 `Base64RemoteImage.razor` and put the following markup into it:
+
+_File: {APP NAMESPACE}.Client/Shared/Base64RemoteImage.razor_
 
 ```HTML
 @inject HttpClient Http
@@ -1206,6 +1242,8 @@ Let's get back to making the `<UserEditor />` component more useful.
 In the same **Pages** folder, create a new **class** named `UserEditor.razor.cs`. After
 adding this file, it should open up in an editor window with content similar to this:
 
+_File: {APP NAMESPACE}.Client/Pages/UserEditor.razor.cs_
+
 ```C#
 using System;
 using System.Collections.Generic;
@@ -1231,8 +1269,10 @@ Because of auto-generated code by design-time tools in Visual Studio, the `parti
 modifier allows us to define a same type multiple times in different files.
 
 To correct this error, add the `partial` modifier to the new _UserEditor_ class. We also
-seize the opportunity to initialize the component's `Model` property. Change the file's
-content to this:
+seize the opportunity to initialize the component's `Model` property (inherited from
+`FormManagerBase<UpdateUserModel>`). Change the file's content to this:
+
+_File: {APP NAMESPACE}.Client/Pages/UserEditor.razor.cs_
 
 ```C#
 using {APP NAMESPACE}.Client.Models;
@@ -1261,8 +1301,10 @@ moment and focus on the creation of the API endpoint for this new requirement.
 
 Back to the **{APP NAMESPACE}.Server** project where we're going to add a new method to
 the `AccountController` class. The purpose of this method is to return user information
-for the currently logged-in user. Copy and paste the following `GetInfo` method into the
+for the currently logged-in user. Copy and paste the following methods into the
 `AccountController` class, preferrably above the `Update` method we defined earlier.
+
+_File: {APP NAMESPACE}.Server/Controllers/AccountController.cs_
 
 ```C#
 // ...code omitted for brevity
@@ -1270,17 +1312,156 @@ public class AccountController : ControllerBase
 {
     // ...code omitted for brevity
     [HttpGet("info")]
-    public async Task<IActionResult> GetInfo()
+    public IActionResult GetInfo()
     {
-        var user = await _userManager.FindByNameAsync(GetUserName());
+        var user = _userManager.Users.FirstOrDefault();
         if (user != null)
         {
             return Ok(new { user.FirstName, user.LastName, user.Email, user.PhoneNumber });
         }
         return NotFound();
     }
+
+    [HttpGet("Photo")]
+    public IActionResult Photo()
+    {
+        var user = await _userManager.Users.FirstOrDefault();
+        if (user != null && user.Photo != null)
+        {
+            return File(user.Photo, "image/jpeg");
+        }
+        return NotFound();
+    }
     // ...code omitted for brevity
 }
 ```
+
+The above `GetInfo` method attempts to retrieve the first available user in the database.
+If found, returns an anonymous type with a few properties like `FirstName`, etc;
+otherwise, a 404 HTTP error (NotFound) is returned.
+
+The `Photo` method returns the first user's binary photo as a `FileContentResult`.
+
+The methods are decorated with the `[AllowAnonymous]` attribute, which allows non
+authenticated users to call the APIs. This is a temporary implementation, just to make
+sure that our component works as expected.
+
+Before we continue, let's try out the `<UserEditor />` component we've built so far.
+Press `Ctrl+F5` to run the application and navigate to `/account/update`. The page
+displays a blank form because the component isn't doing anything useful right now.
+
+Let's change the `partial class UserEditor` so that we can call the above test APIs.
+
+_File: {APP NAMESPACE}.Client/Pages/UserEditor.razor.cs_
+
+```C#
+using BlazorFormManager;
+using {APP NAMESPACE}.Client.Models;
+using Microsoft.AspNetCore.Components;
+using System;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Client.Pages
+{
+    public partial class UserEditor
+    {
+        [Inject] private HttpClient Http { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            // This isn't an unnecessary assignment; EditForm needs an initialized Model.
+            // Do the initialization before calling any asynchronous method.
+            Model = new UpdateUserModel();
+            try
+            {
+                var user = await Http.GetFromJsonAsync<UpdateUserModel>("api/account/info");
+                Model = user;
+            }
+            catch (Exception ex)
+            {
+                SubmitResult = FormManagerSubmitResult.Failed(null, ex.ToString(), false);
+            }
+            await base.OnInitializedAsync();
+        }
+    }
+}
+```
+
+Make sure that you already have registered a user. If not, go to `/account/register` and
+do so. If you now run the application again after these changes, you'll once again get a
+blank form. But if you scroll down below the submit button you'll see a long detailed
+error message starting with
+`Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException`.
+
+The URLs `api/account/info` and `api/account/photo` don't work within our application but
+if you type them into your browser's address bar (e.g. https://localhost:44306/api/account/info
+or https://localhost:44306/api/account/photo), you'll be surprised they're working.
+
+So the question is: "Why are they not working in the app?". The response has to do with
+the injected `HttpClient`. If you look into the `{APP NAMESPACE}.Client.Program.cs` file,
+you'll find out that this HttpClient is configured as a named HttpClient and registered
+as a transient service:
+
+_File: {APP NAMESPACE}.Client/Program.cs_
+
+```C#
+// code omitted for brevity
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var builder = WebAssemblyHostBuilder.CreateDefault(args);
+        builder.RootComponents.Add<App>("app");
+
+        builder.Services.AddHttpClient("{APP NAMESPACE}.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+            .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+        // Supply HttpClient instances that include access tokens when making requests to the server project
+        builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("{APP NAMESPACE}.ServerAPI"));
+
+        builder.Services.AddApiAuthorization();
+
+        await builder.Build().RunAsync();
+    }
+}
+```
+
+To be more specific, the line with the call to the method
+`AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>()` is the reason why our
+`<UserEditor />` component is not working. This is normal because, usually, the API
+endpoints within the application's base URI are secured and need an access token. And
+this `BaseAddressAuthorizationMessageHandler` class makes sure an access token gets
+attached to every outgoing HTTP request made with an injected instance of `HttpClient`.
+Since we're not authenticated yet, thus the exception thrown when making an HTTP call
+with that client.
+
+If you comment out that line and re-run the app it should display the first user it can
+grab in the database.
+
+_File: {APP NAMESPACE}.Client/Program.cs_
+
+```C#
+// code omitted for brevity
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        // code omitted for brevity
+
+        builder.Services.AddHttpClient("{APP NAMESPACE}.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+            //.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+        // code omitted for brevity
+    }
+}
+```
+
+Make some changes to the user's account details and click the `Save` button. It should
+work like charm.
+
+Now that we know our `<UserEditor />` component is working, let's move on to securing
+the component and implementing token-based authentication and authorization.
 
 Documentation work in progress...
