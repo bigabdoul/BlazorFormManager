@@ -109,7 +109,7 @@
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.IsDebug">
             <summary>
-            Indicates whether the <see cref="P:BlazorFormManager.Components.FormManagerBase.LogLevel"/> property is <see cref="F:BlazorFormManager.Debug.ConsoleLogLevel.Debug"/>.
+            Indicates whether the <see cref="P:BlazorFormManager.Components.FormManagerBase.LogLevel"/> property is <see cref="F:BlazorFormManager.Debugging.ConsoleLogLevel.Debug"/>.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.AjaxUploadNotSupported">
@@ -199,7 +199,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.SetLogLevelAsync(BlazorFormManager.Debug.ConsoleLogLevel)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.SetLogLevelAsync(BlazorFormManager.Debugging.ConsoleLogLevel)">
             <summary>
             Sets the log level in the BlazorFormManager.js script using the specified <paramref name="level"/>.
             </summary>
@@ -213,7 +213,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.OnBeforeSendAsync(BlazorFormManager.Debug.FormManagerXhrResult)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnBeforeSendAsync(BlazorFormManager.Debugging.FormManagerXhrResult)">
             <summary>
             Event raised before the form data is sent.
             </summary>
@@ -223,7 +223,7 @@
             </param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.OnSendFailedAsync(BlazorFormManager.Debug.FormManagerXhrResult,System.String)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnSendFailedAsync(BlazorFormManager.Debugging.FormManagerXhrResult,System.String)">
             <summary>
             Invoked when in an error occurred during the form data submission.
             </summary>
@@ -234,7 +234,7 @@
             <param name="message">An error message that might have been returned by the server.</param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.OnSendSucceededAsync(BlazorFormManager.Debug.FormManagerXhrResult,System.String)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnSendSucceededAsync(BlazorFormManager.Debugging.FormManagerXhrResult,System.String)">
             <summary>
             Invoked when the form data has been successfully uploaded.
             </summary>
@@ -252,7 +252,7 @@
             <param name="e">An object that holds event data related to the upload.</param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.OnAjaxUploadWithProgressNotSupportedAsync(BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnAjaxUploadWithProgressNotSupportedAsync(BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs)">
             <summary>
             Invoked when the user's browser does not support AJAX upload 
             with progress report. Return false to continue form submission 
@@ -361,27 +361,27 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="P:BlazorFormManager.Components.Debug.FormDebugInfo.Model">
+        <member name="P:BlazorFormManager.Components.Debugging.FormDebugInfo.Model">
             <summary>
             Gets or sets the form manager XHR result.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.Debug.FormDebugInfo.Options">
+        <member name="P:BlazorFormManager.Components.Debugging.FormDebugInfo.Options">
             <summary>
             Gets or sets the debug options.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.Debug.FormDebugOptionsView.Parent">
+        <member name="P:BlazorFormManager.Components.Debugging.FormDebugOptionsView.Parent">
             <summary>
             Gets or sets the parent container.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.Debug.UnsupportedBrowserProperties.Model">
+        <member name="P:BlazorFormManager.Components.Debugging.UnsupportedBrowserProperties.Model">
             <summary>
             Gets or sets a collection of key-value pairs of browser properties.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.Debug.UnsupportedBrowserProperties.HideAjaxNotSupportedMessage">
+        <member name="P:BlazorFormManager.Components.Debugging.UnsupportedBrowserProperties.HideAjaxNotSupportedMessage">
             <summary>
             Indicates whether to hide the message 'AJAX Upload Not Supported!...'.
             </summary>
@@ -423,104 +423,104 @@
             Gets or sets the event callback used to handle a cancellation request.
             </summary>
         </member>
-        <member name="T:BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs">
+        <member name="T:BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs">
             <summary>
             Provides event data when a browser does not support AJAX upload with progress report.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs.#ctor">
+        <member name="M:BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs.#ctor">
             <summary>
-            Initializes a new instance of the <see cref="T:BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs"/> class.
+            Initializes a new instance of the <see cref="T:BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs"/> class.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs.#ctor(System.Boolean)">
+        <member name="M:BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs.#ctor(System.Boolean)">
             <summary>
             <inheritdoc/>
             </summary>
             <param name="cancel"><inheritdoc/></param>
         </member>
-        <member name="P:BlazorFormManager.Debug.AjaxUploadNotSupportedEventArgs.ExtraProperties">
+        <member name="P:BlazorFormManager.Debugging.AjaxUploadNotSupportedEventArgs.ExtraProperties">
             <summary>
             Gets or sets supplementary properties received from an XMLHttpRequest.
             </summary>
         </member>
-        <member name="T:BlazorFormManager.Debug.ConsoleLogLevel">
+        <member name="T:BlazorFormManager.Debugging.ConsoleLogLevel">
             <summary>
             JavaScript console log level enumerations.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.ConsoleLogLevel.None">
+        <member name="F:BlazorFormManager.Debugging.ConsoleLogLevel.None">
             <summary>
             Log nothing.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.ConsoleLogLevel.Information">
+        <member name="F:BlazorFormManager.Debugging.ConsoleLogLevel.Information">
             <summary>
             Log information only.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.ConsoleLogLevel.Warning">
+        <member name="F:BlazorFormManager.Debugging.ConsoleLogLevel.Warning">
             <summary>
             Log warnings only.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.ConsoleLogLevel.Error">
+        <member name="F:BlazorFormManager.Debugging.ConsoleLogLevel.Error">
             <summary>
             Log errors only.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.ConsoleLogLevel.Debug">
+        <member name="F:BlazorFormManager.Debugging.ConsoleLogLevel.Debug">
             <summary>
             Log everything.
             </summary>
         </member>
-        <member name="T:BlazorFormManager.Debug.FormManagerXhrDebug">
+        <member name="T:BlazorFormManager.Debugging.FormManagerXhrDebug">
             <summary>
             Specifies options on how to handle debug information related to JavaScript's XMLHttpRequest object.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrDebug.#ctor">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrDebug.#ctor">
             <summary>
-            Initializes a new instance of the <see cref="T:BlazorFormManager.Debug.FormManagerXhrDebug"/> class.
+            Initializes a new instance of the <see cref="T:BlazorFormManager.Debugging.FormManagerXhrDebug"/> class.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrDebug.HtmlDocViewEnabled">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrDebug.HtmlDocViewEnabled">
             <summary>
             Indicates, when applicable, whether to interpret HTTP responses 
             with the <see cref="T:Microsoft.AspNetCore.Components.MarkupString"/> structure or not. This could
             be potentially dangerous if the server is not trustworthy.
             </summary>
         </member>
-        <member name="T:BlazorFormManager.Debug.FormManagerXhrResult">
+        <member name="T:BlazorFormManager.Debugging.FormManagerXhrResult">
             <summary>
             Provides debugging information and configuration values for 
             HTTP requests done with JavaScript's XMLHttpRequest object.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrResult.#ctor">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrResult.#ctor">
             <summary>
-            Initializes a new instance of the <see cref="T:BlazorFormManager.Debug.FormManagerXhrResult"/> class.
+            Initializes a new instance of the <see cref="T:BlazorFormManager.Debugging.FormManagerXhrResult"/> class.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.Cancel">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.Cancel">
             <summary>
             Indicates whether an event caller should quit further processing.
             This property is not part of the XMLHttpRequest object.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.RequestHeaders">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.RequestHeaders">
             <summary>
             Gets or sets the request headers.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.Response">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.Response">
             <summary>
             Gets or sets the response's body content as an ArrayBuffer, Blob, 
             Document, JavaScript Object, or DOMString, depending on the value 
             of the request's responseType property.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseHeaders">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseHeaders">
             <summary>
             Gets or sets all the response headers, separated by CRLF, 
             as a string, or returns null if no response has been received. 
@@ -541,12 +541,12 @@
             </para>
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseText">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseText">
             <summary>
             Gets or set the text received from a server following a request being sent.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseType">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseType">
             <summary>
             Gets or sets an enumerated string value specifying the type of data 
             contained in the response. It also lets the author change the response 
@@ -555,7 +555,7 @@
             document, json, text, ms-stream
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseUrl">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseUrl">
             <summary>
             The read-only XMLHttpRequest.responseURL property returns the serialized 
             URL of the response or the empty string if the URL is null. If the URL 
@@ -563,20 +563,20 @@
             The value of responseURL will be the final URL obtained after any redirects.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseXML">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseXML">
             <summary>
             The XMLHttpRequest.responseXML read-only property returns a Document containing 
             the HTML or XML retrieved by the request; or null if the request was unsuccessful, 
             has not yet been sent, or if the data can't be parsed as XML or HTML.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.Status">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.Status">
             <summary>
             The read-only XMLHttpRequest.status property returns the 
             numerical HTTP status code of the XMLHttpRequest's response.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.StatusText">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.StatusText">
             <summary>
             The read-only XMLHttpRequest.statusText property returns a DOMString containing 
             the response's status message as returned by the HTTP server. Unlike 
@@ -586,7 +586,7 @@
             will be an empty string.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.WithCredentials">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.WithCredentials">
             <summary>
             The XMLHttpRequest.withCredentials property is a Boolean that indicates 
             whether or not cross-site Access-Control requests should be made using 
@@ -594,35 +594,35 @@
             Setting withCredentials has no effect on same-site requests.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.ExtraProperties">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.ExtraProperties">
             <summary>
             Gets or sets supplementary properties received from an XMLHttpRequest object.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.IsSuccessStatusCode">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.IsSuccessStatusCode">
             <summary>
-            Determines whether the <see cref="P:BlazorFormManager.Debug.FormManagerXhrResult.Status"/> code indicates 
+            Determines whether the <see cref="P:BlazorFormManager.Debugging.FormManagerXhrResult.Status"/> code indicates 
             success (integer between 200 and 299 inclusive).
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.Headers">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.Headers">
             <summary>
             Gets a read-only dictionary of all the response headers.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.IsHtmlResponse">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.IsHtmlResponse">
             <summary>
             Determines whether the 'content-type' response header 
             value contains the word 'html' (case-insensitive lookup).
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Debug.FormManagerXhrResult.IsJsonResponse">
+        <member name="P:BlazorFormManager.Debugging.FormManagerXhrResult.IsJsonResponse">
             <summary>
             Determines whether the 'content-type' response header 
             value contains the word 'json' (case-insensitive lookup).
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrResult.ResponseContentTypeContains(System.String)">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseContentTypeContains(System.String)">
             <summary>
             Determines whether the 'content-type' response header 
             contains the specified value (case-insensitive lookup).
@@ -630,7 +630,7 @@
             <param name="value">The header value to lookup.</param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrResult.ResponseContentTypeContains(System.String,System.StringComparison)">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseContentTypeContains(System.String,System.StringComparison)">
             <summary>
             Determines whether the 'content-type' response header contains
             the specified value using the specified string comparison.
@@ -641,53 +641,53 @@
             </param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrResult.ParseResponseType">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrResult.ParseResponseType">
             <summary>
-            Returns the <see cref="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseType"/> property as a well-known enumeration value.
+            Returns the <see cref="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseType"/> property as a well-known enumeration value.
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Debug.FormManagerXhrResult.GetAllResponseHeaders">
+        <member name="M:BlazorFormManager.Debugging.FormManagerXhrResult.GetAllResponseHeaders">
             <summary>
-            Parse the <see cref="P:BlazorFormManager.Debug.FormManagerXhrResult.ResponseHeaders"/> property into 
+            Parse the <see cref="P:BlazorFormManager.Debugging.FormManagerXhrResult.ResponseHeaders"/> property into 
             a collection of key-value pairs of string elements.
             </summary>
             <returns></returns>
         </member>
-        <member name="T:BlazorFormManager.Debug.XMLHttpRequestResponseType">
+        <member name="T:BlazorFormManager.Debugging.XMLHttpRequestResponseType">
             <summary>
             Provides enumeration values for HTTP response types 
             received through JavaScript's XMLHttpRequest object.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.Text">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.Text">
             <summary>
             The response is a text in a DOMString object.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.ArrayBuffer">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.ArrayBuffer">
             <summary>
             The response is a JavaScript ArrayBuffer containing binary data.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.Blob">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.Blob">
             <summary>
             The response is a Blob object containing the binary data.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.Document">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.Document">
             <summary>
             The response is an HTML Document or XML XMLDocument, as 
             appropriate based on the MIME type of the received data.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.Json">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.Json">
             <summary>
             The response is a JavaScript object created by 
             parsing the contents of received data as JSON.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Debug.XMLHttpRequestResponseType.MsStream">
+        <member name="F:BlazorFormManager.Debugging.XMLHttpRequestResponseType.MsStream">
             <summary>
             The response is part of a streaming download; this response 
             type is only allowed for download requests, and is only 
@@ -725,7 +725,7 @@
             Gets or sets the error or success message.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.FormManagerSubmitResult.Success(BlazorFormManager.Debug.FormManagerXhrResult,System.String,System.Boolean)">
+        <member name="M:BlazorFormManager.FormManagerSubmitResult.Success(BlazorFormManager.Debugging.FormManagerXhrResult,System.String,System.Boolean)">
             <summary>
             Creates and initializes a new instance of the <see cref="T:BlazorFormManager.FormManagerSubmitResult"/>
             class for a successful form submission.
@@ -744,7 +744,7 @@
             <param name="message">The success message.</param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.FormManagerSubmitResult.Failed(BlazorFormManager.Debug.FormManagerXhrResult,System.String,System.Boolean)">
+        <member name="M:BlazorFormManager.FormManagerSubmitResult.Failed(BlazorFormManager.Debugging.FormManagerXhrResult,System.String,System.Boolean)">
             <summary>
             Creates and initializes a new instance of the <see cref="T:BlazorFormManager.FormManagerSubmitResult"/>
             class for a non successful form submission.
