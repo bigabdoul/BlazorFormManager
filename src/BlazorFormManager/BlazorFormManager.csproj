@@ -15,7 +15,10 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>c#, .net, razor, class, library, blazor, form, form manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>This Razor Class Library has been tested with a Blazor WebAssembly App template in Visual Studio 2019 Community. Tests with other project types will be done in future releases. Sample (demo) projects can be found on Github at https://github.com/bigabdoul/BlazorFormManager</PackageReleaseNotes>
+    <PackageReleaseNotes>The namespaces BlazorFormManager.Debug and BlazorFormManager.Components.Debug have been respectively renamed to BlazorFormManager.Debugging and BlazorFormManager.Components.Debugging.
+
+Authorization access token code has also been simplified.</PackageReleaseNotes>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
