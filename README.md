@@ -60,7 +60,7 @@ appropriate key combination on your device).
       @page "/account/register"
       @using System.ComponentModel.DataAnnotations
 
-      <FormManager @ref="form" Model="User" FormAction="api/account/register">
+      <FormManager @ref="form" Model="User" FormAction="api/account/register" EnableProgressBar>
         <div class="row">
             <div class="col-md-8">
               <div class="row">
