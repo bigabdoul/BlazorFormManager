@@ -920,7 +920,7 @@ public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
     string message;
     try
     {
-        var user = await _userManager.FindByNameAsync(GetUserName());
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         if (user != null)
         {
@@ -950,8 +950,6 @@ public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
 
     return Ok(new { success = false, error = message });
 }
-
-private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimTypes.Name);
 ```
 
 ### 11.3 Putting it all together
@@ -1062,7 +1060,7 @@ namespace {APP NAMESPACE}.Server.Controllers
             string message;
             try
             {
-                var user = await _userManager.FindByNameAsync(GetUserName());
+                var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
                 if (user != null)
                 {
@@ -1459,9 +1457,439 @@ public class Program
 ```
 
 Make some changes to the user's account details and click the `Save` button. It should
-work like charm.
+work like a charm. Now that we know our `<UserEditor />` component is working, let's 
+finalize it by securing the application again, make changes to the following files as 
+shown next:
 
-Now that we know our `<UserEditor />` component is working, let's move on to securing
-the component and implementing token-based authentication and authorization.
+_File: {APP NAMESPACE}.Client/Program.cs_
+
+```C#
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Client
+{
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            var builder = WebAssemblyHostBuilder.CreateDefault(args);
+            builder.RootComponents.Add<App>("app");
+
+            builder.Services.AddHttpClient("{APP NAMESPACE}.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+            // Supply HttpClient instances that include access tokens when making requests to the server project
+            builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("{APP NAMESPACE}.ServerAPI"));
+
+            builder.Services.AddApiAuthorization();
+
+            await builder.Build().RunAsync();
+        }
+    }
+}
+```
+
+_File: {APP NAMESPACE}.Server/Controllers/AccountController.cs_
+
+```C#
+using {APP NAMESPACE}.Client.Models;
+using {APP NAMESPACE}.Server.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Server.Controllers
+{
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccountController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
+        {
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register
+        (
+            [FromForm] RegisterUserModel model,
+            [FromServices] SignInManager<ApplicationUser> signInManager
+        )
+        {
+            string message;
+            try
+            {
+                var emailConfirmed = !_userManager.Options.SignIn.RequireConfirmedAccount;
+                var user = new ApplicationUser
+                {
+                    Email = model.Email,
+                    EmailConfirmed = emailConfirmed,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    UserName = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                };
+
+                var (success, photoMessage) = await SetPhotoAsync(user);
+                if (!success) return Ok(new { success, error = photoMessage });
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    message = "Your account has been successfully created. ";
+                    _logger.LogInformation("User created a new account with password.");
+                    var signedIn = false;
+
+                    if (emailConfirmed)
+                    {
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        signedIn = true;
+
+                        message += "You have been automatically signed in because " +
+                            "account confirmation is disabled. ";
+
+                        _logger.LogInformation(message);
+                    }
+                    else
+                    {
+                        message += "You must confirm your email address before you can log in. ";
+                    }
+
+                    message += photoMessage;
+                    return Ok(new { success = true, message, signedIn });
+                }
+
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var error in result.Errors)
+                    sb.AppendLine(error.Description);
+
+                message = sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                message = $"An unexpected error of type {ex.GetType().FullName} occurred while creating the user.";
+                _logger.LogError(message);
+            }
+            return Ok(new { success = false, error = message });
+        }
+
+        [HttpGet("info")]
+        public async Task<IActionResult> GetInfo()
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            if (user != null)
+            {
+                return Ok(new { user.FirstName, user.LastName, user.Email, user.PhoneNumber });
+            }
+            return NotFound();
+        }
+
+        [HttpGet("Photo")]
+        public async Task<IActionResult> Photo()
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            if (user != null && user.Photo != null)
+            {
+                return File(user.Photo, "image/jpeg");
+            }
+            return NotFound();
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
+        {
+            string message;
+            try
+            {
+                var user = await _userManager.FindByNameAsync(User.Identity.Name);
+                
+                if (user != null)
+                {
+                    var (success, photoMessage) = await SetPhotoAsync(user);
+                    if (!success) return Ok(new { success, error = photoMessage });
+
+                    user.FirstName = model.FirstName;
+                    user.LastName = model.LastName;
+                    user.PhoneNumber = model.PhoneNumber;
+
+                    await _userManager.UpdateAsync(user);
+
+                    _logger.LogInformation("User updated account information.");
+                    message = $"Your account information has been updated. {photoMessage}";
+
+                    return Ok(new { success = true, message });
+                }
+                else
+                {
+                    message = "User not found!";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"An unexpected error of type {ex.GetType().FullName} occurred while updating the user.";
+            }
+
+            return Ok(new { success = false, error = message });
+        }
+
+        private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
+        {
+            bool success = true;
+            string message = null;
+            if (Request.Form.Files.Any())
+            {
+                var file = Request.Form.Files.First();
+
+                if (string.Equals("image/jpeg", file.ContentType, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("image/jpg", file.ContentType, StringComparison.OrdinalIgnoreCase))
+                {
+                    using var ms = new MemoryStream();
+                    await file.CopyToAsync(ms);
+                    ms.Position = 0L;
+                    var content = ms.ToArray();
+                    user.Photo = content;
+                    message = $"Total size of uploaded file: {content.Length / 1024d:N2} kb.\n";
+                }
+                else
+                {
+                    (success, message) = (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                }
+            }
+            return (success, message);
+        }
+    }
+}
+```
+
+In the _Startup.cs_ file we only need to change the chained method calls from:
+
+```C#
+services.AddIdentityServer()
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+```
+
+to:
+
+```C#
+services.AddIdentityServer()
+    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
+    {
+        options.IdentityResources["openid"].UserClaims.Add("name");
+        options.ApiResources.Single().UserClaims.Add("name");
+        options.IdentityResources["openid"].UserClaims.Add("role");
+        options.ApiResources.Single().UserClaims.Add("role");
+    });
+```
+
+This ensures that user claims from parsed authorization tokens are attached back to API
+calls made to the server.
+
+The final result should be similar to:
+
+_File: {APP NAMESPACE}.Server/Startup.cs_
+
+```C#
+using {APP NAMESPACE}.Server.Data;
+using {APP NAMESPACE}.Server.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Linq;
+
+namespace {APP NAMESPACE}.Server
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+
+            // Get the configuration value for new account confirmation
+            // requirement; fallback to true by default should it be missing.
+            var requireConfirmation = Configuration.GetValue("RequireConfirmedAccount", true);
+
+            services.AddDefaultIdentity<ApplicationUser>(options =>
+                options.SignIn.RequireConfirmedAccount = requireConfirmation)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddIdentityServer()
+                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
+                {
+                    options.IdentityResources["openid"].UserClaims.Add("name");
+                    options.ApiResources.Single().UserClaims.Add("name");
+                    options.IdentityResources["openid"].UserClaims.Add("role");
+                    options.ApiResources.Single().UserClaims.Add("role");
+                });
+
+            services.AddAuthentication()
+                .AddIdentityServerJwt();
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseWebAssemblyDebugging();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseIdentityServer();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapControllers();
+                endpoints.MapFallbackToFile("index.html");
+            });
+        }
+    }
+}
+```
+
+Finally, the _UserEditor.razor.cs_ file should ressemble a variation of the following:
+
+_File: {APP NAMESPACE}.Client/Pages/UserEditor.razor.cs_
+
+```C#
+using BlazorFormManager;
+using {APP NAMESPACE}.Client.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+
+namespace {APP NAMESPACE}.Client.Pages
+{
+    [Authorize]
+    public partial class UserEditor
+    {
+        [Inject] private HttpClient Http { get; set; }
+        [Inject] private IAccessTokenProvider TokenProvider { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            // This isn't an unnecessary assignment; EditForm needs an initialized Model.
+            // Do the initialization before calling any asynchronous method.
+            Model = new UpdateUserModel();
+            try
+            {
+                var user = await Http.GetFromJsonAsync<UpdateUserModel>("api/account/info");
+                Model = user;
+                await SetRequestHeadersAsync();
+                await base.OnInitializedAsync();
+            }
+            catch (AccessTokenNotAvailableException ex)
+            {
+                ex.Redirect();
+            }
+            catch(Exception ex)
+            {
+                SubmitResult = FormManagerSubmitResult.Failed(null, ex.ToString(), false);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to retrieve an access token and add the "authorization" request
+        /// header and a few others that will be used to configure the XMLHttpRequest
+        /// object when submitting the form via AJAX.
+        /// </summary>
+        /// <returns></returns>
+        private async Task SetRequestHeadersAsync()
+        {
+            var tokenResponse = await TokenProvider.RequestAccessToken();
+            if (tokenResponse.TryGetToken(out var token))
+            {
+                RequestHeaders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "authorization", $"Bearer {token.Value}" },
+                    { "x-requested-with", "XMLHttpRequest" },
+                    { "x-powered-by", "BlazorFormManager" },
+                };
+            }
+        }
+
+        /// <summary>
+        /// Check if a file was uploaded then refresh the photo when applicable.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        protected override async Task HandleSubmitDoneAsync(FormManagerSubmitResult result)
+        {
+            if (result.Succeeded)
+            {
+                if (result.UploadContainedFiles)
+                {
+                    // refresh the photo
+                    // remoteImgRef is privately declared in UserEditor.razor
+                    await remoteImgRef.RefreshAsync();
+                }
+                if (result.XHR.IsJsonResponse)
+                {
+                    // From the result.XHR.ResponseText property,
+                    // parse this kind of JSON object:
+                    // { success: true, message: "Some message" }
+                }
+            }
+            await base.HandleSubmitDoneAsync(result);
+        }
+    }
+}
+```
 
 Documentation work in progress...
