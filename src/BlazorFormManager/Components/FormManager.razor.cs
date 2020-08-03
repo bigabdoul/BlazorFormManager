@@ -307,43 +307,6 @@ namespace BlazorFormManager.Components
 
         #endregion
 
-        #region authorization token
-
-        /// <summary>
-        /// Save into the browser's localStorage the specified authorization 
-        /// token or the one found in the <see cref="RequestHeaders"/> dictionary.
-        /// </summary>
-        /// <param name="token">The token to store.</param>
-        /// <returns></returns>
-        public virtual async Task<string> StoreAuthorizationTokenAsync(string token = null)
-        {
-            if (string.IsNullOrEmpty(token) &&
-                RequestHeaders != null &&
-                RequestHeaders.TryGetValue("authorization", out var objToken)
-            )
-            {
-                token = objToken?.ToString().Substring("Bearer ".Length);
-            }
-            await LocalStorage.SetAuthorizationTokenAsync(token);
-            return token;
-        }
-
-        /// <summary>
-        /// Retrieves from the browser's localStorage the previously stored authorization token.
-        /// </summary>
-        /// <returns></returns>
-        public virtual Task<string> RetrieveAuthorizationTokenAsync()
-            => LocalStorage.GetAuthorizationTokenAsync();
-
-        /// <summary>
-        /// Remove from the browser's localStorage the previously stored authorization token.
-        /// </summary>
-        /// <returns></returns>
-        public virtual Task RemoveAuthorizationTokenAsync()
-            => LocalStorage.RemoveAuthorizationTokenAsync();
-
-        #endregion
-
         #region log level
 
         /// <summary>
