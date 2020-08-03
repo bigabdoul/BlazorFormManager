@@ -1895,5 +1895,3 @@ namespace {APP NAMESPACE}.Client.Pages
     }
 }
 ```
-
-Documentation work in progress...
