@@ -1,6 +1,6 @@
 ﻿using BlazorFormManager.Components;
 using BlazorFormManager.Demo.Client.Models;
-using BlazorFormManager.Demo.Client.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using System;
@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace BlazorFormManager.Demo.Client.Pages
 {
+    [Authorize]
     public partial class FormManagerUpdate
     {
         #region fields
@@ -29,10 +30,8 @@ namespace BlazorFormManager.Demo.Client.Pages
         private const string SUCCESS_MESSAGE = 
             "Congratulations, your account has been successfully updated!";
 
-        private string _existingToken;
-
         [Inject] private HttpClient Http { get; set; }
-        [Inject] private IJwtAccessTokenProvider TokenProvider { get; set; }
+        [Inject] private IAccessTokenProvider TokenProvider { get; set; }
 
         #endregion
 
@@ -40,32 +39,23 @@ namespace BlazorFormManager.Demo.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
+            // This isn't an unnecessary assignment; EditForm needs an initialized Model.
+            // Do the initialization before calling any asynchronous method.
+            Model = new UpdateUserModel();
             try
             {
-                Model = new UpdateUserModel();
-                _existingToken = await RetrieveAuthorizationTokenAsync();
-                string token;
-
-                if (string.IsNullOrWhiteSpace(_existingToken))
-                    token = await TokenProvider.GetTokenAsync();
-                else
-                    token = _existingToken;
-
-                RequestHeaders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "authorization", $"Bearer {token}" },
-                    { "x-requested-with", "XMLHttpRequest" },
-                    { "x-powered-by", "BlazorFormManager" },
-                };
-
                 await RetrieveUserInfoAsync();
+                await SetRequestHeadersAsync();
             }
             catch (AccessTokenNotAvailableException ex)
             {
-                await RemoveAuthorizationTokenAsync();
                 ex.Redirect();
             }
+            catch (Exception ex)
+            {
+                SubmitResult = FormManagerSubmitResult.Failed(null, ex.ToString(), false);
+            }
+            await base.OnInitializedAsync();
         }
 
         protected override async Task HandleSubmitDoneAsync(FormManagerSubmitResult result)
@@ -73,19 +63,10 @@ namespace BlazorFormManager.Demo.Client.Pages
             if (result.Succeeded)
             {
                 ProcessCustomServerResponse(result);
-                if (string.IsNullOrWhiteSpace(_existingToken))
-                    _existingToken = await StoreAuthorizationTokenAsync();
-                
                 if (result.UploadContainedFiles)
                     await remoteImgRef?.RefreshAsync();
             }
             await base.HandleSubmitDoneAsync(result);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            _ = RemoveAuthorizationTokenAsync();
-            base.Dispose(disposing);
         }
 
         #endregion
@@ -94,26 +75,19 @@ namespace BlazorFormManager.Demo.Client.Pages
 
         private async Task RetrieveUserInfoAsync()
         {
-            try
+            var user = await Http.GetFromJsonAsync<UpdateUserModel>("api/account/info");
+            if (user != null)
             {
-                var user = await Http.GetFromJsonAsync<UpdateUserModel>("api/account/info");
-                if (user != null)
-                {
-                    // Resetting the model causes the form to NOT submit when 
-                    // everything's fine. To overcome this weird behavior, invoke
-                    // the method SubmitFormAsync() on the submit button's @onclick 
-                    // event handler like so:
+                // Resetting the model causes the form to NOT submit when 
+                // everything's fine. To overcome this weird behavior, invoke
+                // the method SubmitFormAsync() on the submit button's @onclick 
+                // event handler like so:
 
-                    // <button type="button" @onclick="SubmitFormAsync">Save</button>
-                    
-                    // Note that the button's type should be 'button' instead of 'submit'.
-                    // This avoids the risk of the form being submitted twice.
-                    Model = user;
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex);
+                // <button type="button" @onclick="SubmitFormAsync">Save</button>
+
+                // Note that the button's type should be 'button' instead of 'submit'.
+                // This avoids the risk of the form being submitted twice.
+                Model = user;
             }
         }
 
@@ -160,6 +134,30 @@ namespace BlazorFormManager.Demo.Client.Pages
                     Console.WriteLine($"HTML result: {xhr.ResponseText}");
                 else
                     Console.WriteLine($"Raw result: {xhr.ResponseText}");
+            }
+        }
+
+        /// <summary>
+        /// Attempts to retrieve an access token and add the "authorization" request
+        /// header and a few others that will be used to configure the XMLHttpRequest
+        /// object when submitting the form via AJAX.
+        /// </summary>
+        /// <returns></returns>
+        private async Task SetRequestHeadersAsync()
+        {
+            var tokenResponse = await TokenProvider.RequestAccessToken();
+            if (tokenResponse.TryGetToken(out var token))
+            {
+                RequestHeaders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "authorization", $"Bearer {token.Value}" },
+                    { "x-requested-with", "XMLHttpRequest" },
+                    { "x-powered-by", "BlazorFormManager" },
+                };
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not get access token.");
             }
         }
 

@@ -21,8 +21,8 @@ namespace BlazorFormManager.Demo.Client
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BlazorFormManager.Demo.ServerAPI"));
 
-            builder.Services.AddApiAuthorization().AddAccountClaimsPrincipalFactory<CustomUserFactory>();
-            builder.Services.AddScoped<IJwtAccessTokenProvider, JwtAccessTokenProvider>();
+            builder.Services.AddApiAuthorization()
+                .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 
             await builder.Build().RunAsync();
         }

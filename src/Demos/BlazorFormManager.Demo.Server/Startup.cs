@@ -28,7 +28,6 @@ namespace BlazorFormManager.Demo.Server
         }
 
         public IConfiguration Configuration { get; }
-        public static SigningCredentials SigningCredential { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -52,10 +51,6 @@ namespace BlazorFormManager.Demo.Server
                     options.ApiResources.Single().UserClaims.Add("name");
                     options.IdentityResources["openid"].UserClaims.Add("role");
                     options.ApiResources.Single().UserClaims.Add("role");
-
-                    // hold a reference to this credential for signing 
-                    // JWT security tokens in the TokenController
-                    SigningCredential = options.SigningCredential;
                 });
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");

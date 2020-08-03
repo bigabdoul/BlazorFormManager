@@ -10,7 +10,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IOFile = System.IO.File;
 
@@ -49,7 +48,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [HttpGet("info")]
         public async Task<IActionResult> GetInfo()
         {
-            var user = await _userManager.FindByNameAsync(GetUserName());
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
             if (user != null)
             {
                 return Ok(new { user.FirstName, user.LastName, user.Email, user.PhoneNumber });
@@ -153,7 +152,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
             string message;
             try
             {
-                var user = await _userManager.FindByNameAsync(GetUserName());
+                var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
                 if (user != null)
                 {
@@ -193,7 +192,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [HttpGet("Photo")]
         public async Task<IActionResult> Photo()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name ?? GetUserName());
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
             if (user != null && user.Photo != null)
             {
                 return File(user.Photo, "image/jpeg");
@@ -234,8 +233,6 @@ namespace BlazorFormManager.Demo.Server.Controllers
 
         #region helpers
 
-        private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimTypes.Name);
-
         private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
         {
             bool success = true;
@@ -256,7 +253,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 }
                 else
                 {
-                    (success, message) = (false, "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n");
+                    (success, message) = (false, JPEG_ONLY_SUPPORTED);
                 }
             }
             return (success, message);

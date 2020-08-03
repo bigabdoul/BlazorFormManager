@@ -1832,7 +1832,6 @@ namespace {APP NAMESPACE}.Client.Pages
                 var user = await Http.GetFromJsonAsync<UpdateUserModel>("api/account/info");
                 Model = user;
                 await SetRequestHeadersAsync();
-                await base.OnInitializedAsync();
             }
             catch (AccessTokenNotAvailableException ex)
             {
@@ -1842,6 +1841,7 @@ namespace {APP NAMESPACE}.Client.Pages
             {
                 SubmitResult = FormManagerSubmitResult.Failed(null, ex.ToString(), false);
             }
+            await base.OnInitializedAsync();
         }
 
         /// <summary>
@@ -1861,6 +1861,10 @@ namespace {APP NAMESPACE}.Client.Pages
                     { "x-requested-with", "XMLHttpRequest" },
                     { "x-powered-by", "BlazorFormManager" },
                 };
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not get access token.");
             }
         }
 
