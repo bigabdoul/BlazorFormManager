@@ -1,0 +1,39 @@
+﻿@page "/model-with-array"
+@attribute [Authorize]
+@inject IAccessTokenProvider TokenProvider
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+<FormManager Model="model" FormAction="api/account/array-test" RequestHeaders="headers" @ref="manager">
+    <DemoHeader Title="Array Model Test" OnLogLevelChanged="level => manager.SetLogLevelAsync(level)"/>
+    <SubmitButton Manager="manager" Text="Submit" ForceSubmit/>
+</FormManager>
+
+@code {
+    private FormManagerBase manager;
+    private Dictionary<string, object> headers;
+    private ArrayModel model = new ArrayModel
+    {
+        Name = "ArrayModel Test",
+        Items = ArrayModel.SampleItems
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            var tokenResult = await TokenProvider.RequestAccessToken();
+            if (tokenResult.TryGetToken(out var token))
+            {
+                headers = new Dictionary<string, object>
+                {
+                    { "authorization", $"Bearer {token.Value}" },
+                };
+            }
+        }
+        catch (AccessTokenNotAvailableException ex)
+        {
+            ex.Redirect();
+        }
+    }
+}

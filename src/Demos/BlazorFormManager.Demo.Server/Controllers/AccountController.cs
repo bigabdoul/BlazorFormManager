@@ -231,6 +231,16 @@ namespace BlazorFormManager.Demo.Server.Controllers
             });
         }
 
+        [HttpPost("array-test")]
+        public IActionResult ArrayTest([FromForm] ArrayModel model)
+        {
+            var success = model?.Items?.Length == ArrayModel.SampleItems.Length;
+            
+            if (success) return Ok(new { success, message = "Array model lengths match." });
+            
+            return BadRequest(new { success, error = "Array model lengths do not match." });
+        }
+
         #region helpers
 
         private async Task<(bool success, string message)> SetPhotoAsync(ApplicationUser user)
