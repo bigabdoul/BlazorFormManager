@@ -107,7 +107,6 @@
     function registerSubmitHandler() {
         const {
             formId,
-            jwtToken,
             onGetModel,
             onBeforeSubmit,
             onBeforeSend,
@@ -117,7 +116,6 @@
 
         handleFormSubmission({
             formId,
-            jwtToken,
             getFormData: async () => {
                 // custom routine for retrieving form data defined with models
                 let model;
