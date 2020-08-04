@@ -1116,8 +1116,6 @@ namespace {APP NAMESPACE}.Server.Controllers
             }
             return (success, message);
         }
-
-        private string GetUserName() => User.Identity.Name ?? User.FindFirstValue(ClaimTypes.Name);
     }
 }
 ```
@@ -1457,8 +1455,8 @@ public class Program
 ```
 
 Make some changes to the user's account details and click the `Save` button. It should
-work like a charm. Now that we know our `<UserEditor />` component is working, let's 
-finalize it by securing the application again, make changes to the following files as 
+work like a charm. Now that we know our `<UserEditor />` component is working, let's
+finalize it by securing the application again, make changes to the following files as
 shown next:
 
 _File: {APP NAMESPACE}.Client/Program.cs_
@@ -1620,7 +1618,7 @@ namespace {APP NAMESPACE}.Server.Controllers
             try
             {
                 var user = await _userManager.FindByNameAsync(User.Identity.Name);
-                
+
                 if (user != null)
                 {
                     var (success, photoMessage) = await SetPhotoAsync(user);
