@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager
- Version:       1.0.0
+ Version:       1.0.1
  Author:        Abdourahamane Kaba
  Description:   Handle AJAX form data submission with zero or more files, and
                 report back data upload activities to a .NET Blazor Component.
@@ -71,7 +71,7 @@
             raiseAjaxUploadWithProgressNotSupported();
         },
         submitForm: function () {
-            logDebug("Form submit requested.", _form);
+            logDebug("Form submit requested.");
 
             if (!_form) {
                 logInfo("Form not defined");
@@ -126,20 +126,21 @@
                 }
 
                 if (!model) {
-                    logInfo("Model not defined. FormData is collected from inputs.");
+                    logDebug("Model not defined. FormData will be collected by caller.");
                     return {};
                 }
 
-                const formData = new FormData()
-                    , frm = _document.getElementById(formId)
-                    , inputs = frm.querySelectorAll("input[type=file]");
-
+                // collect model...
+                const formData = new FormData();
                 collectModelData(model, formData);
 
+                // ...and input files only, if any
                 let hasFiles = false;
+                const frm = _document.getElementById(formId);
+                const files = frm.querySelectorAll("input[type=file]");
 
-                for (let i = 0; i < inputs.length; i++) {
-                    if (collectInputFiles(inputs[i], formData))
+                for (let i = 0; i < files.length; i++) {
+                    if (collectInputFiles(files[i], formData))
                         hasFiles = true;
                 }
 
@@ -215,7 +216,7 @@
             let cancel = false;
             const { beforeSubmit } = options;
 
-            if (_isFunction(beforeSubmit)) cancel = await beforeSubmit.call(this);
+            if (_isFunction(beforeSubmit)) cancel = await beforeSubmit.call(form);
 
             if (cancel) {
                 logInfo("Form submissing was cancelled.");
@@ -245,27 +246,27 @@
                 if (this.readyState === XHRSTATE.DONE) {
                     // any status code between 200 and 299 inclusive is success
                     if (this.status > 199 && this.status < 300) {
-                        if (_isFunction(done))
+                        if (_isFunction(done)) {
                             done.call(this);
-                    } else if (_isFunction(fail))
+                        }
+                    } else if (_isFunction(fail)) {
                         fail.call(this);
+                    }
                 }
             };
 
             let { formData = null, hasFiles = false } = await getFormData();
 
             if (!formData) {
-                formData = new FormData();
-                const inputs = form.querySelectorAll("input");
+                formData = new FormData(form);
+                const files = form.querySelectorAll("input[type=file]");
 
-                for (let i = 0; i < inputs.length; i++) {
-                    const input = inputs[i];
-                    if (!!input.files) {
-                        if (collectInputFiles(input, formData))
-                            hasFiles = true;
-                    } else {
-                        const name = input.attributes["name"] || {};
-                        if (name.value) formData.append(name.value, input.value);
+                // check if any of the inputs contains at least one file to upload
+                for (let i = 0; i < files.length; i++) {
+                    const input = files[i];
+                    if (!!input.files && input.files.length) {
+                        hasFiles = true;
+                        break;
                     }
                 }
             }
@@ -367,11 +368,7 @@
             if (value instanceof Array) {
                 // build array
                 for (let i = 0; i < value.length; i++) {
-                    for (const prop in value[i]) {
-                        if (value[i].hasOwnProperty(prop)) {
-                            formData.append(`${key}[${i}].${prop}`, value[i][prop]);
-                        }
-                    }
+                    formData.append(`${key}[]`, value[i]);
                 }
             } else if (value != null && value != undefined)
                 formData.append(key, value);
