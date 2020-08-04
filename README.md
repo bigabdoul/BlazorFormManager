@@ -153,8 +153,9 @@ repository.
 
 ## Known issues
 
-When trying to submit the form, in some circumstances, especially when updating a model,
-the form does not respond to a button's submit request, e.g. an input of type submit:
+When trying to submit the form, under some circumstances, especially when updating a
+model, the form does not respond to a button's submit request, e.g. an input of type
+submit:
 
 ```HTML
 <FormManager @ref="form" Model="User" FormAction="api/account/register">
