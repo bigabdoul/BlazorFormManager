@@ -70,6 +70,11 @@
             Event handler invoked when the BlazorFormManager.js script has been successfully initialized.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested">
+            <summary>
+            Event handler invoked when the model to be submitted is requested.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.RequestHeaders">
             <summary>
             Gets or sets a dictionary of key-value pairs of request 
@@ -173,26 +178,6 @@
             <param name="result">An object holding information about the form submission outcome.</param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.StoreAuthorizationTokenAsync(System.String)">
-            <summary>
-            Save into the browser's localStorage the specified authorization 
-            token or the one found in the <see cref="P:BlazorFormManager.Components.FormManagerBase.RequestHeaders"/> dictionary.
-            </summary>
-            <param name="token">The token to store.</param>
-            <returns></returns>
-        </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.RetrieveAuthorizationTokenAsync">
-            <summary>
-            Retrieves from the browser's localStorage the previously stored authorization token.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.RemoveAuthorizationTokenAsync">
-            <summary>
-            Remove from the browser's localStorage the previously stored authorization token.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase.SetLogLevelAsync">
             <summary>
             Sets the log level in the BlazorFormManager.js script.
@@ -210,6 +195,15 @@
             <summary>
             When the task completes, returns true if the form has validation errors, which should 
             cancel the submission; otherwise, false is returned and the form can be safely submitted.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnGetModel">
+            <summary>
+            When the task completes, returns the model to be submitted.
+            If <see cref="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested"/> has a delegate, the model
+            is retrieved from <see cref="P:BlazorFormManager.ModelRequestedEventArgs.Model"/>
+            after invocation of that delegate.
             </summary>
             <returns></returns>
         </member>
@@ -845,6 +839,21 @@
             Removes a previously stored authorization token asynchronously.
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:BlazorFormManager.ModelRequestedEventArgs">
+            <summary>
+            Contains data related to the <see cref="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested"/> event.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ModelRequestedEventArgs.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ModelRequestedEventArgs"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ModelRequestedEventArgs.Model">
+            <summary>
+            Gets or sets the model to be submitted.
+            </summary>
         </member>
         <member name="T:BlazorFormManager.UploadProgressChangedEventArgs">
             <summary>
