@@ -114,6 +114,12 @@ namespace BlazorFormManager.Components
         public EventCallback<FormManagerBase> OnAfterScriptInitialized { get; set; }
 
         /// <summary>
+        /// Event handler invoked when the model to be submitted is requested.
+        /// </summary>
+        [Parameter]
+        public EventCallback<ModelRequestedEventArgs> OnModelRequested { get; set; }
+
+        /// <summary>
         /// Gets or sets a dictionary of key-value pairs of request 
         /// headers to set before sending via XMLHttpRequest.
         /// </summary>
@@ -344,6 +350,31 @@ namespace BlazorFormManager.Components
         {
             AjaxUploadNotSupported = null;
             return Task.FromResult(HasValidationErrors);
+        }
+
+        /// <summary>
+        /// When the task completes, returns the model to be submitted.
+        /// If <see cref="OnModelRequested"/> has a delegate, the model
+        /// is retrieved from <see cref="ModelRequestedEventArgs.Model"/>
+        /// after invocation of that delegate.
+        /// </summary>
+        /// <returns></returns>
+        protected internal virtual async Task<object> OnGetModel()
+        {
+            object model;
+
+            if (OnModelRequested.HasDelegate)
+            {
+                var e = new ModelRequestedEventArgs();
+                await OnModelRequested.InvokeAsync(e);
+                model = e.Model;
+            }
+            else
+            {
+                model = GetModel();
+            }
+
+            return model;
         }
 
         /// <summary>
