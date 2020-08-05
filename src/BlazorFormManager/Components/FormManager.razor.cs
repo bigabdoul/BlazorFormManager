@@ -359,7 +359,7 @@ namespace BlazorFormManager.Components
         /// after invocation of that delegate.
         /// </summary>
         /// <returns></returns>
-        protected internal virtual async Task<object> OnGetModel()
+        protected internal virtual async Task<object> OnGetModelAsync()
         {
             object model;
 

@@ -25,7 +25,7 @@ namespace BlazorFormManager
         [JSInvokable]
         public Task<object> OnGetModel()
         {
-            return _formManager.OnGetModel();
+            return _formManager.OnGetModelAsync();
         }
 
         [JSInvokable]
