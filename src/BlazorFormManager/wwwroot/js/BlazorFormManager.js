@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager
- Version:       1.0.1
+ Version:       1.0.2
  Author:        Abdourahamane Kaba
  Description:   Handle AJAX form data submission with zero or more files, and
                 report back data upload activities to a .NET Blazor Component.
@@ -131,6 +131,7 @@
                 }
 
                 // collect model...
+                logDebug("Collecting form model data...");
                 const formData = new FormData();
                 collectModelData(model, formData);
 
@@ -361,17 +362,21 @@
         return true;
     }
 
-    function collectModelData(model, formData) {
-        logDebug("Collecting form model data...");
-        for (const key in model) {
-            const value = model[key];
-            if (value instanceof Array) {
-                // build array
-                for (let i = 0; i < value.length; i++) {
-                    formData.append(`${key}[]`, value[i]);
-                }
-            } else if (value != null && value != undefined)
-                formData.append(key, value);
+    /**
+     * Recursively append to the specified form data 
+     * properties and values from the given model.
+     * @param {any} model The model from which to collect form data.
+     * @param {FormData} formData The FormData object to which collected values are appended.
+     * @param {string} path The current navigation path to a given property of the model.
+     */
+    function collectModelData(model, formData, path) {
+        if (_isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(data instanceof Blob)) {
+            Object.keys(model).forEach(key => {
+                collectModelData(model[key], formData, path ? `${path}[${key}]` : key);
+            });
+        } else {
+            const value = (model === null || model === undefined) ? '' : model;
+            formData.append(path, value);
         }
     }
 

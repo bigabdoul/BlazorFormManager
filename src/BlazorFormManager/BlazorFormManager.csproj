@@ -15,8 +15,8 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>c#, .net, razor, class, library, blazor, form, form manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>An OnModelRequested event callback has been added to the FormManagerBase class to allow specifying a model before the form is submitted.</PackageReleaseNotes>
-    <Version>1.2.0</Version>
+    <PackageReleaseNotes>Correct form data collection bug in BlazorFormManager.js</PackageReleaseNotes>
+    <Version>1.2.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
