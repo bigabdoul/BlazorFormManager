@@ -16,7 +16,7 @@
     <PackageTags>c#, .net, razor, class, library, blazor, form, form manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
     <PackageReleaseNotes>Correct form data collection bug in BlazorFormManager.js</PackageReleaseNotes>
-    <Version>1.2.2</Version>
+    <Version>1.2.3</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

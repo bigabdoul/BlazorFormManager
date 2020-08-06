@@ -130,21 +130,17 @@
                     return {};
                 }
 
-                // collect model...
                 logDebug("Collecting form model data...");
-                const formData = new FormData();
+
+                // collect existing inputs from the form
+                const form = _document.getElementById(formId);
+                const formData = new FormData(form);
+
+                // add additional form data values using the model...
                 collectModelData(model, formData);
 
-                // ...and input files only, if any
-                let hasFiles = false;
-                const frm = _document.getElementById(formId);
-                const files = frm.querySelectorAll("input[type=file]");
-
-                for (let i = 0; i < files.length; i++) {
-                    if (collectInputFiles(files[i], formData))
-                        hasFiles = true;
-                }
-
+                // check if the form contains any files
+                const hasFiles = containsFiles(form);
                 return { formData, hasFiles };
             },
             beforeSubmit: async () => {
@@ -370,7 +366,7 @@
      * @param {string} path The current navigation path to a given property of the model.
      */
     function collectModelData(model, formData, path) {
-        if (_isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(data instanceof Blob)) {
+        if (_isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
             Object.keys(model).forEach(key => {
                 collectModelData(model[key], formData, path ? `${path}[${key}]` : key);
             });
@@ -380,14 +376,12 @@
         }
     }
 
-    function collectInputFiles(input, formData) {
-        const files = input.files;
-        if (!!files && files.length) {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i], name = input.attributes["name"] || {};
-                formData.append(name.value || "files[]", file);
+    function containsFiles(form) {
+        const inputs = form.querySelectorAll("input[type=file]");
+        for (let i = 0; i < inputs.length; i++) {
+            if (inputs[i].files && inputs[i].files.length) {
+                return true;
             }
-            return true;
         }
         return false;
     }
