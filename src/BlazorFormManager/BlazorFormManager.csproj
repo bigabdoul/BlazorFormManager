@@ -15,8 +15,8 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>c#, .net, razor, class, library, blazor, form, form manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>Correct form data collection bug in BlazorFormManager.js</PackageReleaseNotes>
-    <Version>1.2.3</Version>
+    <PackageReleaseNotes>Add OnBeforeSubmit event callback delegate to FormManagerBase. This is an event handler invoked before the form is submitted. If the form has validation errors or if the action has different requirements than submitting the form, this is the opportunity to intercept and cancel the form submission by setting to true the Cancel property value of an instance of the System.ComponentModel.CancelEventArgs class.</PackageReleaseNotes>
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

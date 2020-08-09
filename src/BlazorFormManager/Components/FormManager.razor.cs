@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -112,6 +113,15 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter]
         public EventCallback<FormManagerBase> OnAfterScriptInitialized { get; set; }
+
+        /// <summary>
+        /// Event handler invoked before the form is submitted. If the form has validation errors
+        /// or if the action has different requirements than submitting the form. this is the
+        /// opportunity to intercept and cancel the form submission by setting the 
+        /// <see cref="CancelEventArgs.Cancel"/> property value to true.
+        /// </summary>
+        [Parameter]
+        public EventCallback<CancelEventArgs> OnBeforeSubmit { get; set; }
 
         /// <summary>
         /// Event handler invoked when the model to be submitted is requested.
@@ -342,14 +352,29 @@ namespace BlazorFormManager.Components
         #region FormManagerBaseJSInvokable accessibility
 
         /// <summary>
-        /// When the task completes, returns true if the form has validation errors, which should 
-        /// cancel the submission; otherwise, false is returned and the form can be safely submitted.
+        /// When the task completes one of the following things can happen:
+        /// <para>
+        /// The <see cref="OnBeforeSubmit"/> event callback has a delegate:
+        /// Returns a boolean value determined by the property value of an instance of the
+        /// <see cref="CancelEventArgs.Cancel"/> class passed to the event callback delegate.
+        /// </para>
+        /// <para>
+        /// The <see cref="OnBeforeSubmit"/> event callback has no delegate:
+        /// Returns true if the form has validation errors, which should cancel the submission;
+        /// otherwise, false is returned and the form can be safely submitted.
+        /// </para>
         /// </summary>
         /// <returns></returns>
-        protected internal virtual Task<bool> OnBeforeSubmitAsync()
+        protected internal virtual async Task<bool> OnBeforeSubmitAsync()
         {
             AjaxUploadNotSupported = null;
-            return Task.FromResult(HasValidationErrors);
+            if (OnBeforeSubmit.HasDelegate)
+            {
+                var e = new CancelEventArgs(false);
+                await OnBeforeSubmit.InvokeAsync(e);
+                return e.Cancel;
+            }
+            return HasValidationErrors;
         }
 
         /// <summary>
