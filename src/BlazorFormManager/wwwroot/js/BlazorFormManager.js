@@ -256,16 +256,7 @@
 
             if (!formData) {
                 formData = new FormData(form);
-                const files = form.querySelectorAll("input[type=file]");
-
-                // check if any of the inputs contains at least one file to upload
-                for (let i = 0; i < files.length; i++) {
-                    const input = files[i];
-                    if (!!input.files && input.files.length) {
-                        hasFiles = true;
-                        break;
-                    }
-                }
+                hasFiles = containsFiles(form);
             }
 
             setupXhrUploadHandlers(xhr, hasFiles);
@@ -376,6 +367,10 @@
         }
     }
 
+    /**
+     * Check if the specified form contains at least one file to upload.
+     * @param {any} form The form to query.
+     */
     function containsFiles(form) {
         const inputs = form.querySelectorAll("input[type=file]");
         for (let i = 0; i < inputs.length; i++) {
