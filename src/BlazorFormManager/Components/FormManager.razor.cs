@@ -161,6 +161,16 @@ namespace BlazorFormManager.Components
         [Parameter]
         public bool EnableProgressBar { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets a value that indicates whether specifying a non-null reference
+        /// model is required when the <see cref="OnModelRequested"/> event is invoked. 
+        /// If this parameter's value is true and no valid model is provided after the 
+        /// <see cref="OnModelRequested"/> event has been invoked, the form submission 
+        /// will be cancelled.
+        /// </summary>
+        [Parameter]
+        public bool RequireModel { get; set; }
+
         #endregion
 
         #region read-only
@@ -234,6 +244,7 @@ namespace BlazorFormManager.Components
                 {
                     FormId,
                     LogLevel,
+                    RequireModel,
                     // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
                     OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
                     OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),

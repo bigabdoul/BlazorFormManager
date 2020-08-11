@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager
- Version:       1.0.2
+ Version:       1.1.0
  Author:        Abdourahamane Kaba
  Description:   Handle AJAX form data submission with zero or more files, and
                 report back data upload activities to a .NET Blazor Component.
@@ -112,10 +112,12 @@
             onBeforeSend,
             onSendFailed,
             onSendSucceeded,
+            requireModel
         } = _managerOptions;
 
         handleFormSubmission({
             formId,
+            requireModel,
             getFormData: async () => {
                 // custom routine for retrieving form data defined with models
                 let model;
@@ -125,9 +127,13 @@
                     logDebug("Model", model);
                 }
 
-                if (!model) {
-                    logDebug("Model not defined. FormData will be collected by caller.");
-                    return {};
+                if (model === null) {
+                    if (requireModel) {
+                        logError("A model is required.");
+                    } else {
+                        logDebug("Model not defined. FormData will be collected by caller.");
+                    }
+                    return { formData: null };
                 }
 
                 logDebug("Collecting form model data...");
@@ -195,7 +201,7 @@
 
     function handleFormSubmission(options) {
         options || (options = {});
-        const { formId } = options;
+        const { formId, requireModel } = options;
 
         if (!formId) {
             logError("No form to upload identified!");
@@ -236,8 +242,20 @@
                 return true;
             }
 
-            const xhr = new XMLHttpRequest();
             const { beforeSend, done, fail, getFormData } = options;
+            let { formData, hasFiles } = await getFormData();
+
+            if (formData === null || formData === undefined) {
+                if (requireModel) {
+                    logError("Form submission cancelled because a model is required to continue.");
+                    return false;
+                } else {
+                    formData = new FormData(form);
+                    hasFiles = containsFiles(form);
+                }
+            }
+
+            const xhr = new XMLHttpRequest();
 
             xhr.onreadystatechange = function () {
                 if (this.readyState === XHRSTATE.DONE) {
@@ -251,13 +269,6 @@
                     }
                 }
             };
-
-            let { formData = null, hasFiles = false } = await getFormData();
-
-            if (!formData) {
-                formData = new FormData(form);
-                hasFiles = containsFiles(form);
-            }
 
             setupXhrUploadHandlers(xhr, hasFiles);
 
@@ -308,6 +319,10 @@
         const optionalNameOfMethodWhen = "string (optional): The name of the .NET method to invoke when ";
         const options = {
             formId: "string (required): The unique identifier of the form to submit.",
+
+            requireModel: "boolean (optional): Gets or sets a value that indicates whether specifying a " +
+                "non-null reference model is required when the 'onGetModel' event is invoked. If this value is " +
+                "true and no valid model is provided after that event, the form submission will be cancelled.",
 
             assembly: "string (optional): The name of the .NET assembly on which " +
                 "to invoke static methods. Required if any of the 'onXXX' static " +
