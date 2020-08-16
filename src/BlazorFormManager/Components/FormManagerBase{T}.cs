@@ -31,7 +31,7 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Gets or sets a callback delegate that is invoked when a field in the form changes.
         /// </summary>
-        [Parameter] public EventCallback<FieldChangedEventArgs> OnFieldChanged { get; set; }
+        [Parameter] public EventCallback<FormFieldChangedEventArgs> OnFieldChanged { get; set; }
 
         /// <summary>
         /// Returns the <see cref="Model"/> property value.
@@ -86,10 +86,16 @@ namespace BlazorFormManager.Components
         private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
         {
             HasChanges = true;
-            HasValidationErrors = !EditContext.Validate();
+            var isvalid = EditContext.Validate();
+            HasValidationErrors = !isvalid;
+
             StateHasChanged();
 
-            if (OnFieldChanged.HasDelegate) OnFieldChanged.InvokeAsync(e);
+            if (OnFieldChanged.HasDelegate)
+            {
+                var arg = new FormFieldChangedEventArgs(isvalid, e.FieldIdentifier);
+                OnFieldChanged.InvokeAsync(arg);
+            }
         }
 
         private void RemoveEditContextHandler()
