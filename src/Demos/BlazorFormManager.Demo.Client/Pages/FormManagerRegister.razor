@@ -1,11 +1,11 @@
 ﻿@page "/account/register"
 
-<FormManager @ref="manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" EnableProgressBar>
+<FormManager @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" EnableProgressBar>
     <DemoHeader Title="Form Manager Demo: Composition" SubTitle="Create a new account" 
-                LogLevel="LogLevel" OnLogLevelChanged="level => manager.SetLogLevelAsync(level)" />
+                LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     <div class="row">
         <div class="col-md-8"><UserModelInputs Model="Model" /></div>
     </div>
-    <SubmitButton Manager="manager" Text="Register me" />
+    <SubmitButton Manager="Manager" Text="Register me" Disabled="SubmitButtonDisabled"/>
     <DataAnnotationsValidator />
 </FormManager>

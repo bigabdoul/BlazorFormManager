@@ -12,11 +12,10 @@ namespace BlazorFormManager.Demo.Client.Pages
         private static readonly JsonSerializerOptions CaseInsensitiveJson =
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        // make these fields protected to avoid compiler warnings
-        protected FormManager<RegisterUserModel> manager;
-
-        private ConsoleLogLevel LogLevel => manager?.LogLevel ?? ConsoleLogLevel.None;
+        private FormManager<RegisterUserModel> Manager { get; set; }
+        private ConsoleLogLevel LogLevel => Manager?.LogLevel ?? ConsoleLogLevel.None;
         private RegisterUserModel Model = new RegisterUserModel();
+        private bool SubmitButtonDisabled { get; set; }
 
         [Inject] NavigationManager NavigationManager { get; set; }
 
@@ -34,11 +33,11 @@ namespace BlazorFormManager.Demo.Client.Pages
 
                     if (!response.Success)
                     {
-                        manager.SubmitResult = FormManagerSubmitResult.Failed(result, response.Error);
+                        Manager.SubmitResult = FormManagerSubmitResult.Failed(result, response.Error);
                     }
                     else if (!string.IsNullOrEmpty(response.Message))
                     {
-                        manager.SubmitResult = FormManagerSubmitResult.Success(result, response.Message);
+                        Manager.SubmitResult = FormManagerSubmitResult.Success(result, response.Message);
                         if (response.SignedIn)
                         {
                             NavigationManager.NavigateTo("/account/update", true);
@@ -56,6 +55,11 @@ namespace BlazorFormManager.Demo.Client.Pages
                     System.Diagnostics.Trace.WriteLine(ex);
                 }
             }
+        }
+
+        private void HandleFieldChanged(FormFieldChangedEventArgs e)
+        {
+            SubmitButtonDisabled = !e.IsValid;
         }
     }
 }

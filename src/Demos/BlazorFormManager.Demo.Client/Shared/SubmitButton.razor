@@ -31,6 +31,11 @@
     /// </summary>
     [Parameter] public bool ForceSubmit { get; set; }
 
+    /// <summary>
+    /// Indicates whether the button is disabled or not.
+    /// </summary>
+    [Parameter] public bool Disabled { get; set; }
+
     private string ButtonType => ForceSubmit ? "button" : "submit";
 
     private async Task HandleClick()
@@ -38,5 +43,5 @@
         if (ForceSubmit) await Manager.SubmitFormAsync();
     }
 
-    private bool SubmitDisabled => Manager.IsRunning;
+    private bool SubmitDisabled => Disabled || Manager.IsRunning;
 }
