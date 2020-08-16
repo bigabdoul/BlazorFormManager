@@ -1,10 +1,10 @@
 ﻿@typeparam TModel
 @inherits FormManagerBase<TModel>
 
-@if (!Equals(default, Model))
+@if (EditContext != null)
 {
     <div class="blazor-form-manager">
-        <EditForm Model="Model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
+        <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
                   id="@FormId" action="@FormAction" method="@FormMethod" enctype="multipart/form-data"
                   @attributes="AdditionalAttributes">
             @ChildContent
