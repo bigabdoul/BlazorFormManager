@@ -178,7 +178,7 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Indicates whether the form currently has validation errors.
         /// </summary>
-        public bool HasValidationErrors { get; private set; }
+        public bool HasValidationErrors { get; protected set; }
 
         /// <summary>
         /// Gets the XMLHttpRequest properties from the last request.
