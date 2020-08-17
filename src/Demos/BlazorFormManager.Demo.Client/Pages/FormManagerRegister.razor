@@ -1,6 +1,6 @@
 ﻿@page "/account/register"
 
-<FormManager @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" EnableProgressBar>
+<FormManager @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" EnableChangeTracking EnableProgressBar>
     <DemoHeader Title="Form Manager Demo: Composition" SubTitle="Create a new account" 
                 LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     <div class="row">

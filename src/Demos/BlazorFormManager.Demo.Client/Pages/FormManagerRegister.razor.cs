@@ -15,7 +15,7 @@ namespace BlazorFormManager.Demo.Client.Pages
         private FormManager<RegisterUserModel> Manager { get; set; }
         private ConsoleLogLevel LogLevel => Manager?.LogLevel ?? ConsoleLogLevel.None;
         private RegisterUserModel Model = new RegisterUserModel();
-        private bool SubmitButtonDisabled { get; set; }
+        private bool SubmitButtonDisabled { get; set; } = true;
 
         [Inject] NavigationManager NavigationManager { get; set; }
 
