@@ -17,6 +17,24 @@ namespace BlazorFormManager.Components
 
         #endregion
 
+        #region properties
+
+        #region protected
+
+        /// <summary>
+        /// Gets the form's current edit context.
+        /// </summary>
+        protected EditContext EditContext { get; private set; }
+
+        /// <summary>
+        /// Indicates whether the form has unsaved changes.
+        /// </summary>
+        public bool HasChanges { get; private set; }
+
+        #endregion
+
+        #region parameters
+
         /// <summary>
         /// Gets or sets the form model to upload.
         /// </summary>
@@ -43,21 +61,17 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter] public bool EnableChangeTracking { get; set; }
 
+        #endregion
+
+        #endregion
+
+        #region methods
+
         /// <summary>
         /// Returns the <see cref="Model"/> property value.
         /// </summary>
         /// <returns></returns>
         public override object GetModel() => Model;
-
-        /// <summary>
-        /// Gets the form's current edit context.
-        /// </summary>
-        protected EditContext EditContext { get; private set; }
-
-        /// <summary>
-        /// Indicates whether the form has unsaved changes.
-        /// </summary>
-        public bool HasChanges { get; private set; }
 
         /// <summary>
         /// <inheritdoc/>
@@ -79,6 +93,8 @@ namespace BlazorFormManager.Components
             RemoveEditContextHandler();
             base.Dispose(disposing);
         }
+
+        #endregion
 
         #region helpers
 
