@@ -14,6 +14,7 @@ namespace BlazorFormManager.Components
         
         private TModel _model;
         private bool _hasChangeTracker;
+        private bool _parametersSet;
 
         #endregion
 
@@ -46,7 +47,7 @@ namespace BlazorFormManager.Components
                 if (!Equals(value, _model))
                 {
                     _model = value;
-                    SetEditContext(value);
+                    SetEditContext();
                 }
             }
         }
@@ -87,6 +88,16 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+            _parametersSet = true;
+            if (EditContext == null) SetEditContext();
+        }
+
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         /// <param name="disposing"><inheritdoc/></param>
         protected override void Dispose(bool disposing)
         {
@@ -98,21 +109,23 @@ namespace BlazorFormManager.Components
 
         #region helpers
 
-        private void SetEditContext(TModel model)
+        private void SetEditContext()
         {
-            if (!Equals(model, default))
-            {
-                RemoveEditContextHandler();
-                EditContext = new EditContext(model);
+            if (!_parametersSet) return;
 
-                if (EnableChangeTracking)
-                {
-                    EditContext.OnFieldChanged += HandleFieldChanged;
-                    _hasChangeTracker = true;
-                }
-                
-                StateHasChanged();
+            RemoveEditContextHandler();
+
+            if (Equals(_model, default)) return;
+
+            EditContext = new EditContext(_model);
+
+            if (EnableChangeTracking)
+            {
+                EditContext.OnFieldChanged += HandleFieldChanged;
+                _hasChangeTracker = true;
             }
+                
+            StateHasChanged();
         }
 
         private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
