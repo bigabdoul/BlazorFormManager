@@ -10,7 +10,12 @@ namespace BlazorFormManager.Components
     /// <typeparam name="TModel">The model type.</typeparam>
     public abstract class FormManagerBase<TModel> : FormManagerBase
     {
+        #region fields
+        
         private TModel _model;
+        private bool _hasChangeTracker;
+
+        #endregion
 
         /// <summary>
         /// Gets or sets the form model to upload.
@@ -32,6 +37,11 @@ namespace BlazorFormManager.Components
         /// Gets or sets a callback delegate that is invoked when a field in the form changes.
         /// </summary>
         [Parameter] public EventCallback<FormFieldChangedEventArgs> OnFieldChanged { get; set; }
+
+        /// <summary>
+        /// Indicates whether field changes should be tracked or not.
+        /// </summary>
+        [Parameter] public bool EnableChangeTracking { get; set; }
 
         /// <summary>
         /// Returns the <see cref="Model"/> property value.
@@ -78,7 +88,13 @@ namespace BlazorFormManager.Components
             {
                 RemoveEditContextHandler();
                 EditContext = new EditContext(model);
-                EditContext.OnFieldChanged += HandleFieldChanged;
+
+                if (EnableChangeTracking)
+                {
+                    EditContext.OnFieldChanged += HandleFieldChanged;
+                    _hasChangeTracker = true;
+                }
+                
                 StateHasChanged();
             }
         }
@@ -89,19 +105,22 @@ namespace BlazorFormManager.Components
             var isvalid = EditContext.Validate();
             HasValidationErrors = !isvalid;
 
-            StateHasChanged();
-
             if (OnFieldChanged.HasDelegate)
             {
                 var arg = new FormFieldChangedEventArgs(isvalid, e.FieldIdentifier);
                 OnFieldChanged.InvokeAsync(arg);
             }
+
+            StateHasChanged();
         }
 
         private void RemoveEditContextHandler()
         {
-            if (EditContext != null)
+            if (_hasChangeTracker && EditContext != null)
+            {
                 EditContext.OnFieldChanged -= HandleFieldChanged;
+                _hasChangeTracker = false;
+            }
         } 
 
         #endregion
