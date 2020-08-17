@@ -20,7 +20,7 @@ namespace BlazorFormManager
         }
 
         /// <summary>
-        /// Indicates whether the underlying model is valid.
+        /// Indicates whether the current underlying <see cref="EditContext"/> is valid.
         /// </summary>
         public bool IsValid { get; }
 
