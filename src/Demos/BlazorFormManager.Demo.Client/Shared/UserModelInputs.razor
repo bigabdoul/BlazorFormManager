@@ -26,12 +26,12 @@
         <div class="@ColWidth">
             <div class="form-group">
                 <label class="sr-only" for="@nameof(register.Password)">@PasswordText</label>
-                <InputText type="password" @bind-Value="register.Password" class="form-control" id="@nameof(register.Password)" title="@PasswordText" placeholder="@PasswordText" />
+                <InputText type="password" @bind-Value="register.Password" class="form-control" id="@nameof(register.Password)" title="@PasswordText" placeholder="@PasswordText" autocomplete="new-password" />
                 <ValidationMessage For="() => register.Password" />
             </div>
             <div class="form-group">
                 <label class="sr-only" for="@nameof(register.ConfirmPassword)">@ConfirmPasswordText</label>
-                <InputText type="password" @bind-Value="register.ConfirmPassword" class="form-control" id="@nameof(register.ConfirmPassword)" title="@ConfirmPasswordText" placeholder="@ConfirmPasswordText" />
+                <InputText type="password" @bind-Value="register.ConfirmPassword" class="form-control" id="@nameof(register.ConfirmPassword)" title="@ConfirmPasswordText" placeholder="@ConfirmPasswordText" autocomplete="new-password" />
                 <ValidationMessage For="() => register.ConfirmPassword" />
             </div>
         </div>
