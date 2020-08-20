@@ -11,7 +11,174 @@ It is flexible enough to allow advanced control, such as setting HTTP request he
 over instances of the XMLHttpRequest object used to send requests, all from the C#/.NET
 perspective.
 
-## Quick start
+## Introducing AutoEditForm
+
+Automatically generate an EditForm with all appropriate inputs using only a model and
+custom attributes. These new form display custom attributes control the way the UI is
+presented and reduce the amount of code required to have a beautifully-layed-out and
+fully-functional editable form. Adding a tiny amount of CSS you can further style your
+form as you desire.
+
+### AutoEditForm quick start (pseudo-code)
+
+For a working sample please checkout the demo application in the project's repository.
+
+#### The sample model:
+
+```C#
+using BlazorFormManager.ComponentModel.ViewAnnotations;
+using System;
+using System.ComponentModel.DataAnnotations;
+
+[FormDisplayDefault(ShowGroupName = true)]
+public class AutoUpdateUserModel
+{
+    [DisplayIgnore]
+    public string Id { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    [FormDisplay(GroupName = "Personal info", Icon = "fas fa-user")]
+    public string FirstName { get; set; }
+
+    [Required]
+    [StringLength(100)]
+    [FormDisplay(GroupName = "Personal info", Name = "Last / Family Name", Icon = "fas fa-user")]
+    public string LastName { get; set; }
+
+    [Required]
+    [StringLength(255)]
+    [EmailAddress]
+    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-envelope", UITypeHint = "email")]
+    public string Email { get; set; }
+
+    [StringLength(30)]
+    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-phone", UITypeHint = "phone")]
+    public string PhoneNumber { get; set; }
+
+    [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 2)]
+    public int AgeRange { get; set; }
+
+    [Range(typeof(DayOfWeek), "Monday", "Friday")]
+    [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 1, Prompt = "[Favourite Working Day]", Icon = "fas fa-calendar")]
+    public string FavouriteWorkingDay { get; set; }
+
+    [FormDisplay(UITypeHint = "radio", Order = 3, Name = "What's your favourite color?")]
+    public string FavouriteColor { get; set; }
+
+    [FormDisplay(Order = 4, Name = "Enable two-factor authentication", Description = "Log in with your email and an SMS confirmation")]
+    public bool TwoFactorEnabled { get; set; }
+}
+```
+
+#### The matching markup on the client (AutoEditFormUpdate.razor):
+
+```HTML
+@attribute [Authorize]
+@page "/account/autoeditform"
+
+<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="HandleSubmitDone" OptionsGetter="GetOptions" @ref="Manager">
+    <AfterDisplayGroups>
+        <hr />
+        <SubmitButton Manager="Manager" Text="Update" />
+    </AfterDisplayGroups>
+    <ChildContent>
+        <Base64RemoteImage Src="api/account/photo" @ref="RemoteImgRef" />
+        <CustomInputFile Name="Photo" />
+        <DataAnnotationsValidator />
+    </ChildContent>
+</AutoEditForm>
+```
+
+#### The code behind the markup (essential parts):
+
+```C#
+using BlazorFormManager.Components;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+
+public partial class AutoEditFormUpdate
+{
+  private static IEnumerable<SelectOptionList> _options;
+  private IDictionary<string, object> RequestHeaders { get; set; }
+  private AutoUpdateUserModel Model { get; set; }
+  private AutoEditForm<AutoUpdateUserModel> Manager { get; set; }
+  private Base64RemoteImage RemoteImgRef { get; set; }
+  ...
+
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      Model = await Http.GetFromJsonAsync<AutoUpdateUserModel>("api/account/info");
+      RequestHeaders = await HeadersProvider.CreateAsync();
+      if (_options == null) _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
+    }
+    catch (AccessTokenNotAvailableException ex)
+    {
+      ex.Redirect();
+    }
+    await base.OnInitializedAsync();
+  }
+
+
+  private IEnumerable<SelectOption> GetOptions(string propertyName)
+    => _options?.Where(opt => opt.PropertyName == propertyName).FirstOrDefault()?.Items;
+}
+```
+
+On the server, in a controller:
+
+```C#
+[Authorize]
+[Route("api/[controller]")]
+[ApiController]
+public class AccountController : ControllerBase
+{
+  [HttpGet("options")]
+  public IEnumerable<SelectOptionList> GetOptions()
+  {
+      // These options could be retrieved from a database or another server-side store;
+      // otherwise, there would be no point in making an HTTP request just to retrieve
+      // static / hard-coded values. But hey, this is a demo project!
+      var ageOptions = new[]
+      {
+          new SelectOption{ Id = "0", Value = "[Your most appropriate age]", IsPrompt = true },
+          new SelectOption{ Id = "1", Value = "Minor (< 18)" },
+          new SelectOption{ Id = "2", Value = "Below or 25" },
+          new SelectOption{ Id = "3", Value = "Below or 30" },
+          new SelectOption{ Id = "4", Value = "Below or 40" },
+          new SelectOption{ Id = "5", Value = "Below 50" },
+          new SelectOption{ Id = "6", Value = "Between 50 and 54" },
+          new SelectOption{ Id = "7", Value = "Between 55 and 60" },
+          new SelectOption{ Id = "8", Value = "Above 60" },
+          new SelectOption{ Id = "8", Value = "Above 70" },
+          new SelectOption{ Id = "8", Value = "Above 80" },
+      };
+
+      var colorOptions = new[]
+      {
+          new SelectOption("red", "Red"),
+          new SelectOption("green", "Green"),
+          new SelectOption("blue", "Blue"),
+      };
+
+      return new[]
+      {
+          new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
+          new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
+      };
+  }
+}
+```
+
+## BlazorFormManager quick start
 
 Clone this repository into a directory on your device:
 
