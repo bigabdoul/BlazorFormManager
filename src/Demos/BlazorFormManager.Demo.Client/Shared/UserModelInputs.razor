@@ -39,12 +39,7 @@
 </div>
 <div class="row">
     <div class="@ColWidth">
-        <div class="form-group">
-            <div class="custom-file mt-3 mb-3">
-                <input type="file" class="custom-file-input" id="@id" title="@ChoosePhotoText">
-                <label class="custom-file-label" for="@id">@ChoosePhotoText</label>
-            </div>
-        </div>
+        <CustomInputFile />
     </div>
 </div>
 @code {
@@ -59,5 +54,4 @@
     [Parameter] public string PhoneNumberText { get; set; } = "Your phone number";
     [Parameter] public string PasswordText { get; set; } = "New password";
     [Parameter] public string ConfirmPasswordText { get; set; } = "Confirm your new password";
-    [Parameter] public string ChoosePhotoText { get; set; } = "Choose a photo";
 }

@@ -35,7 +35,7 @@ namespace BlazorFormManager.Components
         /// Gets or sets the form identifier as found in the rendered DOM.
         /// </summary>
         [Parameter]
-        public string FormId { get; set; } = $"FormManager_EditForm_{Guid.NewGuid():n}";
+        public string FormId { get; set; } = typeof(FormManagerBase).GenerateId();
 
         /// <summary>
         /// Gets or sets the form 'action' attribute.
@@ -170,6 +170,13 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter]
         public bool RequireModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets a function callback used to retrieve a collection of 
+        /// <see cref="SelectOption"/> items to use for a 'select' element or
+        /// an input of type 'radio'.
+        /// </summary>
+        [Parameter] public Func<string, IEnumerable<SelectOption>> OptionsGetter { get; set; }
 
         #endregion
 

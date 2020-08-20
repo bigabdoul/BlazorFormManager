@@ -23,7 +23,7 @@ namespace BlazorFormManager.Components
         #region protected
 
         /// <summary>
-        /// Gets the form's current edit context.
+        /// Gets or sets the form's current edit context.
         /// </summary>
         protected EditContext EditContext { get; private set; }
 
@@ -62,6 +62,11 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter] public bool EnableChangeTracking { get; set; }
 
+        /// <summary>
+        /// Gets or sets an event callback delegate used to notify about model changes.
+        /// </summary>
+        [Parameter] public EventCallback<TModel> OnModelChanged { get; set; }
+
         #endregion
 
         #endregion
@@ -69,25 +74,28 @@ namespace BlazorFormManager.Components
         #region methods
 
         /// <summary>
+        /// Invokes the <see cref="OnModelChanged"/> if it has a delegate.
+        /// </summary>
+        protected virtual void NotifyModelChanged()
+        {
+            if (OnModelChanged.HasDelegate)
+                OnModelChanged.InvokeAsync(_model);
+        }
+
+        /// <summary>
         /// Returns the <see cref="Model"/> property value.
         /// </summary>
         /// <returns></returns>
         public override object GetModel() => Model;
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
-        /// <param name="result"><inheritdoc/></param>
-        /// <returns></returns>
         protected override Task HandleSubmitDoneAsync(FormManagerSubmitResult result)
         {
             HasChanges = !result.Succeeded;
             return base.HandleSubmitDoneAsync(result);
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         protected override void OnParametersSet()
         {
             base.OnParametersSet();
@@ -95,13 +103,10 @@ namespace BlazorFormManager.Components
             if (EditContext == null) SetEditContext();
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
-        /// <param name="disposing"><inheritdoc/></param>
         protected override void Dispose(bool disposing)
         {
-            RemoveEditContextHandler();
+            DetachFieldChangedListener();
             base.Dispose(disposing);
         }
 
@@ -112,10 +117,15 @@ namespace BlazorFormManager.Components
         private void SetEditContext()
         {
             if (!_parametersSet) return;
+            
+            DetachFieldChangedListener();
+            NotifyModelChanged();
 
-            RemoveEditContextHandler();
-
-            if (Equals(_model, default)) return;
+            if (Equals(_model, default))
+            {
+                EditContext = null;
+                return;
+            }
 
             EditContext = new EditContext(_model);
 
@@ -143,7 +153,7 @@ namespace BlazorFormManager.Components
             StateHasChanged();
         }
 
-        private void RemoveEditContextHandler()
+        private void DetachFieldChangedListener()
         {
             if (_hasChangeTracker && EditContext != null)
             {

@@ -1,0 +1,35 @@
+﻿@if (Metadata != null)
+{
+    var metadata = Metadata;
+    var attr = metadata.Attribute;
+    var labelText = metadata.GetDisplayName();
+    if (metadata.IsInputRadio || metadata.IsInputCheckbox)
+    {
+        <div class="form-group">
+            @if (!string.IsNullOrWhiteSpace(labelText) && metadata.IsInputRadio)
+            {
+                <label class="control-label">@labelText</label>
+            }
+            <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" id="@Id" class="@attr.InputCssClass" title="@attr.Description" />
+            <AutoValidationMessage Model="metadata.Model" Property="@metadata.PropertyInfo.Name" />
+        </div>
+    }
+    else
+    {
+        <InputGroupContainer Id="@Id" LabelText="@labelText" Icon="@attr.Icon">
+            <ChildContent>
+                <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" id="@Id" class="@attr.InputCssClass" title="@attr.Description" placeholder="@attr.Prompt">
+                    @ChildContent
+                </AutoInputBase>
+            </ChildContent>
+            <ValidationContent>
+                <AutoValidationMessage Model="metadata.Model" Property="@metadata.PropertyInfo.Name" />
+            </ValidationContent>
+        </InputGroupContainer>
+    }
+}
+@code {
+    [Parameter] public AutoInputMetadata Metadata { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Id { get; set; } = typeof(AutoInputBase).GenerateId();
+}

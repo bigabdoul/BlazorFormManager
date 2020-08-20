@@ -1,3 +1,4 @@
+using BlazorFormManager.Demo.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,8 @@ namespace BlazorFormManager.Demo.Client
 
             builder.Services.AddApiAuthorization()
                 .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
+
+            builder.Services.AddScoped<IRequestHeadersProvider, RequestHeadersProvider>();
 
             await builder.Build().RunAsync();
         }

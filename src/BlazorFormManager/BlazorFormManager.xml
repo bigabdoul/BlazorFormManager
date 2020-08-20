@@ -4,6 +4,387 @@
         <name>BlazorFormManager</name>
     </assembly>
     <members>
+        <member name="T:BlazorFormManager.ComponentModel.AutoInputMetadata">
+            <summary>
+            Holds metadata required for rendering an auto-generated input component.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.AutoInputMetadata.#ctor(System.Object,BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> class using the specified parameters.
+            </summary>
+            <param name="model">The model associated with an instance of an <see cref="T:BlazorFormManager.ComponentModel.IAutoInputComponent"/> component.</param>
+            <param name="attr">An object that encapsulates display-related metadata.</param>
+            
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.Value">
+            <summary>
+            Gets or sets the value of the input. This should be used with two-way binding.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.Options">
+            <summary>
+            Gets a collection of <see cref="T:BlazorFormManager.SelectOption"/> items for a 'select'
+            or 'input' element of type 'radio' to generate.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.AutoInputMetadata.GetDisplayName">
+            <summary>
+            Returns the display name for an input.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.IsInputRadio">
+            <summary>
+            Indicates whether the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> property value is radio.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.IsInputCheckbox">
+            <summary>
+            Indicates whether the input should be of type checkbox.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata">
+            <summary>
+            Holds metadata related to the way a group of inputs is layed out.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata.Items">
+            <summary>
+            Gets a collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> elements.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata.Name">
+            <summary>
+            Gets or sets the name of the section.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata.CssClass">
+            <summary>
+            Gets or sets the CSS class for a section.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata.ShowName">
+            <summary>
+            Indicates whether the section name should be displayed.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.IAutoInputComponent">
+            <summary>
+            Provides a mecanism to update the <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CurrentValue"/> property of an input component.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.IAutoInputComponent.SetCurrentValue(System.Object)">
+            <summary>
+            When implemented by a class, updates the <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CurrentValue"/> property of an input component.
+            </summary>
+            <param name="value">The value to set.</param>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.MetadataExtensions">
+            <summary>
+            Provides extension methods for extracting and manipulating metadata, such as custom attributes.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.MetadataExtensions.ExtractMetadata``1(``0,System.Collections.Generic.IReadOnlyCollection{BlazorFormManager.ComponentModel.FormDisplayGroupMetadata}@)">
+            <summary>
+            Generates a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> instances
+            extracted from custom attributes of types <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/>
+            and <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> that decorate the specified 
+            <typeparamref name="T"/> type.
+            </summary>
+            <typeparam name="T">The type of the object from which to extract metadata.</typeparam>
+            <param name="instance">An instance of the specified <typeparamref name="T"/> type.</param>
+            <param name="result">Returns a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> objects.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.MetadataExtensions.ExtractMetadata(System.Type,System.Object,System.Collections.Generic.IReadOnlyCollection{BlazorFormManager.ComponentModel.FormDisplayGroupMetadata}@)">
+            <summary>
+            Generates a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> instances
+            extracted from custom attributes of types <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/>
+            and <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> that decorate the specified 
+            <paramref name="type"/>.
+            </summary>
+            <param name="type">The type of the object from which to extract metadata.</param>
+            <param name="instance">An instance of the specified <paramref name="type"/>.</param>
+            <param name="result">Returns a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> objects.</param>
+            <returns></returns>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute">
+            <summary>
+            Prevents a property from being included into the input element generation process.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute">
+            <summary>
+            Represents a custom attribute that specifies layout for a form input.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Empty">
+            <summary>
+            Provides a value to use for default form display options.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.GroupName">
+            <summary>
+            Gets or sets a value that is used to group fields in the UI.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Name">
+            <summary>
+            Gets or sets a value that is used for display in the UI.
+            Set to an empty string (value of <see cref="F:System.String.Empty"/>, not null) to omit the label.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ShortName">
+            <summary>
+            Gets or sets a value that is used for the grid column label.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Description">
+            <summary>
+             Gets or sets a value that is used to display a description in the UI.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Prompt">
+            <summary>
+            Gets or sets a value that will be used to set the watermark for prompts in the UI.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Order">
+            <summary>
+            Gets or sets the order weight of the column.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ResourceType">
+            <summary>
+            Gets or sets the type that contains the resources for the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ShortName"/>,
+            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Name"/>, <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Prompt"/>, and <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Description"/> properties.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ColumnCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. col-md-4) used for an element (column)
+            wrapped around the input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.InputCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. form-control) added to the input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UIHint">
+            <summary>
+            Gets or sets a suggestion for the input element to generate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint">
+            <summary>
+            Gets or sets a suggestion for the input type (e.g. checkbox, radio) to generate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Icon">
+            <summary>
+            Gets or sets an icon associated with the generated input.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.GetProperty">
+            <summary>
+            Gets the <see cref="T:System.Reflection.PropertyInfo"/> of the model's property that the current attribute decorates.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.SetProperty(System.Reflection.PropertyInfo)">
+            <summary>
+            Sets the <see cref="T:System.Reflection.PropertyInfo"/> of the model's property that the current attribute decorates.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CreateDefault">
+            <summary>
+            Creates a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/> from matching 
+            properties of the current <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> instance.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute">
+            <summary>
+            Represents a custom attributes that encapsulates default 
+            values for an instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/>.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.GroupCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. row) for a section element.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.ColumnCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. col) for an HTML element wrapped around an input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.InputCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. form-control) added to the input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.ShowGroupName">
+            <summary>
+            Indicates whether to display the name of a group.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.Components.AutoEditFormBase`1">
+            <summary>
+            Represents a form that automatically generates inputs based on declarative layout specifications.
+            </summary>
+            <typeparam name="TModel">The type of the model.</typeparam>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.DisplayGroups">
+            <summary>
+            Gets the collection of <see cref="T:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata"/> retrieved from layout attributes of the associated model.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.HeaderZone">
+            <summary>
+            Gets or sets the form header render fragment.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.FooterZone">
+            <summary>
+            Gets or sets the form footer render fragment.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.BeforeDisplayGroups">
+            <summary>
+            Gets or sets the content rendered before the <see cref="T:BlazorFormManager.Components.FormDisplayGroup"/>s.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.AfterDisplayGroups">
+            <summary>
+            Gets or sets the content rendered after the <see cref="T:BlazorFormManager.Components.FormDisplayGroup"/>s.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoEditFormBase`1.NotifyModelChanged">
+            <inheritdoc/>
+        </member>
+        <member name="T:BlazorFormManager.Components.AutoInputBase">
+            <summary>
+            A base class for form input components generated on the fly.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoInputBase.Metadata">
+            <summary>
+            Gets or sets metadata for generating a form input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoInputBase.ChildContent">
+            <summary>
+            Gets or sets the child content to be rendering inside the element.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoInputBase.Form">
+            <summary>
+            Gets the associated <see cref="T:BlazorFormManager.Components.FormManagerBase"/>.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.SetParametersAsync(Microsoft.AspNetCore.Components.ParameterView)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.BuildRenderTree(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.FormatValueAsString(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.GetElement(System.String@)">
+            <summary>
+            Determines the frame to generate representing an HTML element.
+            </summary>
+            <param name="elementType">Returns the type of element to generate.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderSelectOptions(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+            <summary>
+            Renders option elements for a select element to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderRadioOptions(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+            <summary>
+            Renders a collection of input elements of type 'radio' to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputCheckbox(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+            <summary>
+            Renders a checkbox to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputRadio(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.String,System.String)">
+            <summary>
+            Renders a checkbox to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <param name="propertyName">The name of the input radio.</param>
+            <param name="value">The value of the radio input.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.TryParseValueFromString(System.String,System.Object@,System.String@)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BlazorFormManager.Components.AutoValidationMessage">
+            <summary>
+            <inheritdoc/>
+            This class provides a way to initialize differently the underlying <see cref="T:Microsoft.AspNetCore.Components.Forms.FieldIdentifier"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoValidationMessage.Model">
+            <summary>
+            Specifies the model for which validation messages should be displayed.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.AutoValidationMessage.Property">
+            <summary>
+            Specifies the field for which validation messages should be displayed.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoValidationMessage.OnParametersSet">
+            <inheritdoc />
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoValidationMessage.InitFieldIdentifier(System.Object,System.String)">
+            <summary>
+            Creates a new instance of the <see cref="T:Microsoft.AspNetCore.Components.Forms.FieldIdentifier"/> class using the specified parameters.
+            </summary>
+            <param name="model">The object that owns the field.</param>
+            <param name="fieldName">The name of the editable field.</param>
+        </member>
         <member name="T:BlazorFormManager.Components.FormManagerBase">
             <summary>
             Provides core functionalities for handling AJAX form submissions
@@ -70,6 +451,14 @@
             Event handler invoked when the BlazorFormManager.js script has been successfully initialized.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OnBeforeSubmit">
+            <summary>
+            Event handler invoked before the form is submitted. If the form has validation errors
+            or if the action has different requirements than submitting the form. this is the
+            opportunity to intercept and cancel the form submission by setting the 
+            <see cref="P:System.ComponentModel.CancelEventArgs.Cancel"/> property value to true.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested">
             <summary>
             Event handler invoked when the model to be submitted is requested.
@@ -100,6 +489,22 @@
             <summary>
             Gets or sets a value that indicates whether the progress bar should be 
             displayed when an upload with files is in progress.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.RequireModel">
+            <summary>
+            Gets or sets a value that indicates whether specifying a non-null reference
+            model is required when the <see cref="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested"/> event is invoked. 
+            If this parameter's value is true and no valid model is provided after the 
+            <see cref="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested"/> event has been invoked, the form submission 
+            will be cancelled.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OptionsGetter">
+            <summary>
+            Gets or sets a function callback used to retrieve a collection of 
+            <see cref="T:BlazorFormManager.SelectOption"/> items to use for a 'select' element or
+            an input of type 'radio'.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.HasValidationErrors">
@@ -193,12 +598,21 @@
         </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase.OnBeforeSubmitAsync">
             <summary>
-            When the task completes, returns true if the form has validation errors, which should 
-            cancel the submission; otherwise, false is returned and the form can be safely submitted.
+            When the task completes one of the following things can happen:
+            <para>
+            The <see cref="P:BlazorFormManager.Components.FormManagerBase.OnBeforeSubmit"/> event callback has a delegate:
+            Returns a boolean value determined by the property value of an instance of the
+            <see cref="P:System.ComponentModel.CancelEventArgs.Cancel"/> class passed to the event callback delegate.
+            </para>
+            <para>
+            The <see cref="P:BlazorFormManager.Components.FormManagerBase.OnBeforeSubmit"/> event callback has no delegate:
+            Returns true if the form has validation errors, which should cancel the submission;
+            otherwise, false is returned and the form can be safely submitted.
+            </para>
             </summary>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.OnGetModel">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnGetModelAsync">
             <summary>
             When the task completes, returns the model to be submitted.
             If <see cref="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested"/> has a delegate, the model
@@ -344,9 +758,39 @@
             </summary>
             <typeparam name="TModel">The model type.</typeparam>
         </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase`1.EditContext">
+            <summary>
+            Gets or sets the form's current edit context.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase`1.HasChanges">
+            <summary>
+            Indicates whether the form has unsaved changes.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase`1.Model">
             <summary>
             Gets or sets the form model to upload.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase`1.OnFieldChanged">
+            <summary>
+            Gets or sets a callback delegate that is invoked when a field in the form changes.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase`1.EnableChangeTracking">
+            <summary>
+            Indicates whether field changes should be tracked or not.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase`1.OnModelChanged">
+            <summary>
+            Gets or sets an event callback delegate used to notify about model changes.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase`1.NotifyModelChanged">
+            <summary>
+            Invokes the <see cref="P:BlazorFormManager.Components.FormManagerBase`1.OnModelChanged"/> if it has a delegate.
             </summary>
         </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase`1.GetModel">
@@ -354,6 +798,15 @@
             Returns the <see cref="P:BlazorFormManager.Components.FormManagerBase`1.Model"/> property value.
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase`1.HandleSubmitDoneAsync(BlazorFormManager.FormManagerSubmitResult)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase`1.OnParametersSet">
+            <inheritdoc/>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase`1.Dispose(System.Boolean)">
+            <inheritdoc/>
         </member>
         <member name="P:BlazorFormManager.Components.Debugging.FormDebugInfo.Model">
             <summary>
@@ -688,6 +1141,28 @@
             supported by Internet Explorer.
             </summary>
         </member>
+        <member name="T:BlazorFormManager.FormFieldChangedEventArgs">
+            <summary>
+            Encapsulates data related to an event raised when a form field changes.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.FormFieldChangedEventArgs.#ctor(System.Boolean,Microsoft.AspNetCore.Components.Forms.FieldIdentifier)">
+            <summary>
+            Initializes a new instance of <see cref="T:BlazorFormManager.FormFieldChangedEventArgs"/>
+            </summary>
+            <param name="isValid">true if the form is currently valid; otherwise, false.</param>
+            <param name="fieldIdentifier">The field whose value has changed.</param>
+        </member>
+        <member name="P:BlazorFormManager.FormFieldChangedEventArgs.IsValid">
+            <summary>
+            Indicates whether the current underlying <see cref="T:Microsoft.AspNetCore.Components.Forms.EditContext"/> is valid.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.FormFieldChangedEventArgs.Field">
+            <summary>
+            Identifies the field whose value has changed.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.FormManagerBaseJSInvokable">
             <summary>
             Represents a wrapper around an instance of the <see cref="T:BlazorFormManager.Components.FormManagerBase"/>
@@ -853,6 +1328,87 @@
         <member name="P:BlazorFormManager.ModelRequestedEventArgs.Model">
             <summary>
             Gets or sets the model to be submitted.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.SelectOption">
+            <summary>
+            Represents an select element option.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.SelectOption.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOption"/> class.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.SelectOption.#ctor(System.Object,System.String,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOption"/> class
+            using the specified parameters.
+            </summary>
+            <param name="id">The option identifier.</param>
+            <param name="value">The option value.</param>
+            <param name="isPrompt">true if this is the default option; otherwise, false.</param>
+        </member>
+        <member name="P:BlazorFormManager.SelectOption.Id">
+            <summary>
+            Gets or sets the identifier of the option.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.SelectOption.Value">
+            <summary>
+            Gets or sets the value of the option.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.SelectOption.IsPrompt">
+            <summary>
+            Gets or sets a value that indicates whether the option is the default.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.SelectOptionList">
+            <summary>
+            Represents a collection of <see cref="T:BlazorFormManager.SelectOption"/> items.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.SelectOptionList.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOptionList"/> class.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.SelectOptionList.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOptionList"/> class
+            using the specified parameter.
+            </summary>
+            <param name="propertyName">The associated model property to which this list belongs.</param>
+        </member>
+        <member name="M:BlazorFormManager.SelectOptionList.#ctor(System.Collections.Generic.IEnumerable{BlazorFormManager.SelectOption}[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOptionList"/>
+            class using the specified collection.
+            </summary>
+            <param name="collection">An array of collections whose elements should be added to the end of the underlying list.</param>
+        </member>
+        <member name="M:BlazorFormManager.SelectOptionList.#ctor(System.String,System.Collections.Generic.IEnumerable{BlazorFormManager.SelectOption}[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.SelectOptionList"/> class
+            using the specified parameters.
+            </summary>
+            <param name="propertyName">The associated model property to which this list belongs.</param>
+            <param name="collection">An array of collections whose elements should be added to the end of the underlying list.</param>
+        </member>
+        <member name="P:BlazorFormManager.SelectOptionList.Items">
+            <summary>
+            Gets a collection of <see cref="T:BlazorFormManager.SelectOption"/> elements.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.SelectOptionList.PropertyName">
+            <summary>
+            Gets or sets the name of the associated model property for this list.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.SelectOptionList.GroupName">
+            <summary>
+            Gets or sets the option group name (e.g. &lt;optgroup>)
             </summary>
         </member>
         <member name="T:BlazorFormManager.UploadProgressChangedEventArgs">

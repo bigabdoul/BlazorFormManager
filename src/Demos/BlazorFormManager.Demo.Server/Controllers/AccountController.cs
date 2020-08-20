@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,17 @@ namespace BlazorFormManager.Demo.Server.Controllers
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             if (user != null)
             {
-                return Ok(new { user.FirstName, user.LastName, user.Email, user.PhoneNumber });
+                return Ok(new
+                {
+                    user.FirstName, 
+                    user.LastName, 
+                    user.Email, 
+                    user.PhoneNumber, 
+                    user.AgeRange, 
+                    user.FavouriteColor, 
+                    user.FavouriteWorkingDay,
+                    user.TwoFactorEnabled,
+                });
             }
             return NotFound();
         }
@@ -147,7 +158,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [HttpPost("Update")]
         [RequestSizeLimit(PHOTO_SIZE_LIMIT)]
         [RequestFormLimits(MultipartBodyLengthLimit = PHOTO_SIZE_LIMIT)]
-        public async Task<IActionResult> Update([FromForm] UpdateUserModel model)
+        public async Task<IActionResult> Update([FromForm] AutoUpdateUserModel model)
         {
             string message;
             try
@@ -162,11 +173,27 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
                     user.PhoneNumber = model.PhoneNumber;
+                    user.AgeRange = model.AgeRange;
+                    user.FavouriteColor = model.FavouriteColor;
+                    user.FavouriteWorkingDay = model.FavouriteWorkingDay;
+                    user.TwoFactorEnabled = model.TwoFactorEnabled;
 
                     await _userManager.UpdateAsync(user);
 
                     _logger.LogInformation(ACCOUNT_UPDATED);
+
                     message = $"Your account information has been updated. {photoMessage}";
+
+                    if (!string.IsNullOrWhiteSpace(model.FavouriteColor))
+                        message += $" Your favourite color is {model.FavouriteColor}.";
+
+                    if (!string.IsNullOrWhiteSpace(model.FavouriteWorkingDay))
+                        message += $" Your favourite working day is {model.FavouriteWorkingDay}.";
+
+                    if (model.AgeRange > 0)
+                        message += $" Your age range id is {model.AgeRange}.";
+
+                    message += $"Two factor authentication is {(model.TwoFactorEnabled ? "enabled" : "disabled")}.";
 
                     return Ok(new { success = true, message });
                 }
@@ -239,6 +266,41 @@ namespace BlazorFormManager.Demo.Server.Controllers
             if (success) return Ok(new { success, message = "Array model lengths match." });
             
             return BadRequest(new { success, error = "Array model lengths do not match." });
+        }
+
+        [HttpGet("options")]
+        public IEnumerable<SelectOptionList> GetOptions()
+        {
+            // These options could be retrieved from a database or another server-side store;
+            // otherwise, there would be no point in making an HTTP request just to retrieve
+            // static / hard-coded values. But hey, this is a demo project!
+            var ageOptions = new[]
+            {
+                new SelectOption{ Id = "0", Value = "[Your most appropriate age]", IsPrompt = true },
+                new SelectOption{ Id = "1", Value = "Minor (< 18)" },
+                new SelectOption{ Id = "2", Value = "Below or 25" },
+                new SelectOption{ Id = "3", Value = "Below or 30" },
+                new SelectOption{ Id = "4", Value = "Below or 40" },
+                new SelectOption{ Id = "5", Value = "Below 50" },
+                new SelectOption{ Id = "6", Value = "Between 50 and 54" },
+                new SelectOption{ Id = "7", Value = "Between 55 and 60" },
+                new SelectOption{ Id = "8", Value = "Above 60" },
+                new SelectOption{ Id = "8", Value = "Above 70" },
+                new SelectOption{ Id = "8", Value = "Above 80" },
+            };
+
+            var colorOptions = new[]
+            {
+                new SelectOption("red", "Red"),
+                new SelectOption("green", "Green"),
+                new SelectOption("blue", "Blue"),
+            };
+
+            return new[]
+            {
+                new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
+                new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
+            };
         }
 
         #region helpers

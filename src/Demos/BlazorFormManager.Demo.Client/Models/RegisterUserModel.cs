@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlazorFormManager.Demo.Client.Models
 {
@@ -6,11 +7,13 @@ namespace BlazorFormManager.Demo.Client.Models
     {
         [Required]
         [DataType(DataType.Password)]
+        [FormDisplay(GroupName = "Password")]
         public string Password { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
+        [FormDisplay(GroupName = "Password")]
         public string ConfirmPassword { get; set; }
     }
 }

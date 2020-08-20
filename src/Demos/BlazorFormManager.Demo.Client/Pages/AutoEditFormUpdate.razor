@@ -1,0 +1,17 @@
+﻿@attribute [Authorize]
+@page "/account/autoeditform"
+
+<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="HandleSubmitDone" OptionsGetter="GetOptions" @ref="Manager">
+    <HeaderZone>
+        <DemoHeader Title="Auto Edit Form Demo" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
+    </HeaderZone>
+    <AfterDisplayGroups>
+        <hr />
+        <SubmitButton Manager="Manager" Text="Update" />
+    </AfterDisplayGroups>
+    <ChildContent>
+        <Base64RemoteImage Src="api/account/photo" @ref="RemoteImgRef" />
+        <CustomInputFile Name="Photo" />
+        <DataAnnotationsValidator />
+    </ChildContent>
+</AutoEditForm>

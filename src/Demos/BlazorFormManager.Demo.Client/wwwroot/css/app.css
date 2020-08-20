@@ -43,10 +43,10 @@ app {
             margin-left: 1.5rem;
         }
 
-.main .top-row a:first-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+        .main .top-row a:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
 .sidebar {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
@@ -132,11 +132,20 @@ app {
     z-index: 1000;
 }
 
-#blazor-error-ui .dismiss {
-    cursor: pointer;
-    position: absolute;
-    right: 0.75rem;
-    top: 0.5rem;
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+
+.form-control {
+    min-width: 0;
+}
+
+.auto-edit-form .form-body .child-content {
+    padding: 1rem 2rem !important;
 }
 
 @media (max-width: 767.98px) {
@@ -154,6 +163,19 @@ app {
 }
 
 @media (min-width: 768px) {
+    .auto-edit-form .form-body {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .auto-edit-form .form-body .form-display-group {
+            flex: 2;
+        }
+
+        .auto-edit-form .form-body .child-content {
+            flex: 1;
+        }
+
     app {
         flex-direction: row;
     }

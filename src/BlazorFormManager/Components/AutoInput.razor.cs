@@ -1,0 +1,394 @@
+﻿// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using BlazorFormManager.ComponentModel;
+using BlazorFormManager.ComponentModel.ViewAnnotations;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Rendering;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BlazorFormManager.Components
+{
+    /// <summary>
+    /// A base class for form input components generated on the fly.
+    /// </summary>
+    public class AutoInputBase : InputBase<object>, IAutoInputComponent
+    {
+        #region fields
+        
+        private Type _propertyType;
+        private FormDisplayAttribute _metadataAttribute;
+        private Type _nullableUnderlyingType;
+        private string _stepAttributeValue; // Null by default, so only allows whole numbers as per HTML spec
+        private const string DateFormat = "yyyy-MM-dd"; // Compatible with HTML date inputs
+
+        #endregion
+
+        /// <summary>
+        /// Gets or sets metadata for generating a form input.
+        /// </summary>
+        [Parameter] public AutoInputMetadata Metadata { get; set; }
+
+        /// <summary>
+        /// Gets or sets the child content to be rendering inside the element.
+        /// </summary>
+        [Parameter] public RenderFragment ChildContent { get; set; }
+
+        /// <summary>
+        /// Gets the associated <see cref="FormManagerBase"/>.
+        /// </summary>
+        [CascadingParameter] protected FormManagerBase Form { get; set; }
+
+        /// <inheritdoc/>
+        public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            await base.SetParametersAsync(parameters);
+
+            if (_propertyType == null)
+            {
+                if (Metadata == null) throw new ArgumentNullException(nameof(Metadata));
+                //if (Metadata.Attribute == null) throw new ArgumentNullException(nameof(Metadata.Attribute));
+                //if (Metadata.Property == null) throw new ArgumentNullException(nameof(Metadata.Property));
+
+                _metadataAttribute = Metadata.Attribute;
+                
+                var propertyInfo = Metadata.PropertyInfo;
+                _propertyType = propertyInfo.PropertyType;
+                _nullableUnderlyingType = Nullable.GetUnderlyingType(_propertyType);
+
+                CheckIfInputNumber();
+
+                // must redefine the field identifier alternatively
+                FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
+
+                // for invoking the method SetCurrentValue(object value) when the value changes
+                Metadata.Attach(this);
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            var elementName = GetElement(out var elementType);
+            var sequence = 0;
+
+            if (elementType == "radio")
+            {
+                sequence = RenderRadioOptions(builder, sequence);
+            }
+            else if (_propertyType.IsCheckbox(elementType))
+            {
+                sequence = RenderFormCheck(builder, sequence, radio: false, label: Metadata.GetDisplayName());
+            }
+            else
+            {
+                builder.OpenElement(sequence++, elementName);
+                builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
+
+                if (elementType != null && elementName == "input")
+                {
+                    if (elementType == "number")
+                        builder.AddAttribute(sequence++, "step", _stepAttributeValue);
+                    builder.AddAttribute(sequence++, "type", elementType);
+                }
+
+                builder.AddAttribute(sequence++, "class", CssClass);
+                
+                if (_propertyType.IsString())
+                    builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
+                else
+                    builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValueAsString));
+                
+                builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+
+                var propertyName = Metadata.PropertyInfo.Name;
+
+                if (elementType == "file")
+                    builder.AddAttribute(sequence++, "name", propertyName);
+
+                if (elementName == "select")
+                    sequence = RenderSelectOptions(builder, sequence);
+
+                builder.CloseElement();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override string FormatValueAsString(object value)
+        {
+            switch (value)
+            {
+                case DateTime dateTimeValue:
+                    return BindConverter.FormatValue(dateTimeValue, DateFormat, CultureInfo.InvariantCulture);
+                case DateTimeOffset dateTimeOffsetValue:
+                    return BindConverter.FormatValue(dateTimeOffsetValue, DateFormat, CultureInfo.InvariantCulture);
+                default:
+                    return value?.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Determines the frame to generate representing an HTML element.
+        /// </summary>
+        /// <param name="elementType">Returns the type of element to generate.</param>
+        /// <returns></returns>
+        protected virtual string GetElement(out string elementType)
+        {
+            elementType = string.IsNullOrWhiteSpace(_metadataAttribute.UITypeHint) 
+                ? null
+                : _metadataAttribute.UITypeHint;
+
+            if (!string.IsNullOrWhiteSpace(_metadataAttribute.UIHint))
+                return _metadataAttribute.UIHint;
+
+            if (_propertyType == typeof(bool) && elementType == null)
+                elementType = "checkbox";
+
+            return "input";
+        }
+
+        /// <summary>
+        /// Renders option elements for a select element to the supplied <see cref="RenderTreeBuilder"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderSelectOptions(RenderTreeBuilder builder, int sequence)
+        {
+            var propertyInfo = Metadata.PropertyInfo;
+            var options = (Form?.OptionsGetter?.Invoke(propertyInfo.Name) ?? Metadata.Options)?.ToList();
+
+            if (options?.Count > 0)
+            {
+                var promptId = string.Empty;
+                var prompt = Metadata.Attribute.Prompt;
+                var defaultOption = options.Where(opt => opt.IsPrompt).FirstOrDefault();
+
+                if (defaultOption != null)
+                {
+                    prompt = defaultOption.Value;
+                    promptId = defaultOption.Id;
+
+                    options.Remove(defaultOption);
+                }
+
+                if (string.IsNullOrWhiteSpace(promptId) && (_propertyType.IsNumeric() || true == _nullableUnderlyingType?.IsNumeric()))
+                    promptId = "0";
+
+                builder.AddContent(sequence++, (MarkupString)$"<option value=\"{promptId}\">{prompt}</option>");
+
+                foreach (var item in options)
+                {
+                    builder.AddContent(sequence++, (MarkupString)$"<option value=\"{item.Id}\">{item.Value}</option>");
+                }
+            }
+            else
+            {
+                builder.AddContent(sequence++, ChildContent);
+            }
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Renders a collection of input elements of type 'radio' to the supplied <see cref="RenderTreeBuilder"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderRadioOptions(RenderTreeBuilder builder, int sequence)
+        {
+            var propertyName = Metadata.PropertyInfo.Name;
+            var options = (Form?.OptionsGetter?.Invoke(propertyName) ?? Metadata.Options)?.ToList();
+
+            if (options?.Count > 0)
+            {
+                foreach (var item in options)
+                {
+                    /* This is a variation of what we're building:
+                     <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="@propertyName" value="@item.Id" @onchange="HandleChange" checked="@IsChecked" />
+                            @item.Value
+                        </label>
+                    </div>
+                     */
+                    sequence = RenderFormCheck(builder, sequence, true, label: item.Value, name: propertyName, value: item.Id);
+                }
+            }
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Renders a checkbox to the supplied <see cref="RenderTreeBuilder"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderInputCheckbox(RenderTreeBuilder builder, int sequence)
+        {
+            builder.OpenElement(sequence++, "input");
+            builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
+            builder.AddAttribute(sequence++, "type", "checkbox");
+            builder.AddAttribute(sequence++, "class", $"form-check-input {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
+            builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool>(this, __value => CurrentValue = __value, (bool)CurrentValue));
+            builder.CloseElement();
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Renders a checkbox to the supplied <see cref="RenderTreeBuilder"/>.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <param name="propertyName">The name of the input radio.</param>
+        /// <param name="value">The value of the radio input.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderInputRadio(RenderTreeBuilder builder, int sequence, string propertyName, string value)
+        {
+            builder.OpenElement(sequence++, "input");
+
+            builder.AddAttribute(sequence++, "type", "radio");
+            builder.AddAttribute(sequence++, "class", $"form-check-input {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "name", propertyName);
+            builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
+            builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
+            builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+            builder.CloseElement();
+
+            return sequence;
+        }
+
+        /// <inheritdoc/>
+        protected override bool TryParseValueFromString(string value, out object result, out string validationErrorMessage)
+        {
+            var targetType = _nullableUnderlyingType ?? _propertyType;
+
+            if (targetType.IsString())
+            {
+                result = value;
+                validationErrorMessage = null;
+                return true;
+            }
+
+            bool converted;
+            object convertedValue;
+
+            if (converted = targetType.TryParseByte(value, out var r1)) convertedValue = r1;
+            else if (converted = targetType.TryParseSByte(value, out var r2)) convertedValue = r2;
+            else if (converted = targetType.TryParseChar(value, out var r3)) convertedValue = r3;
+            else if (converted = targetType.TryParseInt16(value, out var r4)) convertedValue = r4;
+            else if (converted = targetType.TryParseUInt16(value, out var r5)) convertedValue = r5;
+            else if (converted = targetType.TryParseInt32(value, out var r6)) convertedValue = r6;
+            else if (converted = targetType.TryParseUInt32(value, out var r7)) convertedValue = r7;
+            else if (converted = targetType.TryParseInt64(value, out var r8)) convertedValue = r8;
+            else if (converted = targetType.TryParseUInt64(value, out var r9)) convertedValue = r9;
+            else if (converted = targetType.TryParseSingle(value, out var r10)) convertedValue = r10;
+            else if (converted = targetType.TryParseDouble(value, out var r11)) convertedValue = r11;
+            else if (converted = targetType.TryParseDecimal(value, out var r12)) convertedValue = r12;
+            else if (converted = targetType.TryParseBoolean(value, out var r13)) convertedValue = r13;
+            else if (converted = targetType.TryParseDateTime(value, out var r14)) convertedValue = r14;
+            else if (converted = targetType.TryParseDateTimeOffset(value, out var r15)) convertedValue = r15;
+            else
+            {
+                return TryParseValueFromStringUltimately(value, out result, out validationErrorMessage);
+            }
+            
+            if (converted)
+            {
+                result = convertedValue;
+                validationErrorMessage = null;
+                return true;
+            }
+            else
+            {
+                result = default;
+                validationErrorMessage = $"The chosen value ({value}) cannot be converted to type {targetType}.";
+                return false;
+            }
+        }
+
+        #region helpers
+
+        private bool TryParseValueFromStringUltimately(string value, out object result, out string validationErrorMessage)
+        {
+            try
+            {
+                if (BindConverter.TryConvertTo<object>(value, CultureInfo.CurrentCulture, out var parsedValue))
+                {
+                    result = parsedValue;
+                    validationErrorMessage = null;
+                    return true;
+                }
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            result = default;
+            validationErrorMessage = $"The {FieldIdentifier.FieldName} field is not valid.";
+            return false;
+        }
+
+        private int RenderFormCheck(RenderTreeBuilder builder, int sequence, bool radio, string label, string name = null, string value = null)
+        {
+            /*
+            <div class="form-check">
+                <label class="form-check-label" title="@attr.Description">
+                    <InputCheckbox @bind-Value="CheckboxValue" class="form-check-input" /> @labelText
+                </label>
+            </div>
+             */
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "form-check");
+
+            builder.OpenElement(sequence++, "label");
+            builder.AddAttribute(sequence++, "class", "form-check-label");
+
+            if (radio) sequence = RenderInputRadio(builder, sequence, name, value);
+            else sequence = RenderInputCheckbox(builder, sequence);
+
+            builder.AddContent(sequence++, label);
+
+            builder.CloseElement(); // </label>
+            builder.CloseElement(); // </div>
+
+            return sequence;
+        }
+
+        void IAutoInputComponent.SetCurrentValue(object value) => CurrentValue = value;
+
+        private void CheckIfInputNumber()
+        {
+            GetElement(out var elementType);
+
+            if (elementType == "number")
+            {
+                // Unwrap Nullable<T>, because InputBase already deals with the Nullable aspect
+                // of it for us. We will only get asked to parse the T for nonempty inputs.
+                var targetType = _nullableUnderlyingType ?? _propertyType;
+                if (targetType == typeof(int) ||
+                    targetType == typeof(long) ||
+                    targetType == typeof(short) ||
+                    targetType == typeof(float) ||
+                    targetType == typeof(double) ||
+                    targetType == typeof(decimal))
+                {
+                    _stepAttributeValue = "any";
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The type '{targetType}' is not a supported numeric type.");
+                }
+            }
+        }
+
+        #endregion
+    }
+}
