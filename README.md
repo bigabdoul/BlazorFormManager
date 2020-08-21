@@ -246,30 +246,50 @@ public class AccountController : ControllerBase
 }
 ```
 
-### With the help of a tiny amount of CSS...
+### With the help of a bit CSS...
 
 ```CSS
+.auto-edit-form .form-body .col {
+    flex: 0 0 auto;
+}
+
 .auto-edit-form .form-body .child-content {
     padding: 1rem 2rem !important;
 }
 
 @media (min-width: 768px) {
+    .auto-edit-form .form-body .col {
+        width: 33.33333333%;
+    }
+
     .auto-edit-form .form-body {
         display: flex;
         flex-direction: row;
     }
 
-      .auto-edit-form .form-body .form-display-group {
-          flex: 2;
-      }
+        .auto-edit-form .form-body .form-display-group {
+            flex: 2;
+        }
 
-      .auto-edit-form .form-body .child-content {
-          flex: 1;
-      }
+        .auto-edit-form .form-body .child-content {
+            flex: 1;
+        }
+}
+
+@media (max-width: 767.98px) {
+    .auto-edit-form .form-body .col {
+        width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .auto-edit-form .form-body .col {
+        width: 100%;
+    }
 }
 ```
 
-### Produce this form!
+### Produces this form layout!
 
 ***
 
