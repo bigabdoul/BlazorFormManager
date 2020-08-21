@@ -70,7 +70,7 @@ namespace BlazorFormManager.ComponentModel
                         if (css == "form-control")
                         {
                             // don't add by default 'form-control' class to the following input types
-                            if (!pi.PropertyType.IsCheckbox(attr.UITypeHint) && attr.UITypeHint != "radio")
+                            if (!pi.PropertyType.SupportsCheckbox(attr.UITypeHint) && attr.UITypeHint != "radio")
                                 attr.InputCssClass = css;
                         }
                         else

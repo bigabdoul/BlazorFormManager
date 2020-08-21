@@ -281,12 +281,12 @@
             Gets the collection of <see cref="T:BlazorFormManager.ComponentModel.FormDisplayGroupMetadata"/> retrieved from layout attributes of the associated model.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.HeaderZone">
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.FormHeader">
             <summary>
             Gets or sets the form header render fragment.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.FooterZone">
+        <member name="P:BlazorFormManager.Components.AutoEditFormBase`1.FormFooter">
             <summary>
             Gets or sets the form footer render fragment.
             </summary>

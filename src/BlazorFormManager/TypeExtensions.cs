@@ -13,7 +13,7 @@ namespace BlazorFormManager
 
         public static string GenerateId(this Type type) => $"{type.Name}_{Guid.NewGuid().GetHashCode():X}";
 
-        public static IEnumerable<SelectOption> OptionsFromRange(this RangeAttribute range, bool useUnderlyingEnumType = false)
+        public static IEnumerable<SelectOption> OptionsFromRange(this RangeAttribute range, bool useUnderlyingEnumType = false, double step = 1.0)
         {
             if (range != null)
             {
@@ -23,7 +23,7 @@ namespace BlazorFormManager
                 }
                 else if (range.Minimum is double dmin && range.Maximum is double dmax)
                 {
-                    return OptionsFromRange(dmin, dmax);
+                    return OptionsFromRange(dmin, dmax, step);
                 }
                 else if (range.Minimum is string smin && range.Maximum is string smax)
                 {
@@ -42,18 +42,18 @@ namespace BlazorFormManager
             return Enumerable.Empty<SelectOption>();
         }
 
-        public static IEnumerable<SelectOption> OptionsFromRange(double min, double max)
+        public static IEnumerable<SelectOption> OptionsFromRange(double min, double max, double step = 1.0)
         {
             if (min > max) (max, min) = (min, max);
 
             yield return new SelectOption { Id = $"{min}", Value = $"{min}" };
 
-            var current = min + 1.0;
+            var current = min + step;
 
             while (current <= max)
             {
                 yield return new SelectOption { Id = $"{current}", Value = $"{current}" };
-                current += 1.0;
+                current += step;
             }
         }
 
@@ -66,7 +66,7 @@ namespace BlazorFormManager
             });
         }
 
-        public static IEnumerable<SelectOption> OptionsFromDateRange(string min, string max, CultureInfo convertCulture = null)
+        public static IEnumerable<SelectOption> OptionsFromDateRange(string min, string max, CultureInfo convertCulture = null, double step = 1.0)
         {
             if (convertCulture is null) convertCulture = CultureInfo.CurrentCulture;
 
@@ -79,7 +79,7 @@ namespace BlazorFormManager
             while (dateCurrent <= dateMax)
             {
                 yield return new SelectOption { Id = $"{dateCurrent}", Value = $"{dateCurrent}" };
-                dateCurrent = dateCurrent.AddDays(1);
+                dateCurrent = dateCurrent.AddDays(step);
             }
         }
 
@@ -121,7 +121,7 @@ namespace BlazorFormManager
             SelectOption NewOption(object id, string value) => new SelectOption { Id = $"{id}", Value = value };
         }
 
-        public static bool IsNumeric(this object obj) => obj.GetType().IsNumeric();
+        public static bool IsNumeric(this object obj) => true == obj?.GetType().IsNumeric();
 
         public static bool IsNumeric(this Type type)
         {
@@ -147,12 +147,12 @@ namespace BlazorFormManager
         }
 
 
-        public static bool IsCheckbox(this Type propertyType, string elementType)
+        public static bool SupportsCheckbox(this Type propertyType, string elementType)
         {
             return propertyType == typeof(bool) && (elementType == "checkbox" || string.IsNullOrWhiteSpace(elementType));
         }
 
-        public static bool IsInputNumber(this Type targetType)
+        public static bool SupportsInputNumber(this Type targetType)
         {
             return targetType == typeof(int) ||
                     targetType == typeof(long) ||
@@ -176,6 +176,7 @@ namespace BlazorFormManager
         public static bool IsDouble(this Type t) => t == typeof(double);
         public static bool IsDecimal(this Type t) => t == typeof(decimal);
         public static bool IsBoolean(this Type t) => t == typeof(bool);
+        public static bool IsDate(this Type t) => t.IsDateTime() || t.IsDateTimeOffset();
         public static bool IsDateTime(this Type t) => t == typeof(DateTime);
         public static bool IsDateTimeOffset(this Type t) => t == typeof(DateTimeOffset);
 

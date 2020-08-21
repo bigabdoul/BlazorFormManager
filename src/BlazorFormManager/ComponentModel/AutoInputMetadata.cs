@@ -66,7 +66,7 @@ namespace BlazorFormManager.ComponentModel
         /// <summary>
         /// Indicates whether the input should be of type checkbox.
         /// </summary>
-        public bool IsInputCheckbox => PropertyInfo.PropertyType.IsCheckbox(Attribute.UITypeHint);
+        public bool IsInputCheckbox => PropertyInfo.PropertyType.SupportsCheckbox(Attribute.UITypeHint);
 
         #region private/internal
 

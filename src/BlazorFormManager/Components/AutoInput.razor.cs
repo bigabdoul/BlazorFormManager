@@ -61,7 +61,7 @@ namespace BlazorFormManager.Components
                 _nullableUnderlyingType = Nullable.GetUnderlyingType(_propertyType);
 
                 CheckIfInputNumber();
-                InitCulture();
+                InitCultureAndFormat();
 
                 // must redefine the field identifier alternatively
                 FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
@@ -81,7 +81,7 @@ namespace BlazorFormManager.Components
             {
                 sequence = RenderRadioOptions(builder, sequence);
             }
-            else if (_propertyType.IsCheckbox(elementType))
+            else if (_propertyType.SupportsCheckbox(elementType))
             {
                 sequence = RenderFormCheck(builder, sequence, radio: false, label: Metadata.GetDisplayName());
             }
@@ -154,9 +154,9 @@ namespace BlazorFormManager.Components
             {
                 if (_propertyType == typeof(bool))
                     elementType = "checkbox";
-                else if (IsInputNumber())
+                else if (SupportsInputNumber())
                     elementType = "number";
-                else if (IsInputDate())
+                else if (SupportsInputDate())
                     elementType = "date";
             }
 
@@ -393,7 +393,7 @@ namespace BlazorFormManager.Components
                 // Unwrap Nullable<T>, because InputBase already deals with the Nullable aspect
                 // of it for us. We will only get asked to parse the T for nonempty inputs.
                 var targetType = _nullableUnderlyingType ?? _propertyType;
-                if (targetType.IsInputNumber())
+                if (targetType.SupportsInputNumber())
                 {
                     _stepAttributeValue = "any";
                 }
@@ -404,15 +404,11 @@ namespace BlazorFormManager.Components
             }
         }
 
-        private bool IsInputNumber() => (_nullableUnderlyingType ?? _propertyType).IsInputNumber();
+        private bool SupportsInputNumber() => (_nullableUnderlyingType ?? _propertyType).SupportsInputNumber();
 
-        private bool IsInputDate()
-        {
-            var targetType = (_nullableUnderlyingType ?? _propertyType);
-            return targetType.IsDateTime() || targetType.IsDateTimeOffset();
-        }
+        private bool SupportsInputDate() => (_nullableUnderlyingType ?? _propertyType).IsDate();
 
-        private void InitCulture()
+        private void InitCultureAndFormat()
         {
             if (!string.IsNullOrWhiteSpace(_metadataAttribute.CultureName))
                 _culture = CultureInfo.GetCultureInfo(_metadataAttribute.CultureName);
@@ -421,7 +417,7 @@ namespace BlazorFormManager.Components
 
             if (!string.IsNullOrWhiteSpace(_metadataAttribute.Format))
                 _format = _metadataAttribute.Format;
-            else if (IsInputDate())
+            else if (SupportsInputDate())
                 _format = "yyyy-MM-dd"; // Compatible with HTML date inputs
         }
 

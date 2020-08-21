@@ -119,8 +119,14 @@ public int AgeRange { get; set; }
 public string PhoneNumber { get; set; }
 ```
 
+Behaviour of some custom attribute properties of the `FormDisplayAttribute` class:
+
 - `UIHint` determines the HTML element to generate, e.g. `input`, `select`, `textarea`...
 - `UITypeHint` determines the type of an `input` element, e.g. `email`, `number`, `date`...
+- `Name` determines the `label` content. If it's an empty (not `null`) string, no label
+  is displayed.
+- `GroupName` displays similiar or related properties on the same row (e.g. 
+  `<div class="row">...</div>`).
 
 If you don't specify these properties, `AutoEditForm`, based on the property type
 (`string`, `int`, `bool`, `DateTime`, etc.), will determine the most suitable element and
