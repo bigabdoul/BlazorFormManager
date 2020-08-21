@@ -390,17 +390,11 @@ namespace BlazorFormManager.Components
 
             if (elementType == "number")
             {
-                // Unwrap Nullable<T>, because InputBase already deals with the Nullable aspect
-                // of it for us. We will only get asked to parse the T for nonempty inputs.
                 var targetType = _nullableUnderlyingType ?? _propertyType;
                 if (targetType.SupportsInputNumber())
-                {
                     _stepAttributeValue = "any";
-                }
                 else
-                {
                     throw new InvalidOperationException($"The type '{targetType}' is not a supported numeric type.");
-                }
             }
         }
 
