@@ -23,7 +23,7 @@ form as you desire.
 
 For a working sample please checkout the demo application in the project's repository.
 
-### The sample model:
+### The sample view model:
 
 ```C#
 using BlazorFormManager.ComponentModel.ViewAnnotations;
@@ -71,6 +71,61 @@ public class AutoUpdateUserModel
 }
 ```
 
+### Understanding the custom attributes
+
+Currently, there are only 3 custom attributes available for decorating the model of the
+`AutoFormEdit` component.
+
+1. `DisplayIgnoreAttribute`
+2. `FormDisplayAttribute`
+3. `FormDisplayDefaultAttribute`
+
+The `FormDisplayDefaultAttribute` class specifies some default properties for the
+`FormDisplayAttribute` class. Some of these default properties can still be locally
+overridden.
+
+The `DisplayIgnoreAttribute` class, as its name suggests, instructs `AutoEditForm`
+to ignore the property when generating corresponding HTML elements. The property's value
+is still accessible in the model though and will be posted back during form submission.
+As a side-effect, it acts like a hidden field.
+
+As you can see, you can still use validation attributes and have the form validated by
+a validator such as the `<DataAnnotationsValidator />` component. For instance, the
+`RangeAttribute` not only makes sure that the user selects values between the mininum
+(Monday) and maximum (Friday) values but the `AutoEditForm` also generates the appropriate
+enumeration values from Monday to Friday. This is only possible if we specify the 
+`UIHint` to be `select` or `radio`.
+
+```C#
+[Range(typeof(DayOfWeek), "Monday", "Friday")]
+[FormDisplay(UIHint = "select")]
+public string FavouriteWorkingDay { get; set; }
+```
+
+For now, supported types for the `RangeAttribute` are `string`, `int`, `double`, `enum`,
+and `DateTime`.
+
+We can dynamically (at run-time) generate values for this property and others as well.
+This is what we'll do for the `AgeRange` and `FavouriteColor` properties.
+
+You'll probably have also noticed the properties `UIHint` and `UITypeHint` of the 
+`FormDisplayAttribute`.
+
+```C#
+[FormDisplay(UIHint = "select")]
+public int AgeRange { get; set; }
+
+[FormDisplay(UITypeHint = "phone")]
+public string PhoneNumber { get; set; }
+```
+
+- `UIHint` determines the HTML element to generate, e.g. `input`, `select`, `textarea`...
+- `UITypeHint` determines the type of an `input` element, e.g. `email`, `number`, `date`...
+
+If you don't specify these properties, `AutoEditForm`, based on the property type
+(`string`, `int`, `bool`, `DateTime`, etc.), will determine the most suitable element and
+input type to generate.
+
 ### The matching markup on the client (AutoEditFormUpdate.razor):
 
 ```HTML
@@ -90,7 +145,10 @@ public class AutoUpdateUserModel
 </AutoEditForm>
 ```
 
-### The code behind the markup (essential parts):
+Here, the `OptionsGetter="GetOptions"` attribute-value pair, as previously mentioned,
+allows us to generate `select` and `<input type="radio"/>` options at run-time.
+
+### The (pseudo) code behind the markup (essential parts):
 
 ```C#
 using BlazorFormManager.Components;
@@ -116,9 +174,16 @@ public partial class AutoEditFormUpdate
   {
     try
     {
+      // retrieve from the server the model being edited
       Model = await Http.GetFromJsonAsync<AutoUpdateUserModel>("api/account/info");
+
+      // required to submit 'authentication: Bearer...' and other useful request headers
       RequestHeaders = await HeadersProvider.CreateAsync();
-      if (_options == null) _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
+
+      // depending on the requirements, cache the options 
+      // or request always fresh values from the server
+      if (_options == null) 
+        _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
     }
     catch (AccessTokenNotAvailableException ex)
     {
@@ -127,7 +192,8 @@ public partial class AutoEditFormUpdate
     await base.OnInitializedAsync();
   }
 
-
+  // AutoInputBase needs this function to filter out the 
+  // appropriate options for a given HTML element being generated
   private IEnumerable<SelectOption> GetOptions(string propertyName)
     => _options?.Where(opt => opt.PropertyName == propertyName).FirstOrDefault()?.Items;
 }
@@ -171,6 +237,8 @@ public class AccountController : ControllerBase
 
       return new[]
       {
+          // nameof(AutoUpdateUserModel.AgeRange) and nameof(AutoUpdateUserModel.FavouriteColor)
+          // refer to the model's property names to which the options respectively apply
           new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
           new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
       };
@@ -191,13 +259,13 @@ public class AccountController : ControllerBase
         flex-direction: row;
     }
 
-    .auto-edit-form .form-body .form-display-group {
-        flex: 2;
-    }
+      .auto-edit-form .form-body .form-display-group {
+          flex: 2;
+      }
 
-    .auto-edit-form .form-body .child-content {
-        flex: 1;
-    }
+      .auto-edit-form .form-body .child-content {
+          flex: 1;
+      }
 }
 ```
 
