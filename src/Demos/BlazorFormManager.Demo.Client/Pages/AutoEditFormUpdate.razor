@@ -2,9 +2,9 @@
 @page "/account/autoeditform"
 
 <AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="HandleSubmitDone" OptionsGetter="GetOptions" @ref="Manager">
-    <HeaderZone>
+    <FormHeader>
         <DemoHeader Title="Auto Edit Form Demo" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
-    </HeaderZone>
+    </FormHeader>
     <AfterDisplayGroups>
         <hr />
         <SubmitButton Manager="Manager" Text="Update" />
