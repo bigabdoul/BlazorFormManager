@@ -84,15 +84,17 @@ The `FormDisplayDefaultAttribute` class specifies some default properties for th
 `FormDisplayAttribute` class. Some of these default properties can still be locally
 overridden.
 
-The `DisplayIgnoreAttribute` class, as its name suggests, instructs `AutoEditForm`
+The `DisplayIgnoreAttribute` class, as its name suggests, instructs `AutoInputBase`
 to ignore the property when generating corresponding HTML elements. The property's value
 is still accessible in the model though and will be posted back during form submission.
-As a side-effect, it acts like a hidden field.
+As a side-effect, it acts like a hidden input field.
+
+`AutoInputBase` is the base component that handles all inputs/elements code generation.
 
 As you can see, you can still use validation attributes and have the form validated by
 a validator such as the `<DataAnnotationsValidator />` component. For instance, the
 `RangeAttribute` not only makes sure that the user selects values between the mininum
-(Monday) and maximum (Friday) values but the `AutoEditForm` also generates the appropriate
+(Monday) and maximum (Friday) values but `AutoInputBase` also generates the appropriate
 enumeration values from Monday to Friday. This is only possible if we specify the 
 `UIHint` to be `select` or `radio`.
 
@@ -128,7 +130,7 @@ Behaviour of some custom attribute properties of the `FormDisplayAttribute` clas
 - `GroupName` displays similiar or related properties on the same row (e.g. 
   `<div class="row">...</div>`).
 
-If you don't specify these properties, `AutoEditForm`, based on the property type
+If you don't specify these properties, `AutoInputBase`, based on the property type
 (`string`, `int`, `bool`, `DateTime`, etc.), will determine the most suitable element and
 input type to generate.
 
@@ -154,7 +156,7 @@ input type to generate.
 Here, the `OptionsGetter="GetOptions"` attribute-value pair, as previously mentioned,
 allows us to generate `select` and `<input type="radio"/>` options at run-time.
 
-### The (pseudo) code behind the markup (essential parts):
+### Essential parts of the (pseudo) code-behind file (AutoEditFormUpdate.razor.cs):
 
 ```C#
 using BlazorFormManager.Components;
@@ -214,39 +216,39 @@ On the server, in a controller:
 public class AccountController : ControllerBase
 {
   [HttpGet("options")]
-  public IEnumerable<SelectOptionList> GetOptions()
+  public IEnumerable<SelectOptionList> Options()
   {
       // These options could be retrieved from a database or another server-side store;
       // otherwise, there would be no point in making an HTTP request just to retrieve
       // static / hard-coded values. But hey, this is a demo project!
       var ageOptions = new[]
       {
-          new SelectOption{ Id = "0", Value = "[Your most appropriate age]", IsPrompt = true },
-          new SelectOption{ Id = "1", Value = "Minor (< 18)" },
-          new SelectOption{ Id = "2", Value = "Below or 25" },
-          new SelectOption{ Id = "3", Value = "Below or 30" },
-          new SelectOption{ Id = "4", Value = "Below or 40" },
-          new SelectOption{ Id = "5", Value = "Below 50" },
-          new SelectOption{ Id = "6", Value = "Between 50 and 54" },
-          new SelectOption{ Id = "7", Value = "Between 55 and 60" },
-          new SelectOption{ Id = "8", Value = "Above 60" },
-          new SelectOption{ Id = "8", Value = "Above 70" },
-          new SelectOption{ Id = "8", Value = "Above 80" },
+        new SelectOption(id: 0, value: "[Your most appropriate age]", isPrompt: true),
+        new SelectOption(1, "Minor (< 18)"),
+        new SelectOption(2, "Below or 25"),
+        new SelectOption(3, "Below or 30"),
+        new SelectOption(4, "Below or 40"),
+        new SelectOption(5, "Below 50"),
+        new SelectOption(6, "Between 50 and 54"),
+        new SelectOption(7, "Between 55 and 60"),
+        new SelectOption(8, "Above 60"),
+        new SelectOption(9, "Above 70"),
+        new SelectOption(10, "Above 80"),
       };
 
       var colorOptions = new[]
       {
-          new SelectOption("red", "Red"),
-          new SelectOption("green", "Green"),
-          new SelectOption("blue", "Blue"),
+        new SelectOption("red", "Red"),
+        new SelectOption("green", "Green"),
+        new SelectOption("blue", "Blue"),
       };
 
       return new[]
       {
-          // nameof(AutoUpdateUserModel.AgeRange) and nameof(AutoUpdateUserModel.FavouriteColor)
-          // refer to the model's property names to which the options respectively apply
-          new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
-          new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
+        // nameof(AutoUpdateUserModel.AgeRange) and nameof(AutoUpdateUserModel.FavouriteColor)
+        // refer to the model's property names to which the options respectively apply
+        new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
+        new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
       };
   }
 }
