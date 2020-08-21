@@ -11,7 +11,7 @@ It is flexible enough to allow advanced control, such as setting HTTP request he
 over instances of the XMLHttpRequest object used to send requests, all from the C#/.NET
 perspective.
 
-## Introducing AutoEditForm
+# Introducing AutoEditForm
 
 Automatically generate an EditForm with all appropriate inputs using only a model and
 custom attributes. These new form display custom attributes control the way the UI is
@@ -19,11 +19,11 @@ presented and reduce the amount of code required to have a beautifully-layed-out
 fully-functional editable form. Adding a tiny amount of CSS you can further style your
 form as you desire.
 
-### AutoEditForm quick start (pseudo-code)
+## AutoEditForm quick start (pseudo-code)
 
 For a working sample please checkout the demo application in the project's repository.
 
-#### The sample model:
+### The sample model:
 
 ```C#
 using BlazorFormManager.ComponentModel.ViewAnnotations;
@@ -71,7 +71,7 @@ public class AutoUpdateUserModel
 }
 ```
 
-#### The matching markup on the client (AutoEditFormUpdate.razor):
+### The matching markup on the client (AutoEditFormUpdate.razor):
 
 ```HTML
 @attribute [Authorize]
@@ -90,7 +90,7 @@ public class AutoUpdateUserModel
 </AutoEditForm>
 ```
 
-#### The code behind the markup (essential parts):
+### The code behind the markup (essential parts):
 
 ```C#
 using BlazorFormManager.Components;
@@ -177,6 +177,37 @@ public class AccountController : ControllerBase
   }
 }
 ```
+
+### With the help of a tiny amount of CSS...
+
+```CSS
+.auto-edit-form .form-body .child-content {
+    padding: 1rem 2rem !important;
+}
+
+@media (min-width: 768px) {
+    .auto-edit-form .form-body {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .auto-edit-form .form-body .form-display-group {
+        flex: 2;
+    }
+
+    .auto-edit-form .form-body .child-content {
+        flex: 1;
+    }
+}
+```
+
+### Produce this form!
+
+***
+
+![The output](https://github.com/bigabdoul/BlazorFormManager/blob/assets/images/auto-edit-form-003.jpg?raw=true)
+
+***
 
 ## BlazorFormManager quick start
 
