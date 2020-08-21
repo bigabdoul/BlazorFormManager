@@ -36,7 +36,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
         private const string JPEG_ONLY_SUPPORTED = "Only photos of type JPEG (with file extension .jpeg or .jpg) are supported.\n";
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<AccountController> _logger; 
+        private readonly ILogger<AccountController> _logger;
 
         #endregion
 
@@ -54,12 +54,12 @@ namespace BlazorFormManager.Demo.Server.Controllers
             {
                 return Ok(new
                 {
-                    user.FirstName, 
-                    user.LastName, 
-                    user.Email, 
-                    user.PhoneNumber, 
-                    user.AgeRange, 
-                    user.FavouriteColor, 
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    user.PhoneNumber,
+                    user.AgeRange,
+                    user.FavouriteColor,
                     user.FavouriteWorkingDay,
                     user.TwoFactorEnabled,
                 });
@@ -81,7 +81,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [RequestFormLimits(MultipartBodyLengthLimit = BIG_FILE_SIZE_LIMIT)]
         public async Task<IActionResult> Register
         (
-            [FromForm] RegisterUserModel model, 
+            [FromForm] RegisterUserModel model,
             [FromServices] SignInManager<ApplicationUser> signInManager
         )
         {
@@ -250,11 +250,11 @@ namespace BlazorFormManager.Demo.Server.Controllers
             }
 
             return Ok(new
-            { 
-                success, 
+            {
+                success,
                 error = success ? null : "Could not save the file.",
-                filename, 
-                length 
+                filename,
+                length
             });
         }
 
@@ -262,9 +262,9 @@ namespace BlazorFormManager.Demo.Server.Controllers
         public IActionResult ArrayTest([FromForm] ArrayModel model)
         {
             var success = model?.Items?.Length == ArrayModel.SampleItems.Length;
-            
+
             if (success) return Ok(new { success, message = "Array model lengths match." });
-            
+
             return BadRequest(new { success, error = "Array model lengths do not match." });
         }
 
@@ -276,17 +276,17 @@ namespace BlazorFormManager.Demo.Server.Controllers
             // static / hard-coded values. But hey, this is a demo project!
             var ageOptions = new[]
             {
-                new SelectOption{ Id = "0", Value = "[Your most appropriate age]", IsPrompt = true },
-                new SelectOption{ Id = "1", Value = "Minor (< 18)" },
-                new SelectOption{ Id = "2", Value = "Below or 25" },
-                new SelectOption{ Id = "3", Value = "Below or 30" },
-                new SelectOption{ Id = "4", Value = "Below or 40" },
-                new SelectOption{ Id = "5", Value = "Below 50" },
-                new SelectOption{ Id = "6", Value = "Between 50 and 54" },
-                new SelectOption{ Id = "7", Value = "Between 55 and 60" },
-                new SelectOption{ Id = "8", Value = "Above 60" },
-                new SelectOption{ Id = "8", Value = "Above 70" },
-                new SelectOption{ Id = "8", Value = "Above 80" },
+                new SelectOption(id: 0, value: "[Your most appropriate age]", isPrompt: true),
+                new SelectOption(1, "Minor (< 18)"),
+                new SelectOption(2, "Below or 25"),
+                new SelectOption(3, "Below or 30"),
+                new SelectOption(4, "Below or 40"),
+                new SelectOption(5, "Below 50"),
+                new SelectOption(6, "Between 50 and 54"),
+                new SelectOption(7, "Between 55 and 60"),
+                new SelectOption(8, "Above 60"),
+                new SelectOption(9, "Above 70"),
+                new SelectOption(10, "Above 80"),
             };
 
             var colorOptions = new[]
