@@ -188,14 +188,20 @@ namespace BlazorFormManager.Components
                     options.Remove(defaultOption);
                 }
 
-                if (string.IsNullOrWhiteSpace(promptId) && (_propertyType.IsNumeric() || true == _nullableUnderlyingType?.IsNumeric()))
+                if (string.IsNullOrWhiteSpace(promptId) && (_nullableUnderlyingType ?? _propertyType).IsNumeric())
                     promptId = "0";
 
-                builder.AddContent(sequence++, (MarkupString)$"<option value=\"{promptId}\">{prompt}</option>");
+                builder.OpenElement(sequence++, "option");
+                builder.AddAttribute(sequence++, "value", promptId);
+                builder.AddContent(sequence++, prompt);
+                builder.CloseElement();
 
                 foreach (var item in options)
                 {
-                    builder.AddContent(sequence++, (MarkupString)$"<option value=\"{item.Id}\">{item.Value}</option>");
+                    builder.OpenElement(sequence++, "option");
+                    builder.AddAttribute(sequence++, "value", item.Id);
+                    builder.AddContent(sequence++, item.Value);
+                    builder.CloseElement();
                 }
             }
             else
