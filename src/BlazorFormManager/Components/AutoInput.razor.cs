@@ -298,25 +298,24 @@ namespace BlazorFormManager.Components
 
             bool converted;
             object convertedValue;
-            var cultureInfo = _culture;
             var numberStyles = _metadataAttribute.NumberStyles;
             var format = _metadataAttribute.Format ?? DateFormat;
 
-            if (converted = targetType.TryParseByte(value, numberStyles, cultureInfo, out var r1)) convertedValue = r1;
-            else if (converted = targetType.TryParseSByte(value, numberStyles, cultureInfo, out var r2)) convertedValue = r2;
+            if (converted = targetType.TryParseByte(value, numberStyles, _culture, out var r1)) convertedValue = r1;
+            else if (converted = targetType.TryParseSByte(value, numberStyles, _culture, out var r2)) convertedValue = r2;
             else if (converted = targetType.TryParseChar(value, out var r3)) convertedValue = r3;
-            else if (converted = targetType.TryParseInt16(value, numberStyles, cultureInfo, out var r4)) convertedValue = r4;
-            else if (converted = targetType.TryParseUInt16(value, numberStyles, cultureInfo, out var r5)) convertedValue = r5;
-            else if (converted = targetType.TryParseInt32(value, numberStyles, cultureInfo, out var r6)) convertedValue = r6;
-            else if (converted = targetType.TryParseUInt32(value, numberStyles, cultureInfo, out var r7)) convertedValue = r7;
-            else if (converted = targetType.TryParseInt64(value, numberStyles, cultureInfo, out var r8)) convertedValue = r8;
-            else if (converted = targetType.TryParseUInt64(value, numberStyles, cultureInfo, out var r9)) convertedValue = r9;
-            else if (converted = targetType.TryParseSingle(value, numberStyles, cultureInfo, out var r10)) convertedValue = r10;
-            else if (converted = targetType.TryParseDouble(value, numberStyles, cultureInfo, out var r11)) convertedValue = r11;
-            else if (converted = targetType.TryParseDecimal(value, numberStyles, cultureInfo, out var r12)) convertedValue = r12;
+            else if (converted = targetType.TryParseInt16(value, numberStyles, _culture, out var r4)) convertedValue = r4;
+            else if (converted = targetType.TryParseUInt16(value, numberStyles, _culture, out var r5)) convertedValue = r5;
+            else if (converted = targetType.TryParseInt32(value, numberStyles, _culture, out var r6)) convertedValue = r6;
+            else if (converted = targetType.TryParseUInt32(value, numberStyles, _culture, out var r7)) convertedValue = r7;
+            else if (converted = targetType.TryParseInt64(value, numberStyles, _culture, out var r8)) convertedValue = r8;
+            else if (converted = targetType.TryParseUInt64(value, numberStyles, _culture, out var r9)) convertedValue = r9;
+            else if (converted = targetType.TryParseSingle(value, numberStyles, _culture, out var r10)) convertedValue = r10;
+            else if (converted = targetType.TryParseDouble(value, numberStyles, _culture, out var r11)) convertedValue = r11;
+            else if (converted = targetType.TryParseDecimal(value, numberStyles, _culture, out var r12)) convertedValue = r12;
             else if (converted = targetType.TryParseBoolean(value, out var r13)) convertedValue = r13;
-            else if (converted = targetType.TryParseDateTime(value, format, cultureInfo, out var r14)) convertedValue = r14;
-            else if (converted = targetType.TryParseDateTimeOffset(value, format, cultureInfo, out var r15)) convertedValue = r15;
+            else if (converted = targetType.TryParseDateTime(value, format, _culture, out var r14)) convertedValue = r14;
+            else if (converted = targetType.TryParseDateTimeOffset(value, format, _culture, out var r15)) convertedValue = r15;
             else
             {
                 return TryParseValueFromStringUltimately(value, out result, out validationErrorMessage);
