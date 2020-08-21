@@ -23,6 +23,7 @@ namespace BlazorFormManager.Components
         private FormDisplayAttribute _metadataAttribute;
         private Type _nullableUnderlyingType;
         private string _stepAttributeValue; // Null by default, so only allows whole numbers as per HTML spec
+        private CultureInfo _culture;
         private const string DateFormat = "yyyy-MM-dd"; // Compatible with HTML date inputs
 
         #endregion
@@ -60,6 +61,7 @@ namespace BlazorFormManager.Components
                 _nullableUnderlyingType = Nullable.GetUnderlyingType(_propertyType);
 
                 CheckIfInputNumber();
+                InitCulture();
 
                 // must redefine the field identifier alternatively
                 FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
@@ -122,9 +124,9 @@ namespace BlazorFormManager.Components
             switch (value)
             {
                 case DateTime dateTimeValue:
-                    return BindConverter.FormatValue(dateTimeValue, DateFormat, CultureInfo.InvariantCulture);
+                    return BindConverter.FormatValue(dateTimeValue, _metadataAttribute.Format ?? DateFormat, _culture);
                 case DateTimeOffset dateTimeOffsetValue:
-                    return BindConverter.FormatValue(dateTimeOffsetValue, DateFormat, CultureInfo.InvariantCulture);
+                    return BindConverter.FormatValue(dateTimeOffsetValue, _metadataAttribute.Format ?? DateFormat, _culture);
                 default:
                     return value?.ToString();
             }
@@ -137,17 +139,28 @@ namespace BlazorFormManager.Components
         /// <returns></returns>
         protected virtual string GetElement(out string elementType)
         {
+            string element;
+
             elementType = string.IsNullOrWhiteSpace(_metadataAttribute.UITypeHint) 
                 ? null
                 : _metadataAttribute.UITypeHint;
 
             if (!string.IsNullOrWhiteSpace(_metadataAttribute.UIHint))
-                return _metadataAttribute.UIHint;
+                element = _metadataAttribute.UIHint;
+            else
+                element = "input";
 
-            if (_propertyType == typeof(bool) && elementType == null)
-                elementType = "checkbox";
+            if (elementType == null)
+            {
+                if (_propertyType == typeof(bool))
+                    elementType = "checkbox";
+                else if (IsInputNumber())
+                    elementType = "number";
+                else if (IsInputDate())
+                    elementType = "date";
+            }
 
-            return "input";
+            return element;
         }
 
         /// <summary>
@@ -164,7 +177,7 @@ namespace BlazorFormManager.Components
             if (options?.Count > 0)
             {
                 var promptId = string.Empty;
-                var prompt = Metadata.Attribute.Prompt;
+                var prompt = _metadataAttribute.Prompt;
                 var defaultOption = options.Where(opt => opt.IsPrompt).FirstOrDefault();
 
                 if (defaultOption != null)
@@ -279,22 +292,25 @@ namespace BlazorFormManager.Components
 
             bool converted;
             object convertedValue;
+            var cultureInfo = _culture;
+            var numberStyles = _metadataAttribute.NumberStyles;
+            var format = _metadataAttribute.Format ?? DateFormat;
 
-            if (converted = targetType.TryParseByte(value, out var r1)) convertedValue = r1;
-            else if (converted = targetType.TryParseSByte(value, out var r2)) convertedValue = r2;
+            if (converted = targetType.TryParseByte(value, numberStyles, cultureInfo, out var r1)) convertedValue = r1;
+            else if (converted = targetType.TryParseSByte(value, numberStyles, cultureInfo, out var r2)) convertedValue = r2;
             else if (converted = targetType.TryParseChar(value, out var r3)) convertedValue = r3;
-            else if (converted = targetType.TryParseInt16(value, out var r4)) convertedValue = r4;
-            else if (converted = targetType.TryParseUInt16(value, out var r5)) convertedValue = r5;
-            else if (converted = targetType.TryParseInt32(value, out var r6)) convertedValue = r6;
-            else if (converted = targetType.TryParseUInt32(value, out var r7)) convertedValue = r7;
-            else if (converted = targetType.TryParseInt64(value, out var r8)) convertedValue = r8;
-            else if (converted = targetType.TryParseUInt64(value, out var r9)) convertedValue = r9;
-            else if (converted = targetType.TryParseSingle(value, out var r10)) convertedValue = r10;
-            else if (converted = targetType.TryParseDouble(value, out var r11)) convertedValue = r11;
-            else if (converted = targetType.TryParseDecimal(value, out var r12)) convertedValue = r12;
+            else if (converted = targetType.TryParseInt16(value, numberStyles, cultureInfo, out var r4)) convertedValue = r4;
+            else if (converted = targetType.TryParseUInt16(value, numberStyles, cultureInfo, out var r5)) convertedValue = r5;
+            else if (converted = targetType.TryParseInt32(value, numberStyles, cultureInfo, out var r6)) convertedValue = r6;
+            else if (converted = targetType.TryParseUInt32(value, numberStyles, cultureInfo, out var r7)) convertedValue = r7;
+            else if (converted = targetType.TryParseInt64(value, numberStyles, cultureInfo, out var r8)) convertedValue = r8;
+            else if (converted = targetType.TryParseUInt64(value, numberStyles, cultureInfo, out var r9)) convertedValue = r9;
+            else if (converted = targetType.TryParseSingle(value, numberStyles, cultureInfo, out var r10)) convertedValue = r10;
+            else if (converted = targetType.TryParseDouble(value, numberStyles, cultureInfo, out var r11)) convertedValue = r11;
+            else if (converted = targetType.TryParseDecimal(value, numberStyles, cultureInfo, out var r12)) convertedValue = r12;
             else if (converted = targetType.TryParseBoolean(value, out var r13)) convertedValue = r13;
-            else if (converted = targetType.TryParseDateTime(value, out var r14)) convertedValue = r14;
-            else if (converted = targetType.TryParseDateTimeOffset(value, out var r15)) convertedValue = r15;
+            else if (converted = targetType.TryParseDateTime(value, format, cultureInfo, out var r14)) convertedValue = r14;
+            else if (converted = targetType.TryParseDateTimeOffset(value, format, cultureInfo, out var r15)) convertedValue = r15;
             else
             {
                 return TryParseValueFromStringUltimately(value, out result, out validationErrorMessage);
@@ -320,7 +336,7 @@ namespace BlazorFormManager.Components
         {
             try
             {
-                if (BindConverter.TryConvertTo<object>(value, CultureInfo.CurrentCulture, out var parsedValue))
+                if (BindConverter.TryConvertTo<object>(value, _culture, out var parsedValue))
                 {
                     result = parsedValue;
                     validationErrorMessage = null;
@@ -373,12 +389,7 @@ namespace BlazorFormManager.Components
                 // Unwrap Nullable<T>, because InputBase already deals with the Nullable aspect
                 // of it for us. We will only get asked to parse the T for nonempty inputs.
                 var targetType = _nullableUnderlyingType ?? _propertyType;
-                if (targetType == typeof(int) ||
-                    targetType == typeof(long) ||
-                    targetType == typeof(short) ||
-                    targetType == typeof(float) ||
-                    targetType == typeof(double) ||
-                    targetType == typeof(decimal))
+                if (targetType.IsInputNumber())
                 {
                     _stepAttributeValue = "any";
                 }
@@ -387,6 +398,25 @@ namespace BlazorFormManager.Components
                     throw new InvalidOperationException($"The type '{targetType}' is not a supported numeric type.");
                 }
             }
+        }
+
+        private bool IsInputNumber() => (_nullableUnderlyingType ?? _propertyType).IsInputNumber();
+
+        private bool IsInputDate()
+        {
+            var targetType = (_nullableUnderlyingType ?? _propertyType);
+            return targetType.IsDateTime() || targetType.IsDateTimeOffset();
+        }
+
+        private void InitCulture()
+        {
+            if (!string.IsNullOrWhiteSpace(_metadataAttribute.CultureName))
+                _culture = CultureInfo.GetCultureInfo(_metadataAttribute.CultureName);
+            else
+                _culture = CultureInfo.CurrentCulture;
+
+            if (string.IsNullOrWhiteSpace(_metadataAttribute.Format))
+                _metadataAttribute.Format = DateFormat;
         }
 
         #endregion

@@ -202,6 +202,24 @@
             Gets or sets an icon associated with the generated input.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Format">
+            <summary>
+            Gets or sets the data format. If you want to format a <see cref="T:System.DateTime"/>
+            or <see cref="T:System.DateTimeOffset"/>, you must specify a valid value for 
+            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CultureName"/> and set <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> to 'text'.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CultureName">
+            <summary>
+            The case-insensitive name of a culture to use for conversions and formatting.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.NumberStyles">
+            <summary>
+            Determines the styles permitted in numeric string arguments that are passed to
+            the Parse and TryParse methods of the integral and floating-point numeric types.
+            </summary>
+        </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.GetProperty">
             <summary>
             Gets the <see cref="T:System.Reflection.PropertyInfo"/> of the model's property that the current attribute decorates.

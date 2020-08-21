@@ -152,6 +152,16 @@ namespace BlazorFormManager
             return propertyType == typeof(bool) && (elementType == "checkbox" || string.IsNullOrWhiteSpace(elementType));
         }
 
+        public static bool IsInputNumber(this Type targetType)
+        {
+            return targetType == typeof(int) ||
+                    targetType == typeof(long) ||
+                    targetType == typeof(short) ||
+                    targetType == typeof(float) ||
+                    targetType == typeof(double) ||
+                    targetType == typeof(decimal);
+        }
+
         public static bool IsString(this Type t) => t == typeof(string);
         public static bool IsByte(this Type t) => t == typeof(byte);
         public static bool IsSByte(this Type t) => t == typeof(sbyte);
@@ -169,80 +179,133 @@ namespace BlazorFormManager
         public static bool IsDateTime(this Type t) => t == typeof(DateTime);
         public static bool IsDateTimeOffset(this Type t) => t == typeof(DateTimeOffset);
 
-        public static bool TryParseByte(this Type t, string value, out byte result)
+        public static bool TryParseByte(this Type t, string value, out byte result) 
+            => t.TryParseByte(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseByte(this Type t, string value, NumberStyles style, IFormatProvider provider, out byte result)
         {
             result = default;
-            return t.IsByte() && byte.TryParse(value, out result);
+            return t.IsByte() && byte.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseSByte(this Type t, string value, out sbyte result)
+
+        public static bool TryParseSByte(this Type t, string value, out sbyte result) 
+            => t.TryParseSByte(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseSByte(this Type t, string value, NumberStyles style, IFormatProvider provider, out sbyte result)
         {
             result = default;
-            return t.IsSByte() && sbyte.TryParse(value, out result);
+            return t.IsSByte() && sbyte.TryParse(value, style, provider, out result);
         }
+
         public static bool TryParseChar(this Type t, string value, out char result)
         {
             result = default;
             return t.IsChar() && char.TryParse(value, out result);
         }
-        public static bool TryParseInt16(this Type t, string value, out short result)
+
+        public static bool TryParseInt16(this Type t, string value, out short result) 
+            => t.TryParseInt16(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseInt16(this Type t, string value, NumberStyles style, IFormatProvider provider, out short result)
         {
             result = default;
-            return t.IsInt16() && short.TryParse(value, out result);
+            return t.IsInt16() && short.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseUInt16(this Type t, string value, out ushort result)
+
+        public static bool TryParseUInt16(this Type t, string value, out ushort result) 
+            => t.TryParseUInt16(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseUInt16(this Type t, string value, NumberStyles style, IFormatProvider provider, out ushort result)
         {
             result = default;
-            return t.IsUInt16() && ushort.TryParse(value, out result);
+            return t.IsUInt16() && ushort.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseInt32(this Type t, string value, out int result)
+
+        public static bool TryParseInt32(this Type t, string value, out int result) 
+            => t.TryParseInt32(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseInt32(this Type t, string value, NumberStyles style, IFormatProvider provider, out int result)
         {
             result = default;
-            return t.IsInt32() && int.TryParse(value, out result);
+            return t.IsInt32() && int.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseUInt32(this Type t, string value, out uint result)
+
+        public static bool TryParseUInt32(this Type t, string value, out uint result) 
+            => t.TryParseUInt32(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseUInt32(this Type t, string value, NumberStyles style, IFormatProvider provider, out uint result)
         {
             result = default;
-            return t.IsUInt32() && uint.TryParse(value, out result);
+            return t.IsUInt32() && uint.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseInt64(this Type t, string value, out long result)
+
+        public static bool TryParseInt64(this Type t, string value, out long result) 
+            => t.TryParseInt64(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseInt64(this Type t, string value, NumberStyles style, IFormatProvider provider, out long result)
         {
             result = default;
-            return t.IsInt64() && long.TryParse(value, out result);
+            return t.IsInt64() && long.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseUInt64(this Type t, string value, out ulong result)
+
+        public static bool TryParseUInt64(this Type t, string value, out ulong result) 
+            => t.TryParseUInt64(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseUInt64(this Type t, string value, NumberStyles style, IFormatProvider provider, out ulong result)
         {
             result = default;
-            return t.IsUInt64() && ulong.TryParse(value, out result);
+            return t.IsUInt64() && ulong.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseSingle(this Type t, string value, out float result)
+
+        public static bool TryParseSingle(this Type t, string value, out float result) 
+            => t.TryParseSingle(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseSingle(this Type t, string value, NumberStyles style, IFormatProvider provider, out float result)
         {
             result = default;
-            return t.IsSingle() && float.TryParse(value, out result);
+            return t.IsSingle() && float.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseDouble(this Type t, string value, out double result)
+
+        public static bool TryParseDouble(this Type t, string value, out double result) 
+            => t.TryParseDouble(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseDouble(this Type t, string value, NumberStyles style, IFormatProvider provider, out double result)
         {
             result = default;
-            return t.IsDouble() && double.TryParse(value, out result);
+            return t.IsDouble() && double.TryParse(value, style, provider, out result);
         }
-        public static bool TryParseDecimal(this Type t, string value, out decimal result)
+
+        public static bool TryParseDecimal(this Type t, string value, out decimal result) 
+            => t.TryParseDecimal(value, NumberStyles.None, null, out result);
+
+        public static bool TryParseDecimal(this Type t, string value, NumberStyles style, IFormatProvider provider, out decimal result)
         {
             result = default;
-            return t.IsDecimal() && decimal.TryParse(value, out result);
+            return t.IsDecimal() && decimal.TryParse(value, style, provider, out result);
         }
+
         public static bool TryParseBoolean(this Type t, string value, out bool result)
         {
             result = default;
             return t.IsBoolean() && bool.TryParse(value, out result);
         }
-        public static bool TryParseDateTime(this Type t, string value, out DateTime result)
+
+        public static bool TryParseDateTime(this Type t, string value, out DateTime result) 
+            => t.TryParseDateTime(value, DateFormat, CultureInfo.InvariantCulture, out result);
+
+        public static bool TryParseDateTime(this Type t, string value, string format, CultureInfo culture, out DateTime result)
         {
             result = default;
-            return t.IsDateTime() && BindConverter.TryConvertToDateTime(value, CultureInfo.InvariantCulture, DateFormat, out result);
+            return t.IsDateTime() && BindConverter.TryConvertToDateTime(value, culture, format, out result);
         }
+
         public static bool TryParseDateTimeOffset(this Type t, string value, out DateTimeOffset result)
+            => t.TryParseDateTimeOffset(value, DateFormat, CultureInfo.InvariantCulture, out result);
+
+        public static bool TryParseDateTimeOffset(this Type t, string value, string format, CultureInfo culture, out DateTimeOffset result)
         {
             result = default;
-            return t.IsDateTimeOffset() && BindConverter.TryConvertToDateTimeOffset(value, CultureInfo.InvariantCulture, DateFormat, out result);
+            return t.IsDateTimeOffset() && BindConverter.TryConvertToDateTimeOffset(value, culture, format, out result);
         }
     }
 }

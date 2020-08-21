@@ -89,6 +89,25 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         public string Icon { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the data format. If you want to format a <see cref="DateTime"/>
+        /// or <see cref="DateTimeOffset"/>, you must specify a valid value for 
+        /// <see cref="CultureName"/> and set <see cref="UITypeHint"/> to 'text'.
+        /// </summary>
+        public string Format { get; set; }
+
+        /// <summary>
+        /// The case-insensitive name of a culture to use for conversions and formatting.
+        /// </summary>
+        public string CultureName { get; set; }
+
+        /// <summary>
+        /// Determines the styles permitted in numeric string arguments that are passed to
+        /// the Parse and TryParse methods of the integral and floating-point numeric types.
+        /// </summary>
+        public System.Globalization.NumberStyles NumberStyles { get; set; }
+
         #region internal
 
         private PropertyInfo _property;
