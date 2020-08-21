@@ -18,12 +18,12 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Gets or sets the form header render fragment.
         /// </summary>
-        [Parameter] public RenderFragment HeaderZone { get; set; }
+        [Parameter] public RenderFragment FormHeader { get; set; }
 
         /// <summary>
         /// Gets or sets the form footer render fragment.
         /// </summary>
-        [Parameter] public RenderFragment FooterZone { get; set; }
+        [Parameter] public RenderFragment FormFooter { get; set; }
 
         /// <summary>
         /// Gets or sets the content rendered before the <see cref="FormDisplayGroup"/>s.

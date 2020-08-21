@@ -5,9 +5,9 @@
 {
     <div class="auto-edit-form">
         <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" id="@FormId" action="@FormAction" method="@FormMethod" enctype="multipart/form-data" @attributes="AdditionalAttributes">
-            @if (HeaderZone != null)
+            @if (FormHeader != null)
             {
-                <div class="header-zone">@HeaderZone</div>
+                <div class="form-header">@FormHeader</div>
             }
             <div class="form-body">
                 <div class="form-display-group">
@@ -37,9 +37,9 @@
                     @ChildContent
                 </div>
             </div>
-            @if (FooterZone != null)
+            @if (FormFooter != null)
             {
-                <div class="footer-zone">@FooterZone</div>
+                <div class="form-footer">@FormFooter</div>
             }
         </EditForm>
         <FormSubmitResultView Result="SubmitResult" />
