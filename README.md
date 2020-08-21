@@ -210,6 +210,10 @@ public partial class AutoEditFormUpdate
 On the server, in a controller:
 
 ```C#
+using BlazorFormManager;
+using System;
+using System.Collections.Generic;
+
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
@@ -245,8 +249,9 @@ public class AccountController : ControllerBase
 
       return new[]
       {
+        // Reference to the AutoUpdateUserModel class is required!
         // nameof(AutoUpdateUserModel.AgeRange) and nameof(AutoUpdateUserModel.FavouriteColor)
-        // refer to the model's property names to which the options respectively apply
+        // refer to the model's property names to which the options respectively apply.
         new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
         new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
       };
