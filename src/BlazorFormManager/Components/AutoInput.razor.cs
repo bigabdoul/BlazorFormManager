@@ -24,7 +24,7 @@ namespace BlazorFormManager.Components
         private Type _nullableUnderlyingType;
         private string _stepAttributeValue; // Null by default, so only allows whole numbers as per HTML spec
         private CultureInfo _culture;
-        private const string DateFormat = "yyyy-MM-dd"; // Compatible with HTML date inputs
+        private string _format;
 
         #endregion
 
@@ -124,9 +124,9 @@ namespace BlazorFormManager.Components
             switch (value)
             {
                 case DateTime dateTimeValue:
-                    return BindConverter.FormatValue(dateTimeValue, _metadataAttribute.Format ?? DateFormat, _culture);
+                    return BindConverter.FormatValue(dateTimeValue, _format, _culture);
                 case DateTimeOffset dateTimeOffsetValue:
-                    return BindConverter.FormatValue(dateTimeOffsetValue, _metadataAttribute.Format ?? DateFormat, _culture);
+                    return BindConverter.FormatValue(dateTimeOffsetValue, _format, _culture);
                 default:
                     return value?.ToString();
             }
@@ -299,7 +299,6 @@ namespace BlazorFormManager.Components
             bool converted;
             object convertedValue;
             var numberStyles = _metadataAttribute.NumberStyles;
-            var format = _metadataAttribute.Format ?? DateFormat;
 
             if (converted = targetType.TryParseByte(value, numberStyles, _culture, out var r1)) convertedValue = r1;
             else if (converted = targetType.TryParseSByte(value, numberStyles, _culture, out var r2)) convertedValue = r2;
@@ -314,8 +313,8 @@ namespace BlazorFormManager.Components
             else if (converted = targetType.TryParseDouble(value, numberStyles, _culture, out var r11)) convertedValue = r11;
             else if (converted = targetType.TryParseDecimal(value, numberStyles, _culture, out var r12)) convertedValue = r12;
             else if (converted = targetType.TryParseBoolean(value, out var r13)) convertedValue = r13;
-            else if (converted = targetType.TryParseDateTime(value, format, _culture, out var r14)) convertedValue = r14;
-            else if (converted = targetType.TryParseDateTimeOffset(value, format, _culture, out var r15)) convertedValue = r15;
+            else if (converted = targetType.TryParseDateTime(value, _format, _culture, out var r14)) convertedValue = r14;
+            else if (converted = targetType.TryParseDateTimeOffset(value, _format, _culture, out var r15)) convertedValue = r15;
             else
             {
                 return TryParseValueFromStringUltimately(value, out result, out validationErrorMessage);
@@ -420,8 +419,10 @@ namespace BlazorFormManager.Components
             else
                 _culture = CultureInfo.CurrentCulture;
 
-            if (string.IsNullOrWhiteSpace(_metadataAttribute.Format))
-                _metadataAttribute.Format = DateFormat;
+            if (!string.IsNullOrWhiteSpace(_metadataAttribute.Format))
+                _format = _metadataAttribute.Format;
+            else if (IsInputDate())
+                _format = "yyyy-MM-dd"; // Compatible with HTML date inputs
         }
 
         #endregion
