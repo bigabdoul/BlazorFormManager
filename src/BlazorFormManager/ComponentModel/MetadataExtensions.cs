@@ -49,7 +49,7 @@ namespace BlazorFormManager.ComponentModel
                 var emptyDisplay = FormDisplayAttribute.Empty;
                 var properties = type.GetProperties();
                 var layoutDefault = type.GetCustomAttributes<FormDisplayDefaultAttribute>()
-                                             .SingleOrDefault() ?? FormDisplayDefaultAttribute.Empty;
+                                        .SingleOrDefault() ?? FormDisplayDefaultAttribute.Empty;
                 
                 foreach (var pi in properties)
                 {
@@ -59,8 +59,10 @@ namespace BlazorFormManager.ComponentModel
 
                     var attr = pi.GetCustomAttribute<FormDisplayAttribute>(true);
 
-                    if (attr == null) attr = FormDisplayAttribute.CreateDefault();
-                    if (attr.ColumnCssClass == null) attr.ColumnCssClass = layoutDefault.ColumnCssClass ?? emptyDisplay.ColumnCssClass;
+                    if (attr == null)
+                        attr = layoutDefault.CreateDefault();
+                    else if (attr.ColumnCssClass == null) 
+                        attr.ColumnCssClass = layoutDefault.ColumnCssClass;
 
                     if (attr.InputCssClass == null)
                     {

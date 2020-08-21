@@ -15,8 +15,8 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public static readonly FormDisplayAttribute Empty = new FormDisplayAttribute
         {
             GroupName = string.Empty,
-            ColumnCssClass = "col",
-            InputCssClass = "form-control",
+            ColumnCssClass = FormDisplayDefaultAttribute.Empty.ColumnCssClass,
+            InputCssClass = FormDisplayDefaultAttribute.Empty.InputCssClass,
         };
 
         /// <summary>
@@ -108,21 +108,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         /// <param name="value"></param>
         internal void SetProperty(PropertyInfo value) => _property = value;
-
-        /// <summary>
-        /// Creates a new instance of the <see cref="FormDisplayAttribute"/> from matching 
-        /// properties of the current <see cref="FormDisplayDefaultAttribute"/> instance.
-        /// </summary>
-        /// <returns></returns>
-        internal static FormDisplayAttribute CreateDefault()
-        {
-            return new FormDisplayAttribute
-            {
-                GroupName = Empty.GroupName,
-                ColumnCssClass = Empty.ColumnCssClass,
-                InputCssClass = Empty.InputCssClass,
-            };
-        }
 
         #endregion
     }

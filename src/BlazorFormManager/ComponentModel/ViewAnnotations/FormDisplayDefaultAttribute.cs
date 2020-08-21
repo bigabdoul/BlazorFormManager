@@ -37,5 +37,20 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// Indicates whether to display the name of a group.
         /// </summary>
         public bool ShowGroupName { get; set; }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="FormDisplayAttribute"/> from matching 
+        /// properties of the current <see cref="FormDisplayDefaultAttribute"/> instance.
+        /// </summary>
+        /// <returns></returns>
+        internal FormDisplayAttribute CreateDefault()
+        {
+            return new FormDisplayAttribute
+            {
+                ColumnCssClass = ColumnCssClass,
+                InputCssClass = InputCssClass,
+                GroupName = string.Empty,
+            };
+        }
     }
 }

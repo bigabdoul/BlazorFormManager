@@ -214,13 +214,6 @@
             </summary>
             <param name="value"></param>
         </member>
-        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CreateDefault">
-            <summary>
-            Creates a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/> from matching 
-            properties of the current <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> instance.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute">
             <summary>
             Represents a custom attributes that encapsulates default 
@@ -251,6 +244,13 @@
             <summary>
             Indicates whether to display the name of a group.
             </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.CreateDefault">
+            <summary>
+            Creates a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/> from matching 
+            properties of the current <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute"/> instance.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:BlazorFormManager.Components.AutoEditFormBase`1">
             <summary>
