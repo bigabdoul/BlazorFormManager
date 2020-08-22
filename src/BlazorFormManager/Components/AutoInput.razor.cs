@@ -86,6 +86,10 @@ namespace BlazorFormManager.Components
             {
                 sequence = RenderFormCheck(builder, sequence, radio: false, label: Metadata.GetDisplayName());
             }
+            else if (elementType == "file")
+            {
+                sequence = RenderInputFile(builder, sequence);
+            }
             else
             {
                 builder.OpenElement(sequence++, elementName);
@@ -105,32 +109,8 @@ namespace BlazorFormManager.Components
                 else
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValueAsString));
                 
-                if (elementType == "file")
-                {
-                    // For the file to be uploadable it must have a name.
-                    builder.AddAttribute(sequence++, "name", Metadata.PropertyInfo.Name);
-
-                    // Also, the 'onchange' event callback shouldn't change the CurrentValueAsString 
-                    // property nor should that property be used to initialize the input's value.
-                    // This is because the value of an input of type file cannot be changed programmatically.
-                    // The browser reserves this right.
-
-                    void __handleFileChange(string __value)
-                    {
-                        // Before we pass on the value, let's extract just the file name.
-                        var filename = string.IsNullOrEmpty(__value) ? __value : Path.GetFileName(__value);
-
-                        // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
-                        Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(filename, FieldIdentifier, isFile: true));
-                    }
-
-                    builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __handleFileChange, string.Empty));
-                }
-                else
-                {
-                    builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
-                }
-
+                builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+                
                 if (elementName == "select")
                     sequence = RenderSelectOptions(builder, sequence);
 
@@ -300,6 +280,63 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.CloseElement();
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Renders to the supplied <see cref="RenderTreeBuilder"/> an input of type file.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderInputFile(RenderTreeBuilder builder, int sequence)
+        {
+            /*
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
+                <label class="custom-file-label" for="@id">@Prompt</label>
+            </div>
+            */
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "custom-file");
+
+            builder.OpenElement(sequence++, "input");
+            builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
+            builder.AddAttribute(sequence++, "type", "file");
+            builder.AddAttribute(sequence++, "class", $"custom-file-input {CssClass}".Trim());
+
+            // For the file to be uploadable it must have a name.
+            var propertyName = Metadata.PropertyInfo.Name;
+
+            builder.AddAttribute(sequence++, "id", propertyName);
+            builder.AddAttribute(sequence++, "name", propertyName);
+
+            // Also, the 'onchange' event callback shouldn't change the CurrentValueAsString 
+            // property nor should that property be used to initialize the input's value.
+            // This is because the value of an input of type file cannot be changed programmatically.
+            // The browser reserves this right.
+
+            void __handleFileChange(string __value)
+            {
+                // Before we pass on the value, let's extract just the file name.
+                var filename = string.IsNullOrEmpty(__value) ? __value : Path.GetFileName(__value);
+
+                // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
+                Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(filename, FieldIdentifier, isFile: true));
+            }
+
+            builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __handleFileChange, string.Empty));
+
+            builder.CloseElement(); // /> (input)
+
+            builder.OpenElement(sequence++, "label");
+            builder.AddAttribute(sequence++, "class", "custom-file-label");
+            builder.AddAttribute(sequence++, "for", propertyName);
+            builder.AddContent(sequence++, _metadataAttribute.Prompt ?? Metadata.GetDisplayName());
+            builder.CloseElement(); // </label>
+
+            builder.CloseElement(); // </div>
 
             return sequence;
         }

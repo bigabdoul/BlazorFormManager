@@ -394,6 +394,14 @@
             <param name="value">The value of the radio input.</param>
             <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputFile(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+            <summary>
+            Renders to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> an input of type file.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
         <member name="M:BlazorFormManager.Components.AutoInputBase.TryParseValueFromString(System.String,System.Object@,System.String@)">
             <inheritdoc/>
         </member>
