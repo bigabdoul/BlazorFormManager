@@ -191,16 +191,18 @@ namespace BlazorFormManager.Components
                 if (string.IsNullOrWhiteSpace(promptId) && (_nullableUnderlyingType ?? _propertyType).IsNumeric())
                     promptId = "0";
 
-                builder.OpenElement(sequence++, "option");
-                builder.AddAttribute(sequence++, "value", promptId);
-                builder.AddContent(sequence++, prompt);
-                builder.CloseElement();
+                __createOption(promptId, prompt);
 
                 foreach (var item in options)
                 {
+                    __createOption(item.Id, item.Value);
+                }
+
+                void __createOption(string __id, string __value)
+                {
                     builder.OpenElement(sequence++, "option");
-                    builder.AddAttribute(sequence++, "value", item.Id);
-                    builder.AddContent(sequence++, item.Value);
+                    builder.AddAttribute(sequence++, "value", __id);
+                    builder.AddContent(sequence++, __value);
                     builder.CloseElement();
                 }
             }
