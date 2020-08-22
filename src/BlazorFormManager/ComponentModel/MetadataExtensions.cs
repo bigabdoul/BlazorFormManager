@@ -15,6 +15,8 @@ namespace BlazorFormManager.ComponentModel
         private static readonly ConcurrentDictionary<Type, IReadOnlyCollection<FormDisplayGroupMetadata>> _sectionLayoutMetadataCache
             = new ConcurrentDictionary<Type, IReadOnlyCollection<FormDisplayGroupMetadata>>();
 
+        private const string form_control = "form-control";
+
         /// <summary>
         /// Generates a grouped collection of <see cref="AutoInputMetadata"/> instances
         /// extracted from custom attributes of types <see cref="FormDisplayAttribute"/>
@@ -70,20 +72,21 @@ namespace BlazorFormManager.ComponentModel
                     if (attr.InputCssClass == null)
                     {
                         var css = layoutDefault.InputCssClass ?? emptyDisplay.InputCssClass;
-                        if (css == "form-control")
+                        if (css == form_control)
                         {
                             // don't add by default 'form-control' class to the following input types
-                            if (!pi.PropertyType.SupportsCheckbox(attr.UITypeHint) && !attr.IsInputRadio)
-                                attr.InputCssClass = css;
+                            if (!__isRadioOrCheckbox()) attr.InputCssClass = css;
                         }
-                        else
-                        {
-                            attr.InputCssClass = css;
-                        }
+                        else attr.InputCssClass = css;
                     }
+                    else if (attr.InputCssClass == form_control && __isRadioOrCheckbox())
+                        attr.InputCssClass = null;
 
                     attr.SetProperty(pi);
                     layouts.Add(attr);
+
+                    bool __isRadioOrCheckbox()
+                        => attr.IsInputCheckboxOrRadio || pi.PropertyType.IsBoolean();
                 }
 
                 if (layouts.Count > 0)

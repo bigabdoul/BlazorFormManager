@@ -240,6 +240,11 @@
             the Parse and TryParse methods of the integral and floating-point numeric types.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckbox">
+            <summary>
+            Indicates whether the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> property value is checkbox.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputRadio">
             <summary>
             Indicates whether the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> property value is radio.
@@ -248,6 +253,11 @@
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CustomRenderMode">
             <summary>
             Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckboxOrRadio">
+            <summary>
+            Returns true if either of <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckbox"/> or <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputRadio"/> is true.
             </summary>
         </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.GetProperty">

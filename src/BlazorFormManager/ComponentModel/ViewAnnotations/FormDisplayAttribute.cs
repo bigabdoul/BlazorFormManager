@@ -25,6 +25,8 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         public FormDisplayAttribute()
         {
+            if (InputCssClass == "form-control" && (IsInputCheckbox || IsInputRadio))
+                InputCssClass = null;
         }
 
         /// <summary>
@@ -113,6 +115,11 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public System.Globalization.NumberStyles NumberStyles { get; set; }
 
         /// <summary>
+        /// Indicates whether the <see cref="UITypeHint"/> property value is checkbox.
+        /// </summary>
+        public bool IsInputCheckbox => UITypeHint == "checkbox";
+
+        /// <summary>
         /// Indicates whether the <see cref="UITypeHint"/> property value is radio.
         /// </summary>
         public bool IsInputRadio => UITypeHint == "radio";
@@ -121,6 +128,11 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
         /// </summary>
         public CustomRenderMode CustomRenderMode { get; set; }
+
+        /// <summary>
+        /// Returns true if either of <see cref="IsInputCheckbox"/> or <see cref="IsInputRadio"/> is true.
+        /// </summary>
+        public bool IsInputCheckboxOrRadio => IsInputCheckbox || IsInputRadio;
 
         #region internal
 
