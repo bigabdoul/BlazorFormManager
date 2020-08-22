@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System;
 using System.Threading.Tasks;
 
 namespace BlazorFormManager.Components
@@ -13,10 +14,18 @@ namespace BlazorFormManager.Components
         #region fields
         
         private TModel _model;
-        private bool _hasChangeTracker;
         private bool _parametersSet;
+        private readonly EventHandler<FieldChangedEventArgs> _fieldChangedHandler;
 
         #endregion
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormManagerBase"/> class.
+        /// </summary>
+        protected FormManagerBase()
+        {
+            _fieldChangedHandler = HandleFieldChanged;
+        }
 
         #region properties
 
@@ -30,7 +39,7 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Indicates whether the form has unsaved changes.
         /// </summary>
-        public bool HasChanges { get; private set; }
+        public bool HasChanges { get; protected set; }
 
         #endregion
 
@@ -51,16 +60,6 @@ namespace BlazorFormManager.Components
                 }
             }
         }
-
-        /// <summary>
-        /// Gets or sets a callback delegate that is invoked when a field in the form changes.
-        /// </summary>
-        [Parameter] public EventCallback<FormFieldChangedEventArgs> OnFieldChanged { get; set; }
-
-        /// <summary>
-        /// Indicates whether field changes should be tracked or not.
-        /// </summary>
-        [Parameter] public bool EnableChangeTracking { get; set; }
 
         /// <summary>
         /// Gets or sets an event callback delegate used to notify about model changes.
@@ -87,6 +86,28 @@ namespace BlazorFormManager.Components
         /// </summary>
         /// <returns></returns>
         public override object GetModel() => Model;
+
+        /// <summary>
+        /// Attaches a handler to the <see cref="EditContext.OnFieldChanged"/> event.
+        /// </summary>
+        protected virtual void AttachFieldChangedListener()
+        {
+            if (EditContext != null)
+            {
+                EditContext.OnFieldChanged += _fieldChangedHandler;
+            }
+        }
+
+        /// <summary>
+        /// Detaches a handler to the <see cref="EditContext.OnFieldChanged"/> event.
+        /// </summary>
+        protected virtual void DetachFieldChangedListener()
+        {
+            if (EditContext != null)
+            {
+                EditContext.OnFieldChanged -= _fieldChangedHandler;
+            }
+        }
 
         /// <inheritdoc/>
         protected override Task HandleSubmitDoneAsync(FormManagerSubmitResult result)
@@ -128,12 +149,7 @@ namespace BlazorFormManager.Components
             }
 
             EditContext = new EditContext(_model);
-
-            if (EnableChangeTracking)
-            {
-                EditContext.OnFieldChanged += HandleFieldChanged;
-                _hasChangeTracker = true;
-            }
+            AttachFieldChangedListener();
                 
             StateHasChanged();
         }
@@ -141,26 +157,26 @@ namespace BlazorFormManager.Components
         private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
         {
             HasChanges = true;
-            var isvalid = EditContext.Validate();
-            HasValidationErrors = !isvalid;
 
-            if (OnFieldChanged.HasDelegate)
+            if (EnableChangeTracking)
             {
-                var arg = new FormFieldChangedEventArgs(isvalid, e.FieldIdentifier);
-                OnFieldChanged.InvokeAsync(arg);
+                bool isValid;
+
+                if (ValidateOnFieldChanged)
+                {
+                    isValid = EditContext.Validate();
+                    HasValidationErrors = !isValid;
+                }
+                else isValid = false;
+
+                if (OnFieldChanged.HasDelegate)
+                {
+                    OnFieldChanged.InvokeAsync(new FormFieldChangedEventArgs(isValid, e.FieldIdentifier));
+                }
             }
 
             StateHasChanged();
         }
-
-        private void DetachFieldChangedListener()
-        {
-            if (_hasChangeTracker && EditContext != null)
-            {
-                EditContext.OnFieldChanged -= HandleFieldChanged;
-                _hasChangeTracker = false;
-            }
-        } 
 
         #endregion
     }

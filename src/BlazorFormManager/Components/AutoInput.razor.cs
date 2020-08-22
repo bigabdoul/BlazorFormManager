@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -104,12 +105,31 @@ namespace BlazorFormManager.Components
                 else
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValueAsString));
                 
-                builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
-
-                var propertyName = Metadata.PropertyInfo.Name;
-
                 if (elementType == "file")
-                    builder.AddAttribute(sequence++, "name", propertyName);
+                {
+                    // For the file to be uploadable it must have a name.
+                    builder.AddAttribute(sequence++, "name", Metadata.PropertyInfo.Name);
+
+                    // Also, the 'onchange' event callback shouldn't change the CurrentValueAsString 
+                    // property nor should that property be used to initialize the input's value.
+                    // This is because the value of an input of type file cannot be changed programmatically.
+                    // The browser reserves this right.
+
+                    void __handleFileChange(string __value)
+                    {
+                        // Before we pass on the value, let's extract just the file name.
+                        var filename = string.IsNullOrEmpty(__value) ? __value : Path.GetFileName(__value);
+
+                        // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
+                        Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(filename, FieldIdentifier, isFile: true));
+                    }
+
+                    builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __handleFileChange, string.Empty));
+                }
+                else
+                {
+                    builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+                }
 
                 if (elementName == "select")
                     sequence = RenderSelectOptions(builder, sequence);
@@ -334,7 +354,25 @@ namespace BlazorFormManager.Components
             }
         }
 
+        /// <summary>
+        /// Sets the specified value to the <see cref="InputBase{TValue}.CurrentValue"/> property
+        /// and eventually invokes the <see cref="FormManagerBase.NotifyFieldChanged(FormFieldChangedEventArgs)"/>
+        /// method.
+        /// </summary>
+        /// <param name="value">The value that was changed.</param>
+        /// <param name="propertyName">The name of the property that was changed.</param>
+        protected virtual void SetCurrentValue(object value, string propertyName)
+        {
+            CurrentValue = value;
+            Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(value, FieldIdentifier));
+        }
+
         #region helpers
+
+        void IAutoInputComponent.SetCurrentValue(object value, string propertyName)
+        {
+            SetCurrentValue(value, propertyName);
+        }
 
         private bool TryParseValueFromStringUltimately(string value, out object result, out string validationErrorMessage)
         {
@@ -381,8 +419,6 @@ namespace BlazorFormManager.Components
 
             return sequence;
         }
-
-        void IAutoInputComponent.SetCurrentValue(object value) => CurrentValue = value;
 
         private void CheckIfInputNumber()
         {

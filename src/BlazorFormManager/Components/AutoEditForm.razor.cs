@@ -1,5 +1,6 @@
 ﻿using BlazorFormManager.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using System.Collections.Generic;
 
 namespace BlazorFormManager.Components
@@ -11,7 +12,8 @@ namespace BlazorFormManager.Components
     public abstract class AutoEditFormBase<TModel> : FormManagerBase<TModel>
     {
         /// <summary>
-        /// Gets the collection of <see cref="FormDisplayGroupMetadata"/> retrieved from layout attributes of the associated model.
+        /// Gets the collection of <see cref="FormDisplayGroupMetadata"/> retrieved from
+        /// layout attributes of the associated model.
         /// </summary>
         protected IReadOnlyCollection<FormDisplayGroupMetadata> DisplayGroups { get; private set; }
 
@@ -44,6 +46,40 @@ namespace BlazorFormManager.Components
                 StateHasChanged();
             }
             base.NotifyModelChanged();
+        }
+
+        /// <inheritdoc/>
+        protected internal override void NotifyFieldChanged(FormFieldChangedEventArgs e)
+        {
+            HasChanges = true;
+
+            if (CanTrackChanges)
+            {
+                OnFieldChanged.InvokeAsync(e);
+            }
+            
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// This method does nothing on purpose to avoid attaching field 
+        /// change notifications to the underlying <see cref="EditContext"/>.
+        /// <see cref="EditContext.OnFieldChanged"/> currently doesn't provide the 
+        /// changed value. <see cref="AutoInputBase"/> makes it possible to detect both 
+        /// field changes and the corresponding value that was changed.
+        /// </summary>
+        protected override void AttachFieldChangedListener()
+        {
+            // Don't attach to the underlying EditContext!
+        }
+
+        /// <summary>
+        /// This method does nothing on purpose to avoid detaching from something that 
+        /// was never attached to.
+        /// </summary>
+        protected override void DetachFieldChangedListener()
+        {
+            // Do nothing!
         }
     }
 }

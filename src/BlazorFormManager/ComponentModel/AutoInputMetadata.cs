@@ -12,6 +12,7 @@ namespace BlazorFormManager.ComponentModel
     public sealed class AutoInputMetadata
     {
         private object _value;
+        private readonly string _propertyName;
         private IAutoInputComponent _autoInputComponent;
 
         /// <summary>
@@ -24,6 +25,7 @@ namespace BlazorFormManager.ComponentModel
         {
             Attribute = attr ?? throw new ArgumentNullException(nameof(attr));
             PropertyInfo = attr.GetProperty() ?? throw new ArgumentNullException(nameof(PropertyInfo));
+            _propertyName = PropertyInfo.Name;
             Refresh(model ?? throw new ArgumentNullException(nameof(model)));
             ExtractOptionsFromRange();
         }
@@ -41,7 +43,7 @@ namespace BlazorFormManager.ComponentModel
                     // Console.WriteLine($"Metadata value changed: {value}");
                     _value = value;
                     PropertyInfo.SetValue(Model, _value);
-                    _autoInputComponent?.SetCurrentValue(_value);
+                    _autoInputComponent?.SetCurrentValue(_value, _propertyName);
                 }
             }
         }
@@ -56,7 +58,7 @@ namespace BlazorFormManager.ComponentModel
         /// Returns the display name for an input.
         /// </summary>
         /// <returns></returns>
-        public string GetDisplayName() => Attribute.Name ?? ToSentence(PropertyInfo?.Name);
+        public string GetDisplayName() => Attribute.Name ?? ToSentence(_propertyName);
 
         /// <summary>
         /// Indicates whether the <see cref="FormDisplayAttribute.UITypeHint"/> property value is radio.
@@ -81,7 +83,7 @@ namespace BlazorFormManager.ComponentModel
             {
                 _value = null;
             }
-            _autoInputComponent?.SetCurrentValue(_value);
+            _autoInputComponent?.SetCurrentValue(_value, _propertyName);
         }
 
         internal object Model { get; private set; }
@@ -110,7 +112,7 @@ namespace BlazorFormManager.ComponentModel
         internal void Attach(IAutoInputComponent autoInputBase)
         {
             _autoInputComponent = autoInputBase;
-            _autoInputComponent.SetCurrentValue(_value);
+            _autoInputComponent.SetCurrentValue(_value, _propertyName);
         }
 
         private void ExtractOptionsFromRange()

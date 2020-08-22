@@ -178,6 +178,22 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter] public Func<string, IEnumerable<SelectOption>> OptionsGetter { get; set; }
 
+        /// <summary>
+        /// Indicates whether field changes should be tracked or not.
+        /// </summary>
+        [Parameter] public bool EnableChangeTracking { get; set; }
+
+        /// <summary>
+        /// Indicates whether to force the <see cref="EditContext.Validate"/> method to 
+        /// execute when a field value is changed.
+        /// </summary>
+        [Parameter] public bool ValidateOnFieldChanged { get; set; }
+
+        /// <summary>
+        /// Gets or sets a callback delegate that is invoked when a field in the form changes.
+        /// </summary>
+        [Parameter] public EventCallback<FormFieldChangedEventArgs> OnFieldChanged { get; set; }
+
         #endregion
 
         #region read-only
@@ -281,6 +297,15 @@ namespace BlazorFormManager.Components
         /// </summary>
         /// <returns></returns>
         public abstract object GetModel();
+
+        /// <summary>
+        /// A descendant class may override this method to implement a 
+        /// notification handler that listens for form field value changes.
+        /// </summary>
+        /// <param name="e">The event data.</param>
+        protected internal virtual void NotifyFieldChanged(FormFieldChangedEventArgs e)
+        {
+        }
 
         #endregion
 
@@ -667,6 +692,13 @@ namespace BlazorFormManager.Components
             if (!_scriptInitialized)
                 throw new InvalidOperationException("BlazorFormManager.js script has not been initialized.");
         }
+
+        /// <summary>
+        /// Returns true if <see cref="EnableChangeTracking"/> is true and 
+        /// <see cref="OnFieldChanged"/> has a delegate; otherwise, false.
+        /// </summary>
+        /// <returns></returns>
+        public bool CanTrackChanges => EnableChangeTracking && OnFieldChanged.HasDelegate;
 
         /// <summary>
         /// Resets and/or starts the stop watch.

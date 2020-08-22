@@ -11,6 +11,7 @@ namespace BlazorFormManager.ComponentModel
         /// When implemented by a class, updates the <see cref="InputBase{T}.CurrentValue"/> property of an input component.
         /// </summary>
         /// <param name="value">The value to set.</param>
-        void SetCurrentValue(object value);
+        /// <param name="propertyName">The name of the property whose value changed.</param>
+        void SetCurrentValue(object value, string propertyName);
     }
 }
