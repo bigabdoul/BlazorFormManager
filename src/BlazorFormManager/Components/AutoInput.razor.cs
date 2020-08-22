@@ -107,11 +107,10 @@ namespace BlazorFormManager.Components
             }
             else if (elementType == "file")
             {
-                sequence = RenderInputFile(builder, sequence);
-            }
-            else if (elementType == "customfile")
-            {
-                sequence = RenderCustomInputFile(builder, sequence);
+                if (_metadataAttribute.CustomRenderMode == CustomRenderMode.Enabled)
+                    sequence = RenderCustomInputFile(builder, sequence);
+                else
+                    sequence = RenderInputFile(builder, sequence);
             }
             else
             {
