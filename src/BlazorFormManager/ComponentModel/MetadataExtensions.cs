@@ -50,8 +50,8 @@ namespace BlazorFormManager.ComponentModel
                 var layouts = new List<FormDisplayAttribute>();
                 var emptyDisplay = FormDisplayAttribute.Empty;
                 var properties = type.GetProperties();
-                var layoutDefault = type.GetCustomAttributes<FormDisplayDefaultAttribute>()
-                                        .SingleOrDefault() ?? FormDisplayDefaultAttribute.Empty;
+                var ignoreUndecorated = type.GetCustomAttribute<DisplayIgnoreAttribute>() != null;
+                var layoutDefault = type.GetCustomAttributes<FormDisplayDefaultAttribute>().SingleOrDefault() ?? FormDisplayDefaultAttribute.Empty;
                 
                 foreach (var pi in properties)
                 {
@@ -62,7 +62,10 @@ namespace BlazorFormManager.ComponentModel
                     var attr = pi.GetCustomAttribute<FormDisplayAttribute>(true);
 
                     if (attr == null)
+                    {
+                        if (ignoreUndecorated) continue;
                         attr = layoutDefault.CreateDefault();
+                    }    
                     else if (attr.ColumnCssClass == null) 
                         attr.ColumnCssClass = layoutDefault.ColumnCssClass;
 

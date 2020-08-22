@@ -133,6 +133,8 @@
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute">
             <summary>
             Prevents a property from being included into the input element generation process.
+            If this attribute is applied to a class, all public read/write properties that
+            aren't decorated with <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute"/> will be ignored.
             </summary>
         </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute.#ctor">
