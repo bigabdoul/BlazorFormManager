@@ -49,7 +49,7 @@ namespace BlazorFormManager.Components
             get => _inputId;
             set
             {
-                if (!EqualityComparer<string>.Default.Equals(_inputId, value))
+                if (!string.Equals(_inputId, value))
                     _inputId = value;
             }
         }
@@ -126,6 +126,7 @@ namespace BlazorFormManager.Components
 
                 builder.AddAttribute(sequence++, "class", CssClass);
                 builder.AddAttribute(sequence++, "id", _inputId);
+                CheckDisabled(builder, sequence);
 
                 if (_propertyType.IsString())
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
@@ -303,6 +304,7 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "type", "checkbox");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "id", _inputId);
+            CheckDisabled(builder, sequence);
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool>(this, __value => CurrentValue = __value, (bool)CurrentValue));
             builder.CloseElement();
@@ -341,6 +343,7 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "name", propertyName);
             builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
+            CheckDisabled(builder, sequence);
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.CloseElement();
@@ -581,6 +584,11 @@ namespace BlazorFormManager.Components
                 _format = _metadataAttribute.Format;
             else if (SupportsInputDate())
                 _format = "yyyy-MM-dd"; // Compatible with HTML date inputs
+        }
+
+        private void CheckDisabled(RenderTreeBuilder builder, int sequence)
+        {
+            if (_metadataAttribute.Disabled) builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(true));
         }
 
         #endregion

@@ -130,6 +130,11 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public CustomRenderMode CustomRenderMode { get; set; }
 
         /// <summary>
+        /// Indicates whether the input is disabled.
+        /// </summary>
+        public bool Disabled { get; set; }
+
+        /// <summary>
         /// Returns true if either of <see cref="IsInputCheckbox"/> or <see cref="IsInputRadio"/> is true.
         /// </summary>
         public bool IsInputCheckboxOrRadio => IsInputCheckbox || IsInputRadio;

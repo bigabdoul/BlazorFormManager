@@ -257,6 +257,11 @@
             Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Disabled">
+            <summary>
+            Indicates whether the input is disabled.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckboxOrRadio">
             <summary>
             Returns true if either of <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckbox"/> or <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputRadio"/> is true.
