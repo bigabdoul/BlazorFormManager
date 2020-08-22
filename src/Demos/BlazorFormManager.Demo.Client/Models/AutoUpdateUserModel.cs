@@ -9,12 +9,12 @@ namespace BlazorFormManager.Demo.Client.Models
         [DisplayIgnore]
         public string Id { get; set; }
 
-        [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 2)]
-        public int AgeRange { get; set; }
-
         [Range(typeof(DayOfWeek), "Monday", "Friday")]
         [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 1, Prompt = "[Favourite Working Day]", Icon = "fas fa-calendar")]
         public string FavouriteWorkingDay { get; set; }
+
+        [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 2)]
+        public int AgeRange { get; set; }
 
         [FormDisplay(UITypeHint = "radio", Order = 3, Name = "What's your favourite color?")]
         public string FavouriteColor { get; set; }
