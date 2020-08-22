@@ -40,6 +40,11 @@ namespace BlazorFormManager.Components
         [Parameter] public RenderFragment ChildContent { get; set; }
 
         /// <summary>
+        /// Gets or sets the input identifier.
+        /// </summary>
+        [Parameter] public string Id { get; set; }
+
+        /// <summary>
         /// Gets the associated <see cref="FormManagerBase"/>.
         /// </summary>
         [CascadingParameter] protected FormManagerBase Form { get; set; }
@@ -78,17 +83,24 @@ namespace BlazorFormManager.Components
             var elementName = GetElement(out var elementType);
             var sequence = 0;
 
-            if (elementType == "radio")
+            if (_metadataAttribute.IsInputRadio)
             {
                 sequence = RenderRadioOptions(builder, sequence);
             }
             else if (_propertyType.SupportsCheckbox(elementType))
             {
-                sequence = RenderFormCheck(builder, sequence, radio: false, label: Metadata.GetDisplayName());
+                if (_metadataAttribute.CustomRenderMode == CustomRenderMode.Enabled)
+                    sequence = RenderCustomFormCheck(builder, sequence, radio: false, label: Metadata.GetDisplayName());
+                else
+                    sequence = RenderInputCheckbox(builder, sequence, label: Metadata.GetDisplayName());
             }
             else if (elementType == "file")
             {
-                sequence = RenderInputFile(builder, sequence);
+                (sequence, _) = RenderInputFile(builder, sequence);
+            }
+            else if (elementType == "customfile")
+            {
+                sequence = RenderCustomInputFile(builder, sequence);
             }
             else
             {
@@ -224,20 +236,35 @@ namespace BlazorFormManager.Components
         {
             var propertyName = Metadata.PropertyInfo.Name;
             var options = (Form?.OptionsGetter?.Invoke(propertyName) ?? Metadata.Options)?.ToList();
-
+            
             if (options?.Count > 0)
             {
+                var customRadio = _metadataAttribute.CustomRenderMode == CustomRenderMode.Enabled;
                 foreach (var item in options)
                 {
-                    /* This is a variation of what we're building:
-                     <div class="form-check">
-                        <label class="form-check-label">
+                    if (customRadio)
+                    {
+                        /* This is a variation of what we're building:
+
+                         <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="@propertyName" value="@item.Id" @onchange="HandleChange" checked="@IsChecked" />
+                                @item.Value
+                            </label>
+                        </div>
+                         */
+                        sequence = RenderCustomFormCheck(builder, sequence, true, label: item.Value, name: propertyName, value: item.Id);
+                    }
+                    else
+                    {
+                        /*
+                         <label>
                             <input type="radio" class="form-check-input" name="@propertyName" value="@item.Id" @onchange="HandleChange" checked="@IsChecked" />
                             @item.Value
                         </label>
-                    </div>
-                     */
-                    sequence = RenderFormCheck(builder, sequence, true, label: item.Value, name: propertyName, value: item.Id);
+                         */
+                        sequence = RenderInputRadio(builder, sequence, propertyName, item.Id, label: item.Value);
+                    }
                 }
             }
 
@@ -249,69 +276,94 @@ namespace BlazorFormManager.Components
         /// </summary>
         /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
         /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="InputBase{TValue}.CssClass"/>.</param>
+        /// <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
         /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
-        protected virtual int RenderInputCheckbox(RenderTreeBuilder builder, int sequence)
+        protected virtual int RenderInputCheckbox(RenderTreeBuilder builder, int sequence, string additionalCssClass = null, string label = null)
         {
+            bool insideLabel = !string.IsNullOrWhiteSpace(label);
+            if (insideLabel)
+            {
+                builder.OpenElement(sequence++, "label");
+            }
+
             builder.OpenElement(sequence++, "input");
             builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
             builder.AddAttribute(sequence++, "type", "checkbox");
-            builder.AddAttribute(sequence++, "class", $"form-check-input {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool>(this, __value => CurrentValue = __value, (bool)CurrentValue));
             builder.CloseElement();
+
+            if (insideLabel)
+            {
+                builder.AddContent(sequence++, (MarkupString)"&nbsp;");
+                builder.AddContent(sequence++, label);
+                builder.CloseElement();
+            }
 
             return sequence;
         }
 
         /// <summary>
-        /// Renders a checkbox to the supplied <see cref="RenderTreeBuilder"/>.
+        /// Renders an input radio to the supplied <see cref="RenderTreeBuilder"/>.
         /// </summary>
         /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
         /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
         /// <param name="propertyName">The name of the input radio.</param>
         /// <param name="value">The value of the radio input.</param>
+        /// <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="InputBase{TValue}.CssClass"/>.</param>
+        /// <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
         /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
-        protected virtual int RenderInputRadio(RenderTreeBuilder builder, int sequence, string propertyName, string value)
+        protected virtual int RenderInputRadio(RenderTreeBuilder builder, int sequence, string propertyName, string value, string additionalCssClass = null, string label = null)
         {
+            var insideLabel = !string.IsNullOrWhiteSpace(label);
+            if (insideLabel)
+            {
+                builder.OpenElement(sequence++, "label");
+            }
+
             builder.OpenElement(sequence++, "input");
 
             builder.AddAttribute(sequence++, "type", "radio");
-            builder.AddAttribute(sequence++, "class", $"form-check-input {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "name", propertyName);
             builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.CloseElement();
 
+            if (insideLabel)
+            {
+                builder.AddContent(sequence++, (MarkupString)"&nbsp;");
+                builder.AddContent(sequence++, label);
+                builder.CloseElement();
+            }
+
             return sequence;
         }
 
         /// <summary>
-        /// Renders to the supplied <see cref="RenderTreeBuilder"/> an input of type file.
+        /// Renders an input file to the supplied <see cref="RenderTreeBuilder"/>.
         /// </summary>
         /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
         /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
-        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
-        protected virtual int RenderInputFile(RenderTreeBuilder builder, int sequence)
+        /// <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="InputBase{TValue}.CssClass"/>.</param>
+        /// <returns>
+        /// A tuple of (integer, string) that represents the next position of the instruction in the source code and the 'id' attribute.
+        /// </returns>
+        protected virtual (int sequence, string inputId) RenderInputFile(RenderTreeBuilder builder, int sequence, string additionalCssClass = null)
         {
-            /*
-            <div class="custom-file">
-                <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
-                <label class="custom-file-label" for="@id">@Prompt</label>
-            </div>
-            */
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "custom-file");
-
             builder.OpenElement(sequence++, "input");
             builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
             builder.AddAttribute(sequence++, "type", "file");
-            builder.AddAttribute(sequence++, "class", $"custom-file-input {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
 
             // For the file to be uploadable it must have a name.
             var propertyName = Metadata.PropertyInfo.Name;
+            var inputId = string.IsNullOrWhiteSpace(Id) ? propertyName.GenerateId() : Id;
 
-            builder.AddAttribute(sequence++, "id", propertyName);
+            builder.AddAttribute(sequence++, "id", inputId);
             builder.AddAttribute(sequence++, "name", propertyName);
 
             // Also, the 'onchange' event callback shouldn't change the CurrentValueAsString 
@@ -332,12 +384,74 @@ namespace BlazorFormManager.Components
 
             builder.CloseElement(); // /> (input)
 
+            return (sequence, inputId);
+        }
+
+        /// <summary>
+        /// Renders to the supplied <see cref="RenderTreeBuilder"/> an input of type file.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderCustomInputFile(RenderTreeBuilder builder, int sequence)
+        {
+            /*
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
+                <label class="custom-file-label" for="@id">@Prompt</label>
+            </div>
+            */
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "custom-file");
+
+            string inputId;
+            (sequence, inputId) = RenderInputFile(builder, sequence, "custom-file-input");
+
             builder.OpenElement(sequence++, "label");
             builder.AddAttribute(sequence++, "class", "custom-file-label");
-            builder.AddAttribute(sequence++, "for", propertyName);
+            builder.AddAttribute(sequence++, "for", inputId);
             builder.AddContent(sequence++, _metadataAttribute.Prompt ?? Metadata.GetDisplayName());
             builder.CloseElement(); // </label>
 
+            builder.CloseElement(); // </div>
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Renders to the specified <see cref="RenderBatchBuilder"/> a checkbox 
+        /// or a radio input inside a &lt;div class="form-check"> wrapper element.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <param name="radio">true to render a radio input; otherwise, false to render a checkbox input.</param>
+        /// <param name="label">The label text.</param>
+        /// <param name="name">The name of the input radio.</param>
+        /// <param name="value">The value of the radio input.</param>
+        /// <returns></returns>
+        protected virtual int RenderCustomFormCheck(RenderTreeBuilder builder, int sequence, bool radio, string label, string name = null, string value = null)
+        {
+            /*
+            <div class="form-check">
+                <label class="form-check-label" title="@attr.Description">
+                    <InputCheckbox @bind-Value="CheckboxValue" class="form-check-input" /> @labelText
+                </label>
+            </div>
+             */
+            const string FORM_CHECK_INPUT = "form-check-input";
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "form-check");
+
+            builder.OpenElement(sequence++, "label");
+            builder.AddAttribute(sequence++, "class", "form-check-label");
+
+            if (radio) sequence = RenderInputRadio(builder, sequence, name, value, FORM_CHECK_INPUT);
+            else sequence = RenderInputCheckbox(builder, sequence, FORM_CHECK_INPUT);
+
+            builder.AddContent(sequence++, label);
+
+            builder.CloseElement(); // </label>
             builder.CloseElement(); // </div>
 
             return sequence;
@@ -430,33 +544,6 @@ namespace BlazorFormManager.Components
             result = default;
             validationErrorMessage = $"The {FieldIdentifier.FieldName} field is not valid.";
             return false;
-        }
-
-        private int RenderFormCheck(RenderTreeBuilder builder, int sequence, bool radio, string label, string name = null, string value = null)
-        {
-            /*
-            <div class="form-check">
-                <label class="form-check-label" title="@attr.Description">
-                    <InputCheckbox @bind-Value="CheckboxValue" class="form-check-input" /> @labelText
-                </label>
-            </div>
-             */
-
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "form-check");
-
-            builder.OpenElement(sequence++, "label");
-            builder.AddAttribute(sequence++, "class", "form-check-label");
-
-            if (radio) sequence = RenderInputRadio(builder, sequence, name, value);
-            else sequence = RenderInputCheckbox(builder, sequence);
-
-            builder.AddContent(sequence++, label);
-
-            builder.CloseElement(); // </label>
-            builder.CloseElement(); // </div>
-
-            return sequence;
         }
 
         private void CheckIfInputNumber()

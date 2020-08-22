@@ -3,27 +3,30 @@
     var metadata = Metadata;
     var attr = metadata.Attribute;
     var labelText = metadata.GetDisplayName();
-    if (metadata.IsInputRadio || metadata.IsInputCheckbox)
+    var propertyName = metadata.PropertyInfo.Name;
+    var inputId = Id ?? propertyName.GenerateId();
+
+    if (attr.IsInputRadio || metadata.IsInputCheckbox)
     {
         <div class="form-group">
-            @if (!string.IsNullOrWhiteSpace(labelText) && metadata.IsInputRadio)
+            @if (!string.IsNullOrWhiteSpace(labelText) && attr.IsInputRadio)
             {
                 <label class="control-label">@labelText</label>
             }
-            <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" id="@Id" class="@attr.InputCssClass" title="@attr.Description" />
-            <AutoValidationMessage Model="metadata.Model" Property="@metadata.PropertyInfo.Name" />
+            <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" Id="@inputId" class="@attr.InputCssClass" title="@attr.Description" />
+            <AutoValidationMessage Model="metadata.Model" Property="@propertyName" />
         </div>
     }
     else
     {
-        <InputGroupContainer Id="@Id" LabelText="@labelText" Icon="@attr.Icon">
+        <InputGroupContainer Id="@inputId" LabelText="@labelText" Icon="@attr.Icon">
             <ChildContent>
-                <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" id="@Id" class="@attr.InputCssClass" title="@attr.Description" placeholder="@attr.Prompt">
+                <AutoInputBase Metadata="metadata" @bind-Value="metadata.Value" Id="@inputId" class="@attr.InputCssClass" title="@attr.Description" placeholder="@attr.Prompt">
                     @ChildContent
                 </AutoInputBase>
             </ChildContent>
             <ValidationContent>
-                <AutoValidationMessage Model="metadata.Model" Property="@metadata.PropertyInfo.Name" />
+                <AutoValidationMessage Model="metadata.Model" Property="@propertyName" />
             </ValidationContent>
         </InputGroupContainer>
     }
@@ -31,5 +34,5 @@
 @code {
     [Parameter] public AutoInputMetadata Metadata { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
-    [Parameter] public string Id { get; set; } = typeof(AutoInputBase).GenerateId();
+    [Parameter] public string Id { get; set; }
 }

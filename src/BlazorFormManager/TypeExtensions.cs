@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 
 namespace BlazorFormManager
 {
@@ -12,6 +13,7 @@ namespace BlazorFormManager
         private const string DateFormat = "yyyy-MM-dd"; // Compatible with HTML date inputs
 
         public static string GenerateId(this Type type) => $"{type.Name}_{Guid.NewGuid().GetHashCode():X}";
+        public static string GenerateId(this string name) => $"{name}_{Guid.NewGuid().GetHashCode():X}";
 
         public static IEnumerable<SelectOption> OptionsFromRange(this RangeAttribute range, bool useUnderlyingEnumType = false, double step = 1.0)
         {

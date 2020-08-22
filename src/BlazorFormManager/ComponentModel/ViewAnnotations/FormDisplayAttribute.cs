@@ -6,7 +6,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
     /// <summary>
     /// Represents a custom attribute that specifies layout for a form input.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class FormDisplayAttribute : Attribute
     {
         /// <summary>
@@ -17,6 +17,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
             GroupName = string.Empty,
             ColumnCssClass = FormDisplayDefaultAttribute.Empty.ColumnCssClass,
             InputCssClass = FormDisplayDefaultAttribute.Empty.InputCssClass,
+            CustomRenderMode = FormDisplayDefaultAttribute.Empty.CustomRenderMode,
         };
 
         /// <summary>
@@ -75,12 +76,16 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public string InputCssClass { get; set; }
 
         /// <summary>
-        /// Gets or sets a suggestion for the input element to generate.
+        /// Gets or sets a suggestion for the HTML element to generate. Supported
+        /// elements are all standard HTML data collection elements such as input,
+        /// select, textarea, etc. Other elements are not supported.
         /// </summary>
         public string UIHint { get; set; }
 
         /// <summary>
-        /// Gets or sets a suggestion for the input type (e.g. checkbox, radio) to generate.
+        /// Gets or sets a suggestion for the input type to generate. Supported types are
+        /// all standard HTML input types (e. g. text, checkbox, number, date, file...).
+        /// All type names must be in lower-case characters.
         /// </summary>
         public string UITypeHint { get; set; }
 
@@ -88,7 +93,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// Gets or sets an icon associated with the generated input.
         /// </summary>
         public string Icon { get; set; }
-
 
         /// <summary>
         /// Gets or sets the data format. If you want to format a <see cref="DateTime"/>
@@ -107,6 +111,16 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// the Parse and TryParse methods of the integral and floating-point numeric types.
         /// </summary>
         public System.Globalization.NumberStyles NumberStyles { get; set; }
+
+        /// <summary>
+        /// Indicates whether the <see cref="UITypeHint"/> property value is radio.
+        /// </summary>
+        public bool IsInputRadio => UITypeHint == "radio";
+
+        /// <summary>
+        /// Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
+        /// </summary>
+        public CustomRenderMode CustomRenderMode { get; set; }
 
         #region internal
 

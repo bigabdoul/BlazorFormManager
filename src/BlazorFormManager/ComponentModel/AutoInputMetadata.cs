@@ -61,11 +61,6 @@ namespace BlazorFormManager.ComponentModel
         public string GetDisplayName() => Attribute.Name ?? ToSentence(_propertyName);
 
         /// <summary>
-        /// Indicates whether the <see cref="FormDisplayAttribute.UITypeHint"/> property value is radio.
-        /// </summary>
-        public bool IsInputRadio => Attribute.UITypeHint == "radio";
-
-        /// <summary>
         /// Indicates whether the input should be of type checkbox.
         /// </summary>
         public bool IsInputCheckbox => PropertyInfo.PropertyType.SupportsCheckbox(Attribute.UITypeHint);

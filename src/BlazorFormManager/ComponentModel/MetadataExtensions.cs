@@ -64,13 +64,16 @@ namespace BlazorFormManager.ComponentModel
                     else if (attr.ColumnCssClass == null) 
                         attr.ColumnCssClass = layoutDefault.ColumnCssClass;
 
+                    if (attr.CustomRenderMode == CustomRenderMode.Default)
+                        attr.CustomRenderMode = layoutDefault.CustomRenderMode;
+
                     if (attr.InputCssClass == null)
                     {
                         var css = layoutDefault.InputCssClass ?? emptyDisplay.InputCssClass;
                         if (css == "form-control")
                         {
                             // don't add by default 'form-control' class to the following input types
-                            if (!pi.PropertyType.SupportsCheckbox(attr.UITypeHint) && attr.UITypeHint != "radio")
+                            if (!pi.PropertyType.SupportsCheckbox(attr.UITypeHint) && !attr.IsInputRadio)
                                 attr.InputCssClass = css;
                         }
                         else

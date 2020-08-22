@@ -34,11 +34,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.IsInputRadio">
-            <summary>
-            Indicates whether the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> property value is radio.
-            </summary>
-        </member>
         <member name="P:BlazorFormManager.ComponentModel.AutoInputMetadata.IsInputCheckbox">
             <summary>
             Indicates whether the input should be of type checkbox.
@@ -115,6 +110,26 @@
             <param name="result">Returns a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> objects.</param>
             <returns></returns>
         </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode">
+            <summary>
+            Specifies how components should be rendered.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Default">
+            <summary>
+            The default value.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Disabled">
+            <summary>
+            Custom rendering is disabled.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Enabled">
+            <summary>
+            Custom rendering is enabled.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute">
             <summary>
             Prevents a property from being included into the input element generation process.
@@ -190,12 +205,16 @@
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UIHint">
             <summary>
-            Gets or sets a suggestion for the input element to generate.
+            Gets or sets a suggestion for the HTML element to generate. Supported
+            elements are all standard HTML data collection elements such as input,
+            select, textarea, etc. Other elements are not supported.
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint">
             <summary>
-            Gets or sets a suggestion for the input type (e.g. checkbox, radio) to generate.
+            Gets or sets a suggestion for the input type to generate. Supported types are
+            all standard HTML input types (e. g. text, checkbox, number, date, file...).
+            All type names must be in lower-case characters.
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Icon">
@@ -219,6 +238,16 @@
             <summary>
             Determines the styles permitted in numeric string arguments that are passed to
             the Parse and TryParse methods of the integral and floating-point numeric types.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputRadio">
+            <summary>
+            Indicates whether the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UITypeHint"/> property value is radio.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.CustomRenderMode">
+            <summary>
+            Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
             </summary>
         </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.GetProperty">
@@ -247,21 +276,30 @@
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.GroupCssClass">
             <summary>
             Gets or sets the CSS class (e.g. row) for a section element.
+            The default value is "row".
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.ColumnCssClass">
             <summary>
             Gets or sets the CSS class (e.g. col) for an HTML element wrapped around an input.
+            The default value is "col".
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.InputCssClass">
             <summary>
             Gets or sets the CSS class (e.g. form-control) added to the input.
+            The default value is "form-control".
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.ShowGroupName">
             <summary>
             Indicates whether to display the name of a group.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.CustomRenderMode">
+            <summary>
+            Indicates whether rendering custom inputs is disabled, enabled or determined
+            by the default value. The default is <see cref="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Enabled"/>.
             </summary>
         </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.CreateDefault">
@@ -339,6 +377,11 @@
             Gets or sets the child content to be rendering inside the element.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.AutoInputBase.Id">
+            <summary>
+            Gets or sets the input identifier.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.AutoInputBase.Form">
             <summary>
             Gets the associated <see cref="T:BlazorFormManager.Components.FormManagerBase"/>.
@@ -376,31 +419,59 @@
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
             <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
-        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputCheckbox(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputCheckbox(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.String,System.String)">
             <summary>
             Renders a checkbox to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
             </summary>
             <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CssClass"/>.</param>
+            <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
             <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
-        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputRadio(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.String,System.String)">
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputRadio(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.String,System.String,System.String,System.String)">
             <summary>
-            Renders a checkbox to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            Renders an input radio to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
             </summary>
             <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
             <param name="propertyName">The name of the input radio.</param>
             <param name="value">The value of the radio input.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CssClass"/>.</param>
+            <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
             <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
-        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputFile(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderInputFile(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.String)">
+            <summary>
+            Renders an input file to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CssClass"/>.</param>
+            <returns>
+            A tuple of (integer, string) that represents the next position of the instruction in the source code and the 'id' attribute.
+            </returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderCustomInputFile(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
             <summary>
             Renders to the supplied <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> an input of type file.
             </summary>
             <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
             <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.RenderCustomFormCheck(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,System.Boolean,System.String,System.String,System.String)">
+            <summary>
+            Renders to the specified <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderBatchBuilder"/> a checkbox 
+            or a radio input inside a &lt;div class="form-check"> wrapper element.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <param name="radio">true to render a radio input; otherwise, false to render a checkbox input.</param>
+            <param name="label">The label text.</param>
+            <param name="name">The name of the input radio.</param>
+            <param name="value">The value of the radio input.</param>
+            <returns></returns>
         </member>
         <member name="M:BlazorFormManager.Components.AutoInputBase.TryParseValueFromString(System.String,System.Object@,System.String@)">
             <inheritdoc/>
