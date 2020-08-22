@@ -112,12 +112,12 @@
         </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode">
             <summary>
-            Specifies how components should be rendered.
+            Specifies if components should support custom rendering or not.
             </summary>
         </member>
         <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Default">
             <summary>
-            The default value.
+            The default value is determined by a parent setting.
             </summary>
         </member>
         <member name="F:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode.Disabled">
