@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace BlazorFormManager.Components
         private string _stepAttributeValue; // Null by default, so only allows whole numbers as per HTML spec
         private CultureInfo _culture;
         private string _format;
+        private string _inputId;
 
         #endregion
 
@@ -42,7 +44,15 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Gets or sets the input identifier.
         /// </summary>
-        [Parameter] public string Id { get; set; }
+        [Parameter] public string Id
+        {
+            get => _inputId;
+            set
+            {
+                if (!EqualityComparer<string>.Default.Equals(_inputId, value))
+                    _inputId = value;
+            }
+        }
 
         /// <summary>
         /// Gets the associated <see cref="FormManagerBase"/>.
@@ -57,8 +67,6 @@ namespace BlazorFormManager.Components
             if (_propertyType == null)
             {
                 if (Metadata == null) throw new ArgumentNullException(nameof(Metadata));
-                //if (Metadata.Attribute == null) throw new ArgumentNullException(nameof(Metadata.Attribute));
-                //if (Metadata.Property == null) throw new ArgumentNullException(nameof(Metadata.Property));
 
                 _metadataAttribute = Metadata.Attribute;
                 
@@ -71,6 +79,9 @@ namespace BlazorFormManager.Components
 
                 // must redefine the field identifier alternatively
                 FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
+
+                if (string.IsNullOrWhiteSpace(_inputId))
+                    _inputId = propertyInfo.Name.GenerateId();
 
                 // for invoking the method SetCurrentValue(object value) when the value changes
                 Metadata.Attach(this);
@@ -96,7 +107,7 @@ namespace BlazorFormManager.Components
             }
             else if (elementType == "file")
             {
-                (sequence, _) = RenderInputFile(builder, sequence);
+                sequence = RenderInputFile(builder, sequence);
             }
             else if (elementType == "customfile")
             {
@@ -115,7 +126,8 @@ namespace BlazorFormManager.Components
                 }
 
                 builder.AddAttribute(sequence++, "class", CssClass);
-                
+                builder.AddAttribute(sequence++, "id", _inputId);
+
                 if (_propertyType.IsString())
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
                 else
@@ -291,6 +303,7 @@ namespace BlazorFormManager.Components
             builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
             builder.AddAttribute(sequence++, "type", "checkbox");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
+            builder.AddAttribute(sequence++, "id", _inputId);
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool>(this, __value => CurrentValue = __value, (bool)CurrentValue));
             builder.CloseElement();
@@ -349,22 +362,17 @@ namespace BlazorFormManager.Components
         /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
         /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
         /// <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="InputBase{TValue}.CssClass"/>.</param>
-        /// <returns>
-        /// A tuple of (integer, string) that represents the next position of the instruction in the source code and the 'id' attribute.
-        /// </returns>
-        protected virtual (int sequence, string inputId) RenderInputFile(RenderTreeBuilder builder, int sequence, string additionalCssClass = null)
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderInputFile(RenderTreeBuilder builder, int sequence, string additionalCssClass = null)
         {
             builder.OpenElement(sequence++, "input");
             builder.AddMultipleAttributes(sequence++, AdditionalAttributes);
             builder.AddAttribute(sequence++, "type", "file");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
-
+            builder.AddAttribute(sequence++, "id", _inputId);
+            
             // For the file to be uploadable it must have a name.
-            var propertyName = Metadata.PropertyInfo.Name;
-            var inputId = string.IsNullOrWhiteSpace(Id) ? propertyName.GenerateId() : Id;
-
-            builder.AddAttribute(sequence++, "id", inputId);
-            builder.AddAttribute(sequence++, "name", propertyName);
+            builder.AddAttribute(sequence++, "name", Metadata.PropertyInfo.Name);
 
             // Also, the 'onchange' event callback shouldn't change the CurrentValueAsString 
             // property nor should that property be used to initialize the input's value.
@@ -384,7 +392,7 @@ namespace BlazorFormManager.Components
 
             builder.CloseElement(); // /> (input)
 
-            return (sequence, inputId);
+            return sequence;
         }
 
         /// <summary>
@@ -404,12 +412,11 @@ namespace BlazorFormManager.Components
             builder.OpenElement(sequence++, "div");
             builder.AddAttribute(sequence++, "class", "custom-file");
 
-            string inputId;
-            (sequence, inputId) = RenderInputFile(builder, sequence, "custom-file-input");
+            sequence = RenderInputFile(builder, sequence, "custom-file-input");
 
             builder.OpenElement(sequence++, "label");
             builder.AddAttribute(sequence++, "class", "custom-file-label");
-            builder.AddAttribute(sequence++, "for", inputId);
+            builder.AddAttribute(sequence++, "for", _inputId);
             builder.AddContent(sequence++, _metadataAttribute.Prompt ?? Metadata.GetDisplayName());
             builder.CloseElement(); // </label>
 

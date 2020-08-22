@@ -448,9 +448,7 @@
             <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
             <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Microsoft.AspNetCore.Components.Forms.InputBase`1.CssClass"/>.</param>
-            <returns>
-            A tuple of (integer, string) that represents the next position of the instruction in the source code and the 'id' attribute.
-            </returns>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
         <member name="M:BlazorFormManager.Components.AutoInputBase.RenderCustomInputFile(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
             <summary>

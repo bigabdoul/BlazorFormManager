@@ -4,7 +4,7 @@
     var attr = metadata.Attribute;
     var labelText = metadata.GetDisplayName();
     var propertyName = metadata.PropertyInfo.Name;
-    var inputId = Id ?? propertyName.GenerateId();
+    var  inputId = string.IsNullOrWhiteSpace(Id) ? propertyName.GenerateId() : Id;
 
     if (attr.IsInputRadio || metadata.IsInputCheckbox)
     {
@@ -32,7 +32,7 @@
     }
 }
 @code {
+    [Parameter] public string Id { get; set; }
     [Parameter] public AutoInputMetadata Metadata { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
-    [Parameter] public string Id { get; set; }
 }
