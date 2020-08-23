@@ -588,7 +588,13 @@ namespace BlazorFormManager.Components
 
         private void CheckDisabled(RenderTreeBuilder builder, int sequence)
         {
-            if (_metadataAttribute.Disabled) builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(true));
+            if (_metadataAttribute.Disabled)
+            {
+                bool? state = Form?.DisabledGetter?.Invoke(_propertyType.Name);
+                if (!state.HasValue) state = true;
+
+                builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(state.Value));
+            }
         }
 
         #endregion

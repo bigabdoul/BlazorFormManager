@@ -179,6 +179,11 @@ namespace BlazorFormManager.Components
         [Parameter] public Func<string, IEnumerable<SelectOption>> OptionsGetter { get; set; }
 
         /// <summary>
+        /// Gets or sets a function callback used to dynamically retrieve the disabled state of an input.
+        /// </summary>
+        [Parameter] public Func<string, bool?> DisabledGetter { get; set; }
+
+        /// <summary>
         /// Indicates whether field changes should be tracked or not.
         /// </summary>
         [Parameter] public bool EnableChangeTracking { get; set; }

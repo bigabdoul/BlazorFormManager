@@ -648,6 +648,11 @@
             an input of type 'radio'.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.DisabledGetter">
+            <summary>
+            Gets or sets a function callback used to retrieve the disabled state of an input.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.EnableChangeTracking">
             <summary>
             Indicates whether field changes should be tracked or not.
