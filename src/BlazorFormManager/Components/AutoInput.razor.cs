@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,6 +27,8 @@ namespace BlazorFormManager.Components
         private CultureInfo _culture;
         private string _format;
         private string _inputId;
+        private FormFieldChangedEventArgs _fieldChangedEventArgs;
+        private FormFieldChangedEventArgs _fileFieldChangedEventArgs;
 
         #endregion
 
@@ -79,6 +80,8 @@ namespace BlazorFormManager.Components
 
                 // must redefine the field identifier alternatively
                 FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
+                _fieldChangedEventArgs = null;
+                _fileFieldChangedEventArgs = null;
 
                 if (string.IsNullOrWhiteSpace(_inputId))
                     _inputId = propertyInfo.Name.GenerateId();
@@ -391,8 +394,7 @@ namespace BlazorFormManager.Components
                 // Before we pass on the value, let's extract just the file name.
                 var filename = string.IsNullOrEmpty(__value) ? __value : Path.GetFileName(__value);
 
-                // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
-                Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(filename, FieldIdentifier, isFile: true));
+                NotifyFieldChanged(filename, isFile: true);
             }
 
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __handleFileChange, string.Empty));
@@ -551,7 +553,32 @@ namespace BlazorFormManager.Components
         protected virtual void SetCurrentValue(object value, string propertyName)
         {
             CurrentValue = value;
-            Form?.NotifyFieldChanged(new FormFieldChangedEventArgs(value, FieldIdentifier));
+            NotifyFieldChanged(value, false);
+        }
+
+        /// <summary>
+        /// Notifies the parent <see cref="FormManagerBase"/> that a field's value has been changed.
+        /// </summary>
+        /// <param name="value">The new value.</param>
+        /// <param name="isFile">true if it was file; otherwise, false.</param>
+        protected virtual void NotifyFieldChanged(object value, bool isFile)
+        {
+            if (Form != null)
+            {
+                var targetEventArgs = isFile ? _fileFieldChangedEventArgs : _fieldChangedEventArgs;
+
+                if (targetEventArgs == null)
+                {
+                    targetEventArgs = new FormFieldChangedEventArgs(value, FieldIdentifier, isFile);
+
+                    if (isFile) _fileFieldChangedEventArgs = targetEventArgs;
+                    else _fieldChangedEventArgs = targetEventArgs;
+                }
+                else targetEventArgs.SetValue(value);
+
+                // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
+                Form.NotifyFieldChanged(targetEventArgs);
+            }
         }
 
         #region helpers

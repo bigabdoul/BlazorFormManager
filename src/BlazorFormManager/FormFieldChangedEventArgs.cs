@@ -46,11 +46,16 @@ namespace BlazorFormManager
         /// <summary>
         /// Gets the value of the field that changed.
         /// </summary>
-        public object Value { get; }
+        public object Value { get; private set; }
 
         /// <summary>
         /// Indicates whether the field that triggered the change is an input file.
         /// </summary>
         public bool IsFile { get; }
+
+        internal void SetValue(object value)
+        {
+            Value = value;
+        }
     }
 }

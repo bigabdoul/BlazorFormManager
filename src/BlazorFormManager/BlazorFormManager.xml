@@ -510,6 +510,13 @@
             <param name="value">The value that was changed.</param>
             <param name="propertyName">The name of the property that was changed.</param>
         </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.NotifyFieldChanged(System.Object,System.Boolean)">
+            <summary>
+            Notifies the parent <see cref="T:BlazorFormManager.Components.FormManagerBase"/> that a field's value has been changed.
+            </summary>
+            <param name="value">The new value.</param>
+            <param name="isFile">true if it was file; otherwise, false.</param>
+        </member>
         <member name="T:BlazorFormManager.Components.AutoValidationMessage">
             <summary>
             <inheritdoc/>
