@@ -126,7 +126,8 @@ namespace BlazorFormManager.Components
 
                 builder.AddAttribute(sequence++, "class", CssClass);
                 builder.AddAttribute(sequence++, "id", _inputId);
-                CheckDisabled(builder, sequence);
+                
+                sequence = CheckDisabled(builder, sequence);
 
                 if (_propertyType.IsString())
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
@@ -304,7 +305,9 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "type", "checkbox");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "id", _inputId);
-            CheckDisabled(builder, sequence);
+            
+            sequence = CheckDisabled(builder, sequence);
+
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool>(this, __value => CurrentValue = __value, (bool)CurrentValue));
             builder.CloseElement();
@@ -343,7 +346,9 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "name", propertyName);
             builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
-            CheckDisabled(builder, sequence);
+            
+            sequence = CheckDisabled(builder, sequence);
+
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.CloseElement();
@@ -437,7 +442,7 @@ namespace BlazorFormManager.Components
         /// <param name="label">The label text.</param>
         /// <param name="name">The name of the input radio.</param>
         /// <param name="value">The value of the radio input.</param>
-        /// <returns></returns>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
         protected virtual int RenderCustomFormCheck(RenderTreeBuilder builder, int sequence, bool radio, string label, string name = null, string value = null)
         {
             /*
@@ -463,6 +468,26 @@ namespace BlazorFormManager.Components
             builder.CloseElement(); // </label>
             builder.CloseElement(); // </div>
 
+            return sequence;
+        }
+
+        /// <summary>
+        /// Determines at run-time the disabled state of the current <see cref="AutoInputBase"/>
+        /// if the associated property was statically-marked as disabled with the property
+        /// <see cref="FormDisplayAttribute.Disabled"/> set to true.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int CheckDisabled(RenderTreeBuilder builder, int sequence)
+        {
+            if (_metadataAttribute.Disabled)
+            {
+                bool? state = Form?.DisabledGetter?.Invoke(_propertyType.Name);
+                if (!state.HasValue) state = true;
+
+                builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(state.Value));
+            }
             return sequence;
         }
 
@@ -584,17 +609,6 @@ namespace BlazorFormManager.Components
                 _format = _metadataAttribute.Format;
             else if (SupportsInputDate())
                 _format = "yyyy-MM-dd"; // Compatible with HTML date inputs
-        }
-
-        private void CheckDisabled(RenderTreeBuilder builder, int sequence)
-        {
-            if (_metadataAttribute.Disabled)
-            {
-                bool? state = Form?.DisabledGetter?.Invoke(_propertyType.Name);
-                if (!state.HasValue) state = true;
-
-                builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(state.Value));
-            }
         }
 
         #endregion

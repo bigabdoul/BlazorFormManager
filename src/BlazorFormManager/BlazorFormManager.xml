@@ -486,7 +486,17 @@
             <param name="label">The label text.</param>
             <param name="name">The name of the input radio.</param>
             <param name="value">The value of the radio input.</param>
-            <returns></returns>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoInputBase.CheckDisabled(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32)">
+            <summary>
+            Determines at run-time the disabled state of the current <see cref="T:BlazorFormManager.Components.AutoInputBase"/>
+            if the associated property was statically-marked as disabled with the property
+            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Disabled"/> set to true.
+            </summary>
+            <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
+            <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
         </member>
         <member name="M:BlazorFormManager.Components.AutoInputBase.TryParseValueFromString(System.String,System.Object@,System.String@)">
             <inheritdoc/>
@@ -650,7 +660,7 @@
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.DisabledGetter">
             <summary>
-            Gets or sets a function callback used to retrieve the disabled state of an input.
+            Gets or sets a function callback used to dynamically retrieve the disabled state of an input.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.EnableChangeTracking">
