@@ -1351,7 +1351,7 @@
             <param name="isValid">true if the form is currently valid; otherwise, false.</param>
             <param name="fieldIdentifier">The field whose value has changed.</param>
         </member>
-        <member name="M:BlazorFormManager.FormFieldChangedEventArgs.#ctor(System.Object,Microsoft.AspNetCore.Components.Forms.FieldIdentifier,System.Boolean)">
+        <member name="M:BlazorFormManager.FormFieldChangedEventArgs.#ctor(System.Object,Microsoft.AspNetCore.Components.Forms.FieldIdentifier,System.Boolean,System.String)">
             <summary>
             Initializes a new instance of the <see cref="T:BlazorFormManager.FormFieldChangedEventArgs"/>
             class using the specified parameters.
@@ -1359,6 +1359,7 @@
             <param name="value">The value of the field that changed.</param>
             <param name="fieldIdentifier">The field whose value has changed.</param>
             <param name="isFile">Indicates whether the field that triggered the change is an input file.</param>
+            <param name="elementId">The identifier of the element that triggered the change.</param>
         </member>
         <member name="P:BlazorFormManager.FormFieldChangedEventArgs.IsValid">
             <summary>
@@ -1378,6 +1379,11 @@
         <member name="P:BlazorFormManager.FormFieldChangedEventArgs.IsFile">
             <summary>
             Indicates whether the field that triggered the change is an input file.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.FormFieldChangedEventArgs.ElementId">
+            <summary>
+            Gets the identifier of the element that triggered the change.
             </summary>
         </member>
         <member name="T:BlazorFormManager.FormManagerBaseJSInvokable">

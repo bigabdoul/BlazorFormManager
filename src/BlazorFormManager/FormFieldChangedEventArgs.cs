@@ -26,11 +26,13 @@ namespace BlazorFormManager
         /// <param name="value">The value of the field that changed.</param>
         /// <param name="fieldIdentifier">The field whose value has changed.</param>
         /// <param name="isFile">Indicates whether the field that triggered the change is an input file.</param>
-        public FormFieldChangedEventArgs(object value, FieldIdentifier fieldIdentifier, bool isFile = false)
+        /// <param name="elementId">The identifier of the element that triggered the change.</param>
+        public FormFieldChangedEventArgs(object value, FieldIdentifier fieldIdentifier, bool isFile = false, string elementId = null)
         {
             Value = value;
             Field = fieldIdentifier;
             IsFile = isFile;
+            ElementId = elementId;
         }
 
         /// <summary>
@@ -52,6 +54,11 @@ namespace BlazorFormManager
         /// Indicates whether the field that triggered the change is an input file.
         /// </summary>
         public bool IsFile { get; }
+
+        /// <summary>
+        /// Gets the identifier of the element that triggered the change.
+        /// </summary>
+        public string ElementId { get; }
 
         internal void SetValue(object value)
         {

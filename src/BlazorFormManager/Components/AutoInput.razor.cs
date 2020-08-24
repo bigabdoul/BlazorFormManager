@@ -569,7 +569,7 @@ namespace BlazorFormManager.Components
 
                 if (targetEventArgs == null)
                 {
-                    targetEventArgs = new FormFieldChangedEventArgs(value, FieldIdentifier, isFile);
+                    targetEventArgs = new FormFieldChangedEventArgs(value, FieldIdentifier, isFile, _inputId);
 
                     if (isFile) _fileFieldChangedEventArgs = targetEventArgs;
                     else _fieldChangedEventArgs = targetEventArgs;
