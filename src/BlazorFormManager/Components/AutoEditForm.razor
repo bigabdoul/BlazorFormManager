@@ -5,42 +5,42 @@
 {
     <div class="auto-edit-form">
         <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" id="@FormId" action="@FormAction" method="@FormMethod" enctype="multipart/form-data" @attributes="AdditionalAttributes">
-            @if (FormHeader != null)
-            {
-                <div class="form-header">@FormHeader</div>
-            }
-            <div class="form-body">
-                <div class="form-display-group">
-                    @if (BeforeDisplayGroups != null)
-                    {
-                        <div class="before-display-groups">@BeforeDisplayGroups</div>
-                    }
-                    @if (DisplayGroups?.Count > 0)
-                    {
-                        // This issues a cascaded parameter to instances of the AutoInputBase component
-                        // so that it can access FormManagerBase-related members, such as OptionsGetter, etc.
-                        <CascadingValue Value="this">
+            // This issues a cascaded parameter to instances of the AutoInputBase component
+            // so that it can access FormManagerBase-related members, such as OptionsGetter, etc.
+            <CascadingValue Value="this">
+                @if (FormHeader != null)
+                {
+                    <div class="form-header">@FormHeader</div>
+                }
+                <div class="form-body">
+                    <div class="form-display-group">
+                        @if (BeforeDisplayGroups != null)
+                        {
+                            <div class="before-display-groups">@BeforeDisplayGroups</div>
+                        }
+                        @if (DisplayGroups?.Count > 0)
+                        {
                             <div class="display-groups">
                                 @foreach (FormDisplayGroupMetadata data in DisplayGroups)
                                 {
                                     <FormDisplayGroup Metadata="data" />
                                 }
                             </div>
-                        </CascadingValue>
-                    }
-                    @if (AfterDisplayGroups != null)
-                    {
-                        <div class="after-display-groups">@AfterDisplayGroups</div>
-                    }
+                        }
+                        @if (AfterDisplayGroups != null)
+                        {
+                            <div class="after-display-groups">@AfterDisplayGroups</div>
+                        }
+                    </div>
+                    <div class="child-content">
+                        @ChildContent
+                    </div>
                 </div>
-                <div class="child-content">
-                    @ChildContent
-                </div>
-            </div>
-            @if (FormFooter != null)
-            {
-                <div class="form-footer">@FormFooter</div>
-            }
+                @if (FormFooter != null)
+                {
+                    <div class="form-footer">@FormFooter</div>
+                }
+            </CascadingValue>
         </EditForm>
         <FormSubmitResultView Result="SubmitResult" />
         @if (EnableProgressBar && IsUploadingFiles)
