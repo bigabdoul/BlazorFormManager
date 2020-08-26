@@ -151,5 +151,33 @@ namespace BlazorFormManager.ComponentModel
 
             return result != null;
         }
+
+        /// <summary>
+        /// Attempts to get a cached instance of the <see cref="AutoInputMetadata"/>
+        /// class whose <see cref="AutoInputMetadata.PropertyInfo"/>.Name matches the
+        /// specified <paramref name="propertyName"/>.
+        /// </summary>
+        /// <param name="type">The type of the object to which <paramref name="propertyName"/> belongs.</param>
+        /// <param name="propertyName">The name of the property for which to retrieve the metadata.</param>
+        /// <param name="result">Returns the cached <see cref="AutoInputMetadata"/>, if any.</param>
+        /// <returns></returns>
+        public static bool TryGetMetadata(this Type type, string propertyName, out AutoInputMetadata result)
+        {
+            result = null;
+            if (type is null) return false;
+
+            if (_sectionLayoutMetadataCache.TryGetValue(type, out var meta))
+            {
+                foreach (var group in meta)
+                    foreach (var metadata in group.Items)
+                        if (metadata.PropertyInfo.Name == propertyName)
+                        {
+                            result = metadata;
+                            return true;
+                        }
+            }
+
+            return false;
+        }
     }
 }
