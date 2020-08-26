@@ -48,19 +48,6 @@ namespace BlazorFormManager.Components
             base.NotifyModelChanged();
         }
 
-        /// <inheritdoc/>
-        protected internal override void NotifyFieldChanged(FormFieldChangedEventArgs e)
-        {
-            HasChanges = true;
-
-            if (CanTrackChanges)
-            {
-                OnFieldChanged.InvokeAsync(e);
-            }
-            
-            StateHasChanged();
-        }
-
         /// <summary>
         /// This method does nothing on purpose to avoid attaching field 
         /// change notifications to the underlying <see cref="EditContext"/>.

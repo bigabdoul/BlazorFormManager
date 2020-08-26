@@ -15,8 +15,15 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>Introducing AutoEditForm: Automatically generate an EditForm with all appropriate inputs using only a model and custom attributes. These new form display custom attributes control the way the UI is presented and reduce the amount of code required to have a beautifully-layed-out and fully-functional editable form. Adding a tiny amount of CSS you can further style your form as you desire.</PackageReleaseNotes>
-    <Version>2.0.0</Version>
+    <PackageReleaseNotes>Version 2.1 introduces breaking changes due to huge code refactoring. New types and custom attributes have been added. They make automatic form generation easier than ever before thanks to InputFileAttribute and ImagePreviewAttribute.  ImagePreviewAttribute ensures that no marshalling occurs between JS and .NET when generating an image preview which improves performance and memory usage on the client device.
+
+Advanced support for JavaScript's FileReader API (readAsArrayBuffer, readAsBinaryString, readAsDataURL, readAsText) makes it possible to read files from a user's device and generate image and/or text previews without writing a single line of JavaScript code.
+
+New helper components for file selection, displaying simple error messages, and generating image previews have been added.
+
+Accept only specific file extensions and/or types.
+So much more...</PackageReleaseNotes>
+    <Version>2.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+using Microsoft.AspNetCore.Components.Forms;
 using System;
 
 namespace BlazorFormManager
@@ -27,12 +28,14 @@ namespace BlazorFormManager
         /// <param name="fieldIdentifier">The field whose value has changed.</param>
         /// <param name="isFile">Indicates whether the field that triggered the change is an input file.</param>
         /// <param name="elementId">The identifier of the element that triggered the change.</param>
-        public FormFieldChangedEventArgs(object value, FieldIdentifier fieldIdentifier, bool isFile = false, string elementId = null)
+        /// <param name="fileAttribute">A copy of the custom attribute attached to the current field, if any.</param>
+        public FormFieldChangedEventArgs(object value, FieldIdentifier fieldIdentifier, bool isFile = false, string elementId = null, InputFileAttribute fileAttribute = null)
         {
             Value = value;
             Field = fieldIdentifier;
             IsFile = isFile;
-            ElementId = elementId;
+            FieldId = elementId;
+            FileAttribute = fileAttribute;
         }
 
         /// <summary>
@@ -46,9 +49,19 @@ namespace BlazorFormManager
         public FieldIdentifier Field { get; }
 
         /// <summary>
+        /// Gets the identifier of the field that triggered the change.
+        /// </summary>
+        public string FieldId { get; }
+
+        /// <summary>
         /// Gets the value of the field that changed.
         /// </summary>
         public object Value { get; private set; }
+
+        /// <summary>
+        /// Gets a copy of the custom attribute attached to the current field, if any.
+        /// </summary>
+        public InputFileAttribute FileAttribute { get; }
 
         /// <summary>
         /// Indicates whether the field that triggered the change is an input file.
@@ -56,13 +69,18 @@ namespace BlazorFormManager
         public bool IsFile { get; }
 
         /// <summary>
-        /// Gets the identifier of the element that triggered the change.
+        /// Indicates whether this instance has a valid file.
         /// </summary>
-        public string ElementId { get; }
+        public bool HasFile => FileAttribute != null && FileAttribute.Method != FileReaderMethod.None && !string.IsNullOrWhiteSpace(Value?.ToString());
 
-        internal void SetValue(object value)
+        /// <summary>
+        /// Checks if the current instance refers to a non-empty file matching the specified field name.
+        /// </summary>
+        /// <param name="fieldName">The name of the field to compare against.</param>
+        /// <returns></returns>
+        public bool IsEmptyFile(string fieldName)
         {
-            Value = value;
+            return IsFile && Field.FieldName == fieldName && string.IsNullOrWhiteSpace(Value?.ToString());
         }
     }
 }

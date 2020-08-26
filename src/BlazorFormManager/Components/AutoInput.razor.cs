@@ -19,7 +19,7 @@ namespace BlazorFormManager.Components
     public class AutoInputBase : InputBase<object>, IAutoInputComponent
     {
         #region fields
-        
+
         private Type _propertyType;
         private FormDisplayAttribute _metadataAttribute;
         private Type _nullableUnderlyingType;
@@ -27,8 +27,6 @@ namespace BlazorFormManager.Components
         private CultureInfo _culture;
         private string _format;
         private string _inputId;
-        private FormFieldChangedEventArgs _fieldChangedEventArgs;
-        private FormFieldChangedEventArgs _fileFieldChangedEventArgs;
 
         #endregion
 
@@ -45,13 +43,16 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Gets or sets the input identifier.
         /// </summary>
-        [Parameter] public string Id
+        [Parameter]
+        public string Id
         {
             get => _inputId;
             set
             {
                 if (!string.Equals(_inputId, value))
+                {
                     _inputId = value;
+                }
             }
         }
 
@@ -70,7 +71,7 @@ namespace BlazorFormManager.Components
                 if (Metadata == null) throw new ArgumentNullException(nameof(Metadata));
 
                 _metadataAttribute = Metadata.Attribute;
-                
+
                 var propertyInfo = Metadata.PropertyInfo;
                 _propertyType = propertyInfo.PropertyType;
                 _nullableUnderlyingType = Nullable.GetUnderlyingType(_propertyType);
@@ -80,8 +81,6 @@ namespace BlazorFormManager.Components
 
                 // must redefine the field identifier alternatively
                 FieldIdentifier = new FieldIdentifier(Metadata.Model, propertyInfo.Name);
-                _fieldChangedEventArgs = null;
-                _fileFieldChangedEventArgs = null;
 
                 if (string.IsNullOrWhiteSpace(_inputId))
                     _inputId = propertyInfo.Name.GenerateId();
@@ -129,16 +128,16 @@ namespace BlazorFormManager.Components
 
                 builder.AddAttribute(sequence++, "class", CssClass);
                 builder.AddAttribute(sequence++, "id", _inputId);
-                
+
                 sequence = CheckDisabled(builder, sequence);
 
                 if (_propertyType.IsString())
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
                 else
                     builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValueAsString));
-                
+
                 builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
-                
+
                 if (elementName == "select")
                     sequence = RenderSelectOptions(builder, sequence);
 
@@ -169,7 +168,7 @@ namespace BlazorFormManager.Components
         {
             string element;
 
-            elementType = string.IsNullOrWhiteSpace(_metadataAttribute.UITypeHint) 
+            elementType = string.IsNullOrWhiteSpace(_metadataAttribute.UITypeHint)
                 ? null
                 : _metadataAttribute.UITypeHint;
 
@@ -252,7 +251,7 @@ namespace BlazorFormManager.Components
         {
             var propertyName = Metadata.PropertyInfo.Name;
             var options = (Form?.OptionsGetter?.Invoke(propertyName) ?? Metadata.Options)?.ToList();
-            
+
             if (options?.Count > 0)
             {
                 var customRadio = _metadataAttribute.CustomRenderMode == CustomRenderMode.Enabled;
@@ -308,7 +307,7 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "type", "checkbox");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "id", _inputId);
-            
+
             sequence = CheckDisabled(builder, sequence);
 
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool)CurrentValue));
@@ -349,7 +348,7 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "name", propertyName);
             builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
-            
+
             sequence = CheckDisabled(builder, sequence);
 
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
@@ -380,7 +379,7 @@ namespace BlazorFormManager.Components
             builder.AddAttribute(sequence++, "type", "file");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "id", _inputId);
-            
+
             // For the file to be uploadable it must have a name.
             builder.AddAttribute(sequence++, "name", Metadata.PropertyInfo.Name);
 
@@ -399,7 +398,33 @@ namespace BlazorFormManager.Components
 
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string>(this, __handleFileChange, string.Empty));
 
+            if (_metadataAttribute.FileAttribute != null)
+                sequence = AddInputFileAttributes(builder, sequence, _metadataAttribute.FileAttribute);
+
             builder.CloseElement(); // /> (input)
+
+            return sequence;
+        }
+
+        /// <summary>
+        /// Adds attributes to an input file from the custom attribute <see cref="InputFileAttribute"/>.
+        /// If the <see cref="InputFileAttribute.Method"/> value of the given <paramref name="fileAttr"/>
+        /// is different from <see cref="FileReaderMethod.None"/>, an attempt to register the current
+        /// input with the <see cref="Form"/> is made.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <param name="fileAttr">The <see cref="InputFileAttribute"/> to check.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int AddInputFileAttributes(RenderTreeBuilder builder, int sequence, InputFileAttribute fileAttr)
+        {
+            if (fileAttr == null) throw new ArgumentNullException(nameof(fileAttr));
+
+            if (!string.IsNullOrWhiteSpace(fileAttr.Accept))
+                builder.AddAttribute(sequence++, "accept", fileAttr.Accept);
+
+            if (fileAttr.Multiple)
+                builder.AddAttribute(sequence++, "multiple", BindConverter.FormatValue(fileAttr.Multiple));
 
             return sequence;
         }
@@ -528,7 +553,7 @@ namespace BlazorFormManager.Components
             {
                 return TryParseValueFromStringUltimately(value, out result, out validationErrorMessage);
             }
-            
+
             if (converted)
             {
                 result = convertedValue;
@@ -565,16 +590,12 @@ namespace BlazorFormManager.Components
         {
             if (Form != null)
             {
-                var targetEventArgs = isFile ? _fileFieldChangedEventArgs : _fieldChangedEventArgs;
-
-                if (targetEventArgs == null)
-                {
-                    targetEventArgs = new FormFieldChangedEventArgs(value, FieldIdentifier, isFile, _inputId);
-
-                    if (isFile) _fileFieldChangedEventArgs = targetEventArgs;
-                    else _fieldChangedEventArgs = targetEventArgs;
-                }
-                else targetEventArgs.SetValue(value);
+                var targetEventArgs = new FormFieldChangedEventArgs(value, 
+                    FieldIdentifier, 
+                    isFile, 
+                    _inputId, 
+                    _metadataAttribute.FileAttribute?.Clone()
+                );
 
                 // Let the form manager decide if the OnFieldChanged event callback should be invoked or not.
                 Form.NotifyFieldChanged(targetEventArgs);

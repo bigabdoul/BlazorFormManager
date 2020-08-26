@@ -60,10 +60,18 @@ namespace BlazorFormManager.ComponentModel
                     if (pi.GetCustomAttribute<DisplayIgnoreAttribute>(true) != null) continue;
 
                     var attr = pi.GetCustomAttribute<FormDisplayAttribute>(true);
+                    var imageAttr = pi.GetCustomAttribute<ImagePreviewAttribute>(true);
+                    var inputFile = pi.GetCustomAttribute<InputFileAttribute>(true);
+                    var hasInputFile = inputFile != null || imageAttr != null;
+
+                    if ((hasInputFile || attr?.UITypeHint == "file") && !pi.PropertyType.IsString())
+                        throw new NotSupportedException(
+                            $"Property '{pi.Name}' for file input must be of type string." +
+                            $"The current type {pi.PropertyType} is unsupported");
 
                     if (attr == null)
                     {
-                        if (ignoreUndecorated) continue;
+                        if (!hasInputFile && ignoreUndecorated) continue;
                         attr = layoutDefault.CreateDefault();
                     }    
                     else if (attr.ColumnCssClass == null) 
@@ -84,6 +92,19 @@ namespace BlazorFormManager.ComponentModel
                     }
                     else if (attr.InputCssClass == form_control && __isRadioOrCheckbox())
                         attr.InputCssClass = null;
+
+                    if (hasInputFile)
+                    {
+                        attr.UITypeHint = "file";
+
+                        // give priority to ImagePreviewAttribute
+                        attr.FileAttribute = imageAttr ?? inputFile;
+
+                        if (imageAttr != null && imageAttr.TargetElementId == null)
+                        {
+                            imageAttr.TargetElementId = $"{pi.Name}{ImagePreviewAttribute.TargetElementIdSuffix}";
+                        }
+                    }
 
                     attr.SetProperty(pi);
                     layouts.Add(attr);

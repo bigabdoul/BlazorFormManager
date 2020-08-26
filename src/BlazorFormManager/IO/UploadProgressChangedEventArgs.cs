@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Karfamsoft. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.ComponentModel;
-
-namespace BlazorFormManager
+namespace BlazorFormManager.IO
 {
     /// <summary>
     ///  Encapsulates data related to a form upload event.
     /// </summary>
-    public class UploadProgressChangedEventArgs : CancelEventArgs
+    public sealed class UploadProgressChangedEventArgs : ProgressChangedEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadProgressChangedEventArgs"/> class.
@@ -27,30 +24,18 @@ namespace BlazorFormManager
         }
 
         /// <summary>
-        /// Gets or sets the upload progress event type.
-        /// </summary>
-        public UploadProgressEventType EventType { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of bytes sent so far.
         /// </summary>
-        public long BytesSent { get; set; }
+        public long BytesSent { get => BytesReadOrSent; set => BytesReadOrSent = value; }
 
         /// <summary>
         /// Gets or sets the total number of bytes to send.
         /// </summary>
-        public long TotalBytesToSend { get; set; }
+        public long TotalBytesToSend { get => TotalBytesToReadOrSend; set => TotalBytesToReadOrSend = value; }
 
         /// <summary>
         /// Indicates whether a form upload contains files.
         /// </summary>
         public bool HasFiles { get; set; }
-
-        /// <summary>
-        /// Gets the upload progress percentage.
-        /// </summary>
-        public int ProgressPercentage => TotalBytesToSend > 0L
-            ? Convert.ToInt32(100 * BytesSent / Convert.ToDouble(TotalBytesToSend))
-            : 0;
     }
 }

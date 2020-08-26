@@ -1,8 +1,6 @@
-﻿@using BlazorFormManager.Demo.Client.Extensions
-@page "/account/auto-edit-form/register"
+﻿@page "/account/auto-edit-form/register"
 @inject NavigationManager NavigationManager
-
-<AutoEditForm @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" EnableChangeTracking EnableProgressBar>
+<AutoEditForm @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" OnFileReaderResult="HandleFileReaderResult" EnableChangeTracking EnableProgressBar>
     <FormHeader>
         <DemoHeader Title="Auto Edit Form Demo: Create a new account" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     </FormHeader>
@@ -11,28 +9,8 @@
         <SubmitButton Manager="Manager" Text="Register me" />
         <DataAnnotationsValidator />
     </AfterDisplayGroups>
+    <ChildContent>
+        <ImagePreview PropertyName="@nameof(RegisterUserModel.Photo)" Visible="FileSelected"/>
+    </ChildContent>
 </AutoEditForm>
-
-@code {
-    private RegisterUserModel Model = new RegisterUserModel();
-    private AutoEditForm<RegisterUserModel> Manager;
-    private ConsoleLogLevel LogLevel => Manager?.LogLevel ?? ConsoleLogLevel.None;
-
-    private void HandleFieldChanged(FormFieldChangedEventArgs e)
-    {
-        if (LogLevel > ConsoleLogLevel.None)
-        {
-            Console.WriteLine($"Field value changed: FieldName={e.Field.FieldName} ; Value={e.Value} ; IsFile={e.IsFile}");
-        }
-    }
-
-    private async Task HandleSubmitDone(FormManagerSubmitResult result)
-    {
-        Manager.ProcessCustomServerResponse(result);
-        if (result.Succeeded)
-        {
-            await Task.Delay(2000);
-            NavigationManager.NavigateTo("/account/autoeditform", true);
-        }
-    }
-}
+<ErrorDisplay Error="Error"/>

@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager
- Version:       1.1.0
+ Version:       1.2.0
  Author:        Abdourahamane Kaba
  Description:   Handle AJAX form data submission with zero or more files, and
                 report back data upload activities to a .NET Blazor Component.
@@ -13,10 +13,12 @@
     const LOG_LEVEL = { none: 0, information: 1, warning: 2, error: 3, debug: 4 };
     const UPLOAD_EVENTS = { loadstart: 0, progress: 1, load: 2, error: 3, abort: 4, timeout: 5, loadend: 6 };
     const PRIMITIVES = ["string", "number", "bigint", "boolean"];
+    const FILE_READER_FUNC = { 1: "readAsArrayBuffer", 2: "readAsBinaryString", 3: "readAsDataURL", 4: "readAsText" };
 
     const _dotnet = global.DotNet;
     const _document = global.document;
     const _supportsAJAXwithUpload = supportsAjaxUploadWithProgress();
+    const _supportsFileReader = !!global.FileReader;
 
     let _form;
     let _managerOptions;
@@ -26,7 +28,7 @@
         init: function (options, objInstanceRef) {
             _managerOptions = options;
             _invokableInstanceRef = objInstanceRef;
-            logInfo("Initializing with options:", options);
+            logDebug("Initializing with options:", options);
 
             // fail early
             if (!_isObject(options) || !_isString(options.formId))
@@ -37,7 +39,7 @@
             }
 
             if (!!_invokableInstanceRef) {
-                logInfo("Invokable object instance reference received.", _invokableInstanceRef);
+                logDebug("Invokable object instance reference received.", _invokableInstanceRef);
             } else {
                 logWarning("Invokable object instance reference not received. " +
                     "This is the preferred way of invoking.NET methods from " +
@@ -98,7 +100,8 @@
         },
         request: function (url, method, headers, credentials) {
             return fetchRequest(url, method, headers, credentials);
-        }
+        },
+        readInputFile: readInputFile
     };
 
     /**
@@ -270,7 +273,7 @@
                 }
             };
 
-            setupXhrUploadHandlers(xhr, hasFiles);
+            addXHRUploadEventListeners(xhr, hasFiles);
 
             const url = form.getAttribute("action");
             const method = (form.getAttribute("method") || "POST").toUpperCase();
@@ -340,6 +343,8 @@
             onSendFailed: optionalNameOfMethodWhen + "the HTTP request fails.",
             onSendSucceeded: optionalNameOfMethodWhen + "the HTTP request completes successfully.",
             onUploadChanged: optionalNameOfMethodWhen + "an upload operation occurs.",
+            onFileReaderChanged: optionalNameOfMethodWhen + "a change occurs in a file reading operation.",
+            onFileReaderResult: optionalNameOfMethodWhen + "a file reading operation is completed successfully.",
             onAjaxUploadWithProgressNotSupported: optionalNameOfMethodWhen + "the browser does not support AJAX uploads with progress report.",
         };
 
@@ -447,52 +452,79 @@
         }
     }
 
-    function setupXhrUploadHandlers(xhr, hasFiles) {
+    function addXHRUploadEventListeners(xhr, hasFiles) {
         const { onUploadChanged } = _managerOptions;
         if (!_isString(onUploadChanged)) return;
+        logDebug("Setting up upload event handlers...");
+        addFileReaderOrUploadEventListeners(xhr, xhr.upload, onUploadChanged, hasFiles);
+    }
+
+    function addFileReaderEventListeners(reader, successHandler, loadendHandler, errorHandler) {
+        const { onFileReaderChanged } = _managerOptions;
+        if (!_isString(onFileReaderChanged)) return;
+        addFileReaderOrUploadEventListeners(reader, reader, onFileReaderChanged, false, successHandler, loadendHandler, errorHandler);
+    }
+
+    /**
+     * Set up event handlers for an XMLHttpRequest.upload or FileReader object.
+     * @param {any} owner The object that owns the eventTarget (on which 'abort()' should be called if requested).
+     * @param {any} eventTarget An object to which event listeners will be added.
+     * If it's an XMLHttpRequest instance then it should its 'upload' property.
+     * Otherwise, this is the same object has the 'owner'.
+     * @param {string} interopCallback The name of the .NET callback function to invoke when a change occurs.
+     * @param {boolean} hasFiles true if it's an upload operation with files; otherwise, false.
+     * @param {Function} successHandler Optional: Alternate event handler to invoke when the operation completes successfully.
+     * @param {Function} loadendHandler Optional: Alternate event handler to invoke when the operation finishes.
+     * @param {Function} errorHandler Optional: Alternate event handler to invoke when an error occurs.
+     */
+    function addFileReaderOrUploadEventListeners(owner, eventTarget, interopCallback, hasFiles, successHandler, loadendHandler, errorHandler) {
 
         async function handleEvent(e) {
-            return invokeDotNet(onUploadChanged, {
-                bytesSent: e.loaded,
-                totalBytesToSend: e.total,
+            return invokeDotNet(interopCallback, {
+                bytesReadOrSent: e.loaded,
+                totalBytesToReadOrSend: e.total,
                 eventType: UPLOAD_EVENTS[e.type],
                 hasFiles
             });
         }
 
-        logDebug("Setting up upload event handlers...");
+        // The upload/read has begun.
+        eventTarget.addEventListener('loadstart', handleEvent);
 
-        const { upload } = xhr;
+        if (!successHandler) successHandler = handleEvent;
 
-        // The upload has begun.
-        upload.addEventListener('loadstart', handleEvent);
+        // The upload/read completed successfully.
+        eventTarget.addEventListener('load', successHandler);
 
-        // The upload completed successfully.
-        upload.addEventListener('load', handleEvent);
+        if (!loadendHandler) loadendHandler = handleEvent;
 
         /**
-         * The upload finished. This event does not differentiate between
+         * The upload/read finished. This event does not differentiate between
          * success or failure, and is sent at the end of the upload
          * regardless of the outcome. Prior to this event, one of load,
          * error, abort, or timeout will already have been delivered to
          * indicate why the upload ended.
          */
-        upload.addEventListener('loadend', handleEvent);
+        eventTarget.addEventListener('loadend', loadendHandler);
 
         // Periodically delivered to indicate the amount of progress made so far.
-        upload.addEventListener('progress', function (e) {
-            handleEvent(e).then(cancel => (cancel) && xhr.abort());
+        eventTarget.addEventListener('progress', function (e) {
+            handleEvent(e).then(cancel => (cancel) && owner.abort());
         });
 
-        // The upload failed due to an error.
-        upload.addEventListener('error', handleEvent);
+        if (!errorHandler) errorHandler = handleEvent;
 
-        // The upload operation was aborted.
-        upload.addEventListener('abort', handleEvent);
+        // The upload/read failed due to an error.
+        eventTarget.addEventListener('error', errorHandler);
 
-        // The upload timed out because a reply did not arrive within 
-        // the time interval specified by the XMLHttpRequest.timeout.
-        upload.addEventListener('timeout', handleEvent);
+        // The upload/read operation was aborted.
+        eventTarget.addEventListener('abort', handleEvent);
+
+        if ('ontimeout' in eventTarget) {
+            // The upload timed out because a reply did not arrive within 
+            // the time interval specified by the XMLHttpRequest.timeout.
+            eventTarget.addEventListener('timeout', handleEvent);
+        }
     }
 
     function setRequestHeaders(xhr, headers) {
@@ -533,20 +565,19 @@
         if (logLevel === LOG_LEVEL.none) return;
 
         func || (func = CONSOLE_FUNC.info);
-        const argument = [`${func}: BlazorFormManager:`, ...args];
+        const argument = [`${func === "log" ? "debug" : func}: BlazorFormManager:`, ...args];
 
         if (logLevel === LOG_LEVEL.debug)
             console[func].apply(console, argument);
 
-        else if (func === CONSOLE_FUNC.info && logLevel === LOG_LEVEL.information) {
-            console.info.apply(console, argument);
+        else if (func === CONSOLE_FUNC.error && logLevel >= LOG_LEVEL.error)
+            console.error.apply(console, argument);
 
-        } else if (func === CONSOLE_FUNC.warn && logLevel === LOG_LEVEL.warning) {
+        else if (func === CONSOLE_FUNC.warn && logLevel >= LOG_LEVEL.warning)
             console.warn.apply(console, argument);
 
-        } else if (func === CONSOLE_FUNC.error && logLevel === LOG_LEVEL.error) {
-            console.error.apply(console, argument);
-        }
+        else if (func === CONSOLE_FUNC.info && logLevel >= LOG_LEVEL.information)
+            console.info.apply(console, argument);
     }
 
     function _isString(obj) {
@@ -580,6 +611,204 @@
                 dic[prop] = value;
             }
         }
+    }
+
+    async function readInputFile(options) {
+        if (!_supportsFileReader) {
+            return { succeeded: false, error: "Your device does not support the FileReader API.", code: 1 };
+        }
+
+        logDebug("Reading file(s) from input using options", options);
+
+        let error, code;
+        const { method, inputId, targetElementId } = options;
+        const { onFileReaderResult } = _managerOptions;
+        let targetElement;
+
+        if (_isString(targetElementId)) {
+            targetElement = _document.getElementById(targetElementId);
+            if (!targetElement) {
+                const error = `Target element with id #${targetElementId} not found in the DOM tree.`;
+                logError(error);
+                await invokeDotNet(onFileReaderResult, { succeeded: false, error, method, code: 2 });
+                return;
+            }
+        }
+
+        const methodName = FILE_READER_FUNC[method];
+
+        if (methodName === undefined) {
+            error = `Unsupported file reader method: ${method}`;
+            logError(error);
+            return { succeeded: false, error, code: 3 };
+        }
+
+        if (_isString(inputId) && _isString(onFileReaderResult)) {
+            logDebug(`Retrieving input #${inputId}...`);
+            const input = _document.getElementById(inputId);
+
+            if (!!input && 'files' in input) {
+                const fileList = input.files;
+
+                if (fileList && fileList.length) {
+                    logDebug(`Found input with ${fileList.length} file(s)`);
+
+                    const { accept, acceptType } = options;
+                    const hasAccept = _isString(accept);
+                    const hasAcceptType = _isString(acceptType);
+                    const acceptAllFiles = !(hasAccept || hasAcceptType);
+                    const supportedFiles = acceptAllFiles
+                        ? undefined
+                        : hasAccept ? accept.split(',').map(type => type.trim().toLowerCase()) : undefined;
+
+                    if (acceptAllFiles) logDebug("Any files accepted.");
+
+                    for (let i = 0; i < fileList.length; i++) {
+                        const file = fileList[i];
+
+                        if (!acceptAllFiles) {
+                            if (hasAccept) {
+                                if (!supportsFileExtension(file.name)) {
+                                    logWarning(`File "${file.name}" is not allowed.`);
+                                    continue;
+                                }
+                            }
+                            if (hasAcceptType) {
+                                if (file.type && file.type.indexOf(acceptType) === -1) {
+                                    logWarning(`File "${file.name}" of type ${file.type} is not allowed.`);
+                                    continue;
+                                }
+                            }
+                        }
+
+                        logDebug(`Reading file ${file.name}`);
+                        await readFileCore(file, onFileReaderResult, options, targetElement);
+                    }
+
+                    function supportsFileExtension(name) {
+                        name = (name || "").toLowerCase();
+                        for (let i = 0; i < supportedFiles.length; i++)
+                            if (name.endsWith(supportedFiles[i]))
+                                return true;
+                        return false;
+                    }
+                } else {
+                    logDebug(`No file to read from input #${inputId}.`);
+                }
+
+                return { succeeded: true, code: 0 };
+            } else {
+                code = 5;
+                error = `Specified 'inputId' (${inputId}) does not identify an input element of type 'file'.`;
+                logDebug(error);
+            }
+        } else {
+            code = 4;
+            error = `Invalid file reader options: 'inputId', and/or 'onFileReaderResult' not present.`;
+        }
+        return { succeeded: false, error, code };
+    }
+
+    async function readFileCore(file, onFileReaderResult, options, targetElement) {
+
+        try {
+            const { method, inputId, inputName, targetElementId, targetElementAttributeName } = options;
+
+            // create a Promise that takes care of reading the file
+            const promiseResult = await createFileReaderPromise(file, method);
+            const { succeeded, content } = promiseResult;
+            let result, contentArray;
+
+            if (succeeded) {
+                if (FILE_READER_FUNC[method] === "readAsArrayBuffer") {
+                    contentArray = Array.prototype.slice.call(new Uint8Array(content));
+                    result = {
+                        succeeded,
+                        // convert to a 'normal' array
+                        contentArray
+                    };
+                } else {
+                    result = { succeeded, content };
+                }
+            } else {
+                result = { succeeded: false };
+            }
+
+            if (!!targetElement) {
+                targetElement.setAttribute(targetElementAttributeName || "src", content);
+                result.inputId = targetElementId;
+                result.completedInScript = true;
+
+                // don't send back these values
+                result.content = null;
+                result.contentArray = null;
+            } else {
+                // given back these properties makes the identification 
+                // in the 'onFileReaderResult' callback more accurate
+                result.inputId = inputId;
+            }
+
+            result.method = method;
+            result.inputName = inputName;
+
+            await invokeDotNet(onFileReaderResult, result);
+
+            if (!result.completedInScript) {
+                result.content = null;
+                result.contentArray = null;
+            }
+        } catch (e) {
+            logError(e);
+            await invokeDotNet(onFileReaderResult,  { succeeded: false, error: e.message || e });
+        }
+    }
+
+    function createFileReaderPromise(file, method) {
+        const methodName = FILE_READER_FUNC[method];
+
+        return new Promise((resolve, reject) => {
+            try {
+                let succeeded = false;
+                const reader = new FileReader();
+                const onsucceeded = () => {
+                    succeeded = true;
+                };
+                const onfinish = event => {
+                    resolve({ succeeded, content: event.target.result });
+                };
+                const onerror = () => {
+                    const reason = `"Failed to read file! "`;
+                    logDebug(reason, reader.error);
+                    reject(reason + reader.error);
+                };
+
+                addFileReaderEventListeners(reader, onsucceeded, onfinish, onerror);
+
+                logDebug("Attempting to read file using method", methodName);
+
+                switch (methodName) {
+                    case "readAsArrayBuffer":
+                        reader.readAsArrayBuffer(file);
+                        break;
+                    case "readAsBinaryString":
+                        reader.readAsBinaryString(file);
+                        break;
+                    case "readAsDataURL":
+                        reader.readAsDataURL(file);
+                        break;
+                    case "readAsText":
+                        reader.readAsText(file);
+                        break;
+                    default:
+                        reject(new Error(`Unsupported method: ${method}`));
+                }
+
+            } catch (e) {
+                logDebug("Error reading file", e);
+                reject(e);
+            }
+        });
+
     }
 
     async function fetchRequest(url, method, headers, credentials) {

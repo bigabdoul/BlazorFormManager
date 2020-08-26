@@ -1,14 +1,18 @@
 ﻿@inject HttpClient Http
- 
-@if (!string.IsNullOrEmpty(base64Photo))
+
+@if (!string.IsNullOrEmpty(base64DataURL))
 {
-    <img src="data:image/jpeg;base64, @base64Photo" alt="User's profile picture" class="img-fluid" style="max-height:275px;"/>
+    <img id="@Id" src="@base64DataURL" alt="@altText" class="img-fluid" style="@Style" />
 }
 
 @code {
-    private string base64Photo;
+    private string base64DataURL;
+    private string altText;
+    private int maxHeight = 275;
+    private string Style => $"max-height:{maxHeight}px;";
 
     [Parameter] public string Src { get; set; }
+    [Parameter] public string Id { get; set; } = typeof(Base64RemoteImage).GenerateId();
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,12 +26,36 @@
             var result = await Http.GetAsync(Src);
             result.EnsureSuccessStatusCode();
             var bytes = await result.Content.ReadAsByteArrayAsync();
-            base64Photo = Convert.ToBase64String(bytes);
-            StateHasChanged();
+            SetImage(bytes, altText);
         }
         catch (Exception ex)
         {
             System.Diagnostics.Trace.WriteLine(ex);
         }
+    }
+
+    public void SetImage(byte[] bytes, string alternativeText = null, int maxHeight = 0)
+    {
+        SetDataUrl($"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}", altText);
+    }
+
+    /// <summary>
+    /// Sets the based64-encoded data URL for the image (e.g. data:image/jpeg;base64 abcdef==).
+    /// </summary>
+    /// <param name="base64DataURL">
+    /// The base64-encoded data URL. The base64 string must be prefixed
+    /// by a variant of 'data:image/jpeg' (without the single quotes).
+    /// </param>
+    /// <param name="alternativeText">The alternative text for the image.</param>
+    /// <param name="maxHeight">The maximum height (in pixels) of the image.</param>
+    public void SetDataUrl(string base64DataURL, string alternativeText = null, int maxHeight = 0)
+    {
+        this.base64DataURL = base64DataURL;
+        altText = alternativeText;
+        if (maxHeight > 0)
+        {
+            this.maxHeight = maxHeight;
+        }
+        StateHasChanged();
     }
 }

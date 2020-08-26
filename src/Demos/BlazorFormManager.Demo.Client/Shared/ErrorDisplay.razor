@@ -1,0 +1,10 @@
+﻿@if (Error != null)
+{
+    <div class="alert alert-danger">
+        @Error.Message
+    </div>
+}
+
+@code {
+    [Parameter] public Exception Error { get; set; }
+}

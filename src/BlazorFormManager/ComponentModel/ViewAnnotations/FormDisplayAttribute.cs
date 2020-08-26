@@ -139,6 +139,12 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         public bool IsInputCheckboxOrRadio => IsInputCheckbox || IsInputRadio;
 
+        /// <summary>
+        /// Gets or sets the <see cref="InputFileAttribute"/> associated with the 
+        /// property that this <see cref="FormDisplayAttribute"/> decorates.
+        /// </summary>
+        protected internal InputFileAttribute FileAttribute { get; set; }
+
         #region internal
 
         private PropertyInfo _property;

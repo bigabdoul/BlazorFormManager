@@ -15,7 +15,8 @@ namespace BlazorFormManager.Demo.Client.Models
         [FormDisplay(GroupName = "Password", UITypeHint = "password", Order = 2)]
         public string ConfirmPassword { get; set; }
 
-        [FormDisplay(UITypeHint = "file", Prompt = "Please browse your device and show your face!", InputCssClass = "", Order = 3)]
+        [ImagePreview(Accept = ".jpg, .jpeg")]
+        [FormDisplay(Prompt = "Please browse your device and show your face!", InputCssClass = "", Order = 3)]
         public string Photo { get; set; }
     }
 }

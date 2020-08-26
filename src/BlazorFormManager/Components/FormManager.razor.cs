@@ -1,4 +1,6 @@
-﻿using BlazorFormManager.Debugging;
+﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+using BlazorFormManager.Debugging;
+using BlazorFormManager.IO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -19,6 +21,7 @@ namespace BlazorFormManager.Components
         #region private fields & properties
 
         private bool _scriptInitialized;
+        private bool _initializingScript;
         private ConsoleLogLevel _logLevel;
         FormManagerSubmitResult _submitResult;
         private DotNetObjectReference<FormManagerBaseJSInvokable> _thisObjRef;
@@ -266,30 +269,48 @@ namespace BlazorFormManager.Components
         /// <returns></returns>
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (!_scriptInitialized)
+            // Don't use firstRender for script initialization 
+            // as it may fail on the first attempt.
+            if (!_scriptInitialized && !_initializingScript)
             {
-                var options = new
+                _initializingScript = true;
+                try
                 {
-                    FormId,
-                    LogLevel,
-                    RequireModel,
-                    // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
-                    OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
-                    OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
-                    OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
-                    OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
-                    OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
-                    OnUploadChanged = nameof(FormManagerBaseJSInvokable.OnUploadChanged),
-                    OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
-                };
+                    var options = new
+                    {
+                        FormId,
+                        LogLevel,
+                        RequireModel,
+                        // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
+                        OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
+                        OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
+                        OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
+                        OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
+                        OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
+                        OnUploadChanged = nameof(FormManagerBaseJSInvokable.OnUploadChanged),
+                        OnFileReaderChanged = nameof(FormManagerBaseJSInvokable.OnFileReaderChanged),
+                        OnFileReaderResult = nameof(FormManagerBaseJSInvokable.OnFileReaderResult),
+                        OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
+                    };
 
-                _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
-                _scriptInitialized = await JS.InvokeAsync<bool>("BlazorFormManager.init", options, _thisObjRef);
-                AjaxUploadNotSupported = null;
+                    _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
+                    _scriptInitialized = await JS.InvokeAsync<bool>("BlazorFormManager.init", options, _thisObjRef);
 
-                if (_scriptInitialized && OnAfterScriptInitialized.HasDelegate)
-                    await OnAfterScriptInitialized.InvokeAsync(this);
+                    AjaxUploadNotSupported = null;
+
+                    if (_scriptInitialized && OnAfterScriptInitialized.HasDelegate)
+                        await OnAfterScriptInitialized.InvokeAsync(this);
+
+                    _initializingScript = false;
+                }
+                catch
+                {
+                    _initializingScript = false;
+                    throw;
+                }
+
             }
+
             await base.OnAfterRenderAsync(firstRender);
         }
 
@@ -303,6 +324,10 @@ namespace BlazorFormManager.Components
         /// <returns></returns>
         public abstract object GetModel();
 
+        #endregion
+
+        #region form validation and submission
+
         /// <summary>
         /// A descendant class may override this method to implement a 
         /// notification handler that listens for form field value changes.
@@ -310,11 +335,30 @@ namespace BlazorFormManager.Components
         /// <param name="e">The event data.</param>
         protected internal virtual void NotifyFieldChanged(FormFieldChangedEventArgs e)
         {
+            if (EnableChangeTracking)
+            {
+                if (OnFieldChanged.HasDelegate)
+                {
+                    OnFieldChanged.InvokeAsync(e);
+                }
+                if (e.HasFile)
+                {
+                    var fileAttr = e.FileAttribute;
+                    var imgAttr = fileAttr as ImagePreviewAttribute;
+
+                    _ = ReadFileAsync(new
+                    {
+                        InputId = e.FieldId,
+                        InputName = e.Field.FieldName,
+                        fileAttr.Method,
+                        fileAttr.Accept,
+                        fileAttr.AcceptType,
+                        imgAttr?.TargetElementId,
+                        imgAttr?.TargetElementAttributeName,
+                    });
+                }
+            }
         }
-
-        #endregion
-
-        #region form validation and submission
 
         /// <summary>
         /// Makes sure that the form's 'onsubmit' DOM event handler
@@ -573,7 +617,7 @@ namespace BlazorFormManager.Components
 
         #endregion
 
-        #region upload progress
+        #region IO
 
         #region fields
 
@@ -589,9 +633,14 @@ namespace BlazorFormManager.Components
         /// </summary>
         protected string UploadStatus = "Preparing...";
 
+        /// <summary>
+        /// Indicates the current upload progress status text.
+        /// </summary>
+        protected string ReadStatus = "Preparing...";
+
         #endregion
 
-        #region public properties
+        #region properties
 
         /// <summary>
         /// Gets the stop watch used to measure a form submission duration.
@@ -599,14 +648,14 @@ namespace BlazorFormManager.Components
         public Stopwatch Stopwatch { get; private set; }
 
         /// <summary>
-        /// Gets the current progress' event data.
-        /// </summary>
-        protected UploadProgressChangedEventArgs Progress { get; private set; }
-
-        /// <summary>
         /// Determines whether an active upload containing one or more files is in progress.
         /// </summary>
         public bool IsUploadingFiles => Progress != null && Progress.HasFiles;
+
+        /// <summary>
+        /// Determines whether an active file read operation is in progress.
+        /// </summary>
+        public bool IsReadingFiles => ReadProgress != null;
 
         /// <summary>
         /// Indicates that a form submission hasn't completed yet.
@@ -627,6 +676,23 @@ namespace BlazorFormManager.Components
         /// </summary>
         public int LongRunningDelay { get; set; } = 2000;
 
+        /// <summary>
+        /// Returns true if <see cref="EnableChangeTracking"/> is true and 
+        /// <see cref="OnFieldChanged"/> has a delegate; otherwise, false.
+        /// </summary>
+        /// <returns></returns>
+        public bool CanTrackChanges => EnableChangeTracking && OnFieldChanged.HasDelegate;
+
+        /// <summary>
+        /// Gets the current progress' event data.
+        /// </summary>
+        protected UploadProgressChangedEventArgs Progress { get; private set; }
+
+        /// <summary>
+        /// Gets the current file read progress' event data.
+        /// </summary>
+        protected FileReaderProgressChangedEventArgs ReadProgress { get; private set; }
+
         #endregion
 
         #region methods
@@ -638,16 +704,19 @@ namespace BlazorFormManager.Components
         protected virtual void HandleUploadProgressChanged(UploadProgressChangedEventArgs e)
         {
             Progress = e;
+
+            if (IsDebug) Console.WriteLine($"File upload changed. {e.EventType} event: {e.ProgressPercentage}%");
+
             switch (e.EventType)
             {
-                case UploadProgressEventType.Start:
+                case ProgressChangedEventType.Start:
                     UploadStatus = "Preparing to upload...";
                     StartStopWatch();
                     IsRunning = true;
                     SubmitResult = null;
                     lastUploadHadFiles = e.HasFiles;
                     break;
-                case UploadProgressEventType.Progress:
+                case ProgressChangedEventType.Progress:
                     if (AbortRequested)
                     {
                         e.Cancel = true;
@@ -659,20 +728,20 @@ namespace BlazorFormManager.Components
                         UploadStatus = "Uploading...";
                     }
                     break;
-                case UploadProgressEventType.Complete:
+                case ProgressChangedEventType.Complete:
                     UploadStatus = "Done!";
                     break;
-                case UploadProgressEventType.Error:
+                case ProgressChangedEventType.Error:
                     UploadStatus = "An error occurred during the upload.";
                     break;
-                case UploadProgressEventType.Abort:
+                case ProgressChangedEventType.Abort:
                     UploadStatus = "Operation aborted.";
                     break;
-                case UploadProgressEventType.Timeout:
+                case ProgressChangedEventType.Timeout:
                     UploadStatus = "The upload timed out because a reply did not arrive " +
                         "within the time interval specified by the XMLHttpRequest.timeout.";
                     break;
-                case UploadProgressEventType.End:
+                case ProgressChangedEventType.End:
                     Progress = null;
                     UploadStatus = null;
                     break;
@@ -681,6 +750,176 @@ namespace BlazorFormManager.Components
             }
             StateHasChanged();
         }
+
+        #region FileReader support
+
+        #region parameters
+
+        /// <summary>
+        /// Event handler invoked when a change in the file read process occurs.
+        /// </summary>
+        [Parameter]
+        public EventCallback<FileReaderProgressChangedEventArgs> OnFileReaderProgressChanged { get; set; }
+
+        /// <summary>
+        /// Event handler invoked when a JavaScript file reading operation is 
+        /// completed and the result is available. Check the <see cref="FileReaderResult.Succeeded"/>
+        /// flag to find out if the operation completed successfully.
+        /// </summary>
+        [Parameter] public EventCallback<FileReaderResult> OnFileReaderResult { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// Reads files via JavaScript found in an input tag identified in the DOM by 
+        /// <paramref name="inputId"/>.
+        /// </summary>
+        /// <param name="inputId">The identifier of the input file to read.</param>
+        /// <param name="inputName">The name of the input file.</param>
+        /// <param name="method">The FileReader method to use for reading files.</param>
+        /// <param name="acceptExtensions">A comma-separated list of allowed file extensions.</param>
+        /// <param name="acceptFileType">The type of file allowed to be picked.</param>
+        /// <param name="targetElementId">
+        /// The identifier of an HTML element (typically a &lt;img /> tag) that will display the image.
+        /// </param>
+        /// <param name="targetElementAttributeName">
+        /// The name of the target element's attribute name that will receive the base64-encoded data URL.
+        /// </param>
+        /// <returns></returns>
+        public virtual Task<FileReaderInvokeResult> ReadFileAsync(string inputId, string inputName,
+            FileReaderMethod method, string acceptExtensions = null,
+            string acceptFileType = null,
+            string targetElementId = null,
+            string targetElementAttributeName = null)
+        {
+            return ReadFileAsync(new FileReaderOptions
+            {
+                InputId = inputId,
+                InputName = inputName,
+                Method = method,
+                Accept = acceptExtensions,
+                AcceptType = acceptFileType,
+                TargetElementId = targetElementId,
+                TargetElementAttributeName = targetElementAttributeName,
+            });
+        }
+
+        /// <summary>
+        /// Reads files via JavaScript found in an input tag identified in the DOM by 
+        /// <see cref="FileReaderOptions.InputId"/>.
+        /// </summary>
+        /// <param name="options">An configuration object for reading files.</param>
+        /// <returns></returns>
+        public virtual async Task<FileReaderInvokeResult> ReadFileAsync(FileReaderOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+
+            var result = await ReadFileAsync((object)options);
+
+            if (LogLevel >= ConsoleLogLevel.Error)
+            {
+                if (result.Succeeded)
+                    Console.WriteLine($"File from input #{options.InputId} ({options.InputName}) has been read successfully.");
+                else
+                    Console.WriteLine($"Failed to read file(s) from input #{options.InputId}: {result.Error}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Reads files via JavaScript found in an input tag identified in the DOM
+        /// by a property defined in the given <paramref name="options"/>.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public virtual async Task<FileReaderInvokeResult> ReadFileAsync(object options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            var result = await JS.InvokeAsync<FileReaderInvokeResult>("BlazorFormManager.readInputFile", options);
+            return result;
+        }
+
+        /// <summary>
+        /// Handles various file read-related event types.
+        /// </summary>
+        /// <param name="e">The event data holder.</param>
+        protected virtual void HandleFileReaderProgressChanged(FileReaderProgressChangedEventArgs e)
+        {
+            ReadProgress = e;
+            
+            if (IsDebug) Console.WriteLine($"FileReader changed. {e.EventType} event: {e.ProgressPercentage}%");
+
+            switch (e.EventType)
+            {
+                case ProgressChangedEventType.Start:
+                    ReadStatus = "Preparing to read...";
+                    StartStopWatch();
+                    IsRunning = true;
+                    StateHasChanged();
+                    break;
+                case ProgressChangedEventType.Progress:
+                    if (AbortRequested)
+                    {
+                        e.Cancel = true;
+                        AbortRequested = false;
+                        ReadStatus = "Aborting...";
+                    }
+                    else
+                    {
+                        ReadStatus = "Reading...";
+                    }
+                    break;
+                case ProgressChangedEventType.Complete:
+                    IsRunning = false;
+                    Stopwatch?.Stop();
+                    ReadStatus = "Done!";
+                    StateHasChanged();
+                    break;
+                case ProgressChangedEventType.Error:
+                    ReadStatus = "An error occurred during a file read operation.";
+                    break;
+                case ProgressChangedEventType.Abort:
+                    ReadStatus = "Operation aborted.";
+                    break;
+                case ProgressChangedEventType.End:
+                    IsRunning = false;
+                    ReadProgress = null;
+                    ReadStatus = null;
+                    Stopwatch?.Stop();
+                    StateHasChanged();
+                    break;
+                default:
+                    break;
+            }
+            StateHasChanged();
+        }
+
+        /// <summary>
+        /// Event fired each time a change occurs in the file read process.
+        /// </summary>
+        /// <param name="e">An object that holds event data related to the read operation.</param>
+        /// <returns></returns>
+        protected internal async Task<bool> OnFileReaderChangedAsync(FileReaderProgressChangedEventArgs e)
+        {
+            HandleFileReaderProgressChanged(e);
+            if (OnFileReaderProgressChanged.HasDelegate)
+                await OnFileReaderProgressChanged.InvokeAsync(e);
+            return e.Cancel;
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="OnFileReaderResult"/> event callback.
+        /// </summary>
+        /// <param name="result">The result of a successful file reading operation.</param>
+        /// <returns></returns>
+        protected internal virtual Task OnFileReaderResultAsync(FileReaderResult result)
+        {
+            IsRunning = false;
+            return OnFileReaderResult.InvokeAsync(result);
+        }
+
+        #endregion
 
         #endregion
 
@@ -697,13 +936,6 @@ namespace BlazorFormManager.Components
             if (!_scriptInitialized)
                 throw new InvalidOperationException("BlazorFormManager.js script has not been initialized.");
         }
-
-        /// <summary>
-        /// Returns true if <see cref="EnableChangeTracking"/> is true and 
-        /// <see cref="OnFieldChanged"/> has a delegate; otherwise, false.
-        /// </summary>
-        /// <returns></returns>
-        public bool CanTrackChanges => EnableChangeTracking && OnFieldChanged.HasDelegate;
 
         /// <summary>
         /// Resets and/or starts the stop watch.
