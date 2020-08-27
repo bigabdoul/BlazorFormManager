@@ -4,8 +4,10 @@
     var attr = metadata.Attribute;
     var labelText = metadata.GetDisplayName();
     var propertyName = metadata.PropertyInfo.Name;
-    var  inputId = string.IsNullOrWhiteSpace(Id) ? propertyName.GenerateId() : Id;
-
+    if (string.IsNullOrWhiteSpace(inputId))
+    {
+        inputId = string.IsNullOrWhiteSpace(Id) ? propertyName.GenerateId() : Id;
+    }
     if (attr.IsInputRadio || metadata.IsInputCheckbox)
     {
         <div class="form-group">
@@ -32,6 +34,7 @@
     }
 }
 @code {
+    private string inputId;
     [Parameter] public string Id { get; set; }
     [Parameter] public AutoInputMetadata Metadata { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
