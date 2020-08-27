@@ -7,7 +7,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
     /// values for an instance of the <see cref="FormDisplayAttribute"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class FormDisplayDefaultAttribute : Attribute
+    public class FormDisplayDefaultAttribute : FormAttributeBase
     {
         internal static readonly FormDisplayDefaultAttribute Empty = new FormDisplayDefaultAttribute();
 

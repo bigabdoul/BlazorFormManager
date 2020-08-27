@@ -6,7 +6,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
     /// Represents a custom attribute that is used to generate inputs of type file and
     /// provides settings for file reading using JavaScript's FileReader API.
     /// </summary>
-    public class InputFileAttribute : Attribute, ICloneable
+    public class InputFileAttribute : FormAttributeBase, ICloneable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InputFileAttribute"/> class.
