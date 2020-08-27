@@ -7,7 +7,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
     /// Represents a custom attribute that specifies layout for a form input.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class FormDisplayAttribute : Attribute
+    public class FormDisplayAttribute : FormAttributeBase
     {
         /// <summary>
         /// Provides a value to use for default form display options.
@@ -51,20 +51,9 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets a value that will be used to set the watermark for prompts in the UI.
-        /// </summary>
-        public string Prompt { get; set; }
-
-        /// <summary>
         /// Gets or sets the order weight of the column.
         /// </summary>
         public int Order { get; set; }
-
-        /// <summary>
-        /// Gets or sets the type that contains the resources for the <see cref="ShortName"/>,
-        /// <see cref="Name"/>, <see cref="Prompt"/>, and <see cref="Description"/> properties.
-        /// </summary>
-        public Type ResourceType { get; set; }
 
         /// <summary>
         /// Gets or sets the CSS class (e.g. col-md-4) used for an element (column)
@@ -130,11 +119,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public CustomRenderMode CustomRenderMode { get; set; }
 
         /// <summary>
-        /// Indicates whether the input is disabled.
-        /// </summary>
-        public bool Disabled { get; set; }
-
-        /// <summary>
         /// Returns true if either of <see cref="IsInputCheckbox"/> or <see cref="IsInputRadio"/> is true.
         /// </summary>
         public bool IsInputCheckboxOrRadio => IsInputCheckbox || IsInputRadio;
@@ -164,6 +148,11 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         /// <param name="value"></param>
         internal void SetProperty(PropertyInfo value) => _property = value;
+
+        /// <summary>
+        /// Indicates whether this custom attribute should be ignored during rendering.
+        /// </summary>
+        internal bool Ignore { get; set; }
 
         #endregion
     }
