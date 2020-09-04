@@ -3,6 +3,7 @@
 
 using BlazorFormManager.Components;
 using BlazorFormManager.Debugging;
+using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
 using Microsoft.JSInterop;
 using System;
@@ -72,6 +73,10 @@ namespace BlazorFormManager
             => _formManager.OnUploadChangedAsync(e);
 
         [JSInvokable]
+        public Task<bool> OnReadFileList(ReadFileListEventArgs e)
+            => _formManager.OnReadFileListAsync(e);
+
+        [JSInvokable]
         public Task<bool> OnFileReaderChanged(FileReaderProgressChangedEventArgs e)
             => _formManager.OnFileReaderChangedAsync(e);
 
@@ -82,5 +87,12 @@ namespace BlazorFormManager
         [JSInvokable]
         public Task<bool> OnAjaxUploadWithProgressNotSupported(AjaxUploadNotSupportedEventArgs e)
             => _formManager.OnAjaxUploadWithProgressNotSupportedAsync(e);
+
+        [JSInvokable]
+        public Task<DragEventResponse> OnDragStart(DomDragEventArgs e) 
+            => _formManager.OnDragStartAsync(e);
+        
+        [JSInvokable]
+        public Task<DragEventResponse> OnDrop(DomDragEventArgs e) => _formManager.OnDropAsync(e);
     }
 }

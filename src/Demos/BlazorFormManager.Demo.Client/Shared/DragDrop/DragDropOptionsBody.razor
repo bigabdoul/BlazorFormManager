@@ -1,0 +1,150 @@
+﻿@if (Manager?.Model != null)
+{
+    var model = Manager.Model;
+    var response = model.DropResponse;
+    var imagePreview = response.ImagePreviewOptions;
+    <div class="drag-drop-options-body">
+        <section>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <div class="form-check mb-1">
+                            <label class="form-check-label">
+                                <InputCheckbox @bind-Value="response.Cancel" class="form-check-input" disabled="@model.Disabled" />
+                                <span>Ignore the drop event</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="small text-muted">
+                        <em>
+                            If checked, files dropped onto the dedicated area are neither read nor
+                            stored in the drag and drop store. Drop notifications will still be
+                            received but event processing will be blocked and files just ignored.
+                        </em>
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <InputGroupContainer LabelText="Maximum files" Icon="fas fa-sort-numeric-up" Id="MaxFileCount">
+                        <InputNumber @bind-Value="response.MaxFileCount" id="MaxFileCount" class="form-control" min="0" disabled="@Disabled" />
+                    </InputGroupContainer>
+                    <p class="small text-muted">
+                        <em>
+                            The total number of files allowed. If greater than 0,
+                            files added beyond that threshold will be ignored.
+                        </em>
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <InputGroupContainer LabelText="Maximum total size (MB)" Icon="fas fa-sort-numeric-up" Id="MaxTotalSize">
+                        <InputNumber @bind-Value="response.MaxTotalSize" id="MaxTotalSize" class="form-control" min="0" disabled="@Disabled" />
+                    </InputGroupContainer>
+                    <p class="small text-muted">
+                        <em>
+                            The total combined size, in megabytes of all files allowed. If greater than 0,
+                            files added beyond that threshold will be ignored.
+                        </em>
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <div class="form-check mb-1">
+                            <label class="form-check-label">
+                                <InputCheckbox @bind-Value="response.StoreOnly" class="form-check-input" disabled="@Disabled" />
+                                <span>Store files only</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="small text-muted">
+                        <em>
+                            If checked, files dropped onto the dedicated area are <strong>only stored</strong>
+                            in the drag and drop store. They are not read. You'll still be able to upload
+                            them later.
+                        </em>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        @if (imagePreview != null)
+        {
+            <section>
+                <h6 class="border-bottom pb-3">
+                    Image Preview Generation Options
+                    (<span class="small text-muted">
+                         <em>
+                             Requires the included <strong>imageUtil.js</strong> library. Make sure to add it
+                             <strong>before</strong> BlazorFormManager.js
+                         </em>
+                    </span>)
+                </h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="form-check mb-1">
+                                <label class="form-check-label">
+                                    <InputCheckbox @bind-Value="imagePreview.NoResize" class="form-check-input" disabled="@Disabled" />
+                                    <span>Don't resize images</span>
+                                </label>
+                            </div>
+                        </div>
+                        <p class="small text-muted">
+                            <em>
+                                If <strong>unchecked</strong>, images dropped onto the dedicated area are resized when generating
+                                previews. Otherwise, the dimensions of the images are kept as is. The illusion of thumbnails is 
+                                provided by your browser, with the help of simple CSS styles.
+                            </em>
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <InputGroupContainer LabelText="Preferred width" Icon="fas fa-sort-numeric-up" Id="ImagePreviewWidth">
+                            <InputNumber @bind-Value="imagePreview.Width" id="ImagePreviewWidth" class="form-control" min="0" disabled="@Disabled" />
+                        </InputGroupContainer>
+                        <p class="small text-muted">
+                            <em>
+                                The preferred width of thumbnails to be generated. If zero, the default width (150px) will be used.
+                                The minimum recommended value is 150.
+                            </em>
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <InputGroupContainer LabelText="Preferred height" Icon="fas fa-sort-numeric-up" Id="ImagePreviewHeight">
+                            <InputNumber @bind-Value="imagePreview.Height" id="ImagePreviewHeight" class="form-control" min="0" disabled="@Disabled" />
+                        </InputGroupContainer>
+                        <p class="small text-muted">
+                            <em>
+                                The preferred height of thumbnails to be generated. If zero, the default height (0) will be used.
+                            </em>
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="form-check mb-1">
+                                <label class="form-check-label">
+                                    <InputCheckbox @bind-Value="imagePreview.PreserveAspectRatio" class="form-check-input" disabled="@Disabled" />
+                                    <span>Preserve aspect ratio</span>
+                                </label>
+                            </div>
+                        </div>
+                        <p class="small text-muted">
+                            <em>
+                                If checked, the aspect ratio (width / height) of the original images are kept when
+                                generating thumbnails. In that case it's sufficient to set either the width or the height.
+                            </em>
+                        </p>
+                    </div>
+                </div>
+                <div class="small text-muted">
+                    Thumbnail generation makes the app run a bit slower but is more memory-efficient.
+                    If the number of images you drop onto the area are just a few, it doesn't matter much.
+                    In contrast, generating previews without resizing is a bit faster but less memory-efficient,
+                    especially when you drop a large amount of files.
+                </div>
+            </section>
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] private DragDropOptionsManager Manager { get; set; }
+    private bool Disabled => true == Manager?.Model?.Disabled || true == Manager?.Model?.DropResponse.Cancel;
+}

@@ -3,6 +3,7 @@
     font-family: Consolas;
     font-size: .8rem;
     margin-bottom: 2rem;
+    word-break: break-all;
 }
 
     .blazor-form-manager-debug-info .xhr-status-success > * {
@@ -34,3 +35,222 @@
         .blazor-form-manager-debug-info .xhr-debug-options > * {
             font-size: 90%;
         }
+
+.blazor-form-manager-drag-drop-area {
+    margin-bottom: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+    .blazor-form-manager-drag-drop-area .watermark {
+        width: 100%;
+        color: #ccc;
+        padding-top: 1%;
+        text-align: center;
+    }
+
+    .blazor-form-manager-drag-drop-area .watermark,
+    .blazor-form-manager-drag-drop-area img[src] + div.watermark {
+        display: none;
+    }
+
+    .blazor-form-manager-drag-drop-area.drag-drop-area-empty,
+    .blazor-form-manager-drag-drop-area.drag-drop-area-empty .watermark,
+    .blazor-form-manager-drag-drop-area .image-wrapper,
+    .blazor-form-manager-drag-drop-area .input-file-wrapper input[type=file] {
+        cursor: pointer;
+    }
+
+    .blazor-form-manager-drag-drop-area .input-file-wrapper input[type=file] {
+        opacity: .01;
+    }
+
+    .blazor-form-manager-drag-drop-area.drag-drop-area-empty {
+        border: 3px dashed #eee;
+    }
+
+        .blazor-form-manager-drag-drop-area.drag-drop-area-empty .watermark {
+            display: block;
+        }
+
+    .blazor-form-manager-drag-drop-area .image-wrapper {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-gap: 10px;
+    }
+
+.form-manager-auto-generated {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: top;
+    min-height: 100px;
+}
+
+    .form-manager-auto-generated .bg-dimmed {
+        background-color: rgba(0,0,0,.3);
+        height: 2000px;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        opacity: 0;
+    }
+
+    .form-manager-auto-generated:hover .bg-dimmed {
+        opacity: 1;
+        transition: all .3s ease-out;
+    }
+
+    .form-manager-auto-generated:hover img, .form-manager-auto-generated:hover canvas {
+        transform: scale(1.05, 1.05);
+        transition: all .3s ease-out;
+    }
+
+    .form-manager-auto-generated img, .form-manager-auto-generated canvas {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        object-position: top;
+        border-radius: 15px;
+    }
+
+    .form-manager-auto-generated .file-info {
+        display: none;
+        transition: opacity 0.2s linear 0s;
+        z-index: 20;
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        font-size: 13px;
+        min-width: 100%;
+        max-width: 100%;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.9);
+        line-height: 130%;
+        padding: 1em;
+    }
+
+    .form-manager-auto-generated:hover .file-info {
+        display: block;
+        opacity: 1;
+    }
+
+    .form-manager-auto-generated .file-info .size,
+    .form-manager-auto-generated .file-info .name,
+    .form-manager-auto-generated .file-info .dimensions {
+        display: block;
+        font-weight: 400;
+        background-color: rgba(255, 255, 255, 0.4);
+        padding: .3em .4em;
+        border-radius: 3px;
+    }
+
+        .form-manager-auto-generated .file-info .name:not(:hover) {
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+    .form-manager-auto-generated .file-info .size {
+        margin-bottom: .3em;
+        font-size: 16px;
+    }
+
+    .form-manager-auto-generated .file-info .dimensions {
+        margin-top: .3em;
+    }
+
+
+.input-file-info-table .table-responsive {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 85%;
+}
+
+    .input-file-info-table .table-responsive th.file-name,
+    .input-file-info-table .table-responsive td.file-name {
+        max-width: 350px;
+        overflow-wrap: break-word;
+    }
+
+    .input-file-info-table .table-responsive th.file-size,
+    .input-file-info-table .table-responsive td.file-size {
+        max-width: 100px;
+        text-align: right;
+    }
+
+    .input-file-info-table .table-responsive th.file-type,
+    .input-file-info-table .table-responsive td.file-type {
+        max-width: 200px;
+        overflow-wrap: break-word;
+    }
+
+    .input-file-info-table .table-responsive th.file-date,
+    .input-file-info-table .table-responsive td.file-date {
+        max-width: 100px;
+    }
+
+/** Progress bars */
+.blazor-form-manager-progress {
+    margin-bottom: .8rem;
+}
+
+    .blazor-form-manager-progress .status-text {
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+/** HTML5 progress */
+progress, progress::-webkit-progress-bar {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: none;
+    border: 0;
+    height: 16px;
+    background-color: #eee;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+
+    progress[value], progress::-webkit-progress-value, progress::-moz-progress-bar {
+        width: 300px;
+        height: 16px;
+    }
+
+/** HTML5 progress fallback borrowed from css-tricks */
+.progress-bar {
+    background-color: whiteSmoke;
+    border-radius: 2px;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25) inset;
+    width: 300px;
+    height: 16px;
+    position: relative;
+    display: block;
+}
+
+    .progress-bar > span {
+        background-color: blue;
+        border-radius: 2px;
+        display: block;
+        text-indent: -9999px;
+    }
+
+@media (max-width:767px) {
+    .blazor-form-manager-drag-drop-area .image-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-manager-auto-generated img, .form-manager-auto-generated canvas {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (max-width:480px) {
+    .blazor-form-manager-drag-drop-area .image-wrapper {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

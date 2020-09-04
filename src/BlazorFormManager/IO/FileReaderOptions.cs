@@ -5,7 +5,7 @@ namespace BlazorFormManager.IO
     /// <summary>
     /// Represents options for reading a file in JavaScript.
     /// </summary>
-    public class FileReaderOptions
+    public sealed class FileReaderOptions
     {
         /// <summary>
         /// Gets or sets the input file identifier from which to read.
@@ -34,15 +34,13 @@ namespace BlazorFormManager.IO
         public string AcceptType { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier of an HTML element (typically a &lt;img /> tag)
-        /// that will display the image.
+        /// Indicates whether reading multiple files is allowed.
         /// </summary>
-        public string TargetElementId { get; set; }
+        public bool Multiple { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the target element's attribute name that will 
-        /// receive the base64-encoded data URL.
+        /// Gets or sets the preview options for image file of types.
         /// </summary>
-        public string TargetElementAttributeName { get; set; }
+        public ImagePreviewOptions ImagePreviewOptions { get; set; }
     }
 }

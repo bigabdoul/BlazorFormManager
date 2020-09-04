@@ -32,13 +32,9 @@ namespace BlazorFormManager.Demo.Client.Extensions
         /// </param>
         public static void ProcessCustomServerResponse(this FormManagerBase manager, FormManagerSubmitResult result)
         {
-            // Don't update the state because it will be done by the
-            // form manager once execution of this method is finished.
             var xhr = result.XHR;
             if (xhr.IsJsonResponse)
             {
-                if (manager.IsDebug) Console.WriteLine($"Raw JSON result: {xhr.ResponseText}");
-
                 try
                 {
                     var postResult = JsonSerializer.Deserialize<PostFormHttpResult>(
@@ -61,7 +57,7 @@ namespace BlazorFormManager.Demo.Client.Extensions
                     Trace.WriteLine(ex);
                 }
             }
-            else if (manager.IsDebug)
+            else if (manager.IsDebug && !result.Succeeded)
             {
                 if (xhr.IsHtmlResponse)
                     Console.WriteLine($"HTML result: {xhr.ResponseText}");

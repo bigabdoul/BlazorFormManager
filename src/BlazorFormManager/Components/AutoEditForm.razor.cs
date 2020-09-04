@@ -1,7 +1,10 @@
-﻿using BlazorFormManager.ComponentModel;
+﻿using BlazorFormManager.Collections;
+using BlazorFormManager.ComponentModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BlazorFormManager.Components
 {
@@ -67,6 +70,13 @@ namespace BlazorFormManager.Components
         protected override void DetachFieldChangedListener()
         {
             // Do nothing!
+        }
+
+        /// <inheritdoc/>
+        protected internal override async Task<object> OnGetModelAsync()
+        {
+            var model = await base.OnGetModelAsync();
+            return model.RemoveIgnoredPropertiesFromObjectToBeSerialized();
         }
     }
 }

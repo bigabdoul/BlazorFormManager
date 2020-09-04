@@ -15,15 +15,19 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>Version 2.1 introduces breaking changes due to huge code refactoring. New types and custom attributes have been added. They make automatic form generation easier than ever before thanks to InputFileAttribute and ImagePreviewAttribute.  ImagePreviewAttribute ensures that no marshalling occurs between JS and .NET when generating an image preview which improves performance and memory usage on the client device.
+    <PackageReleaseNotes>Added drag and drop support with simple image manipulation utilities.
+Drag and drop options are configurable both at design and run-time:
 
-Advanced support for JavaScript's FileReader API (readAsArrayBuffer, readAsBinaryString, readAsDataURL, readAsText) makes it possible to read files from a user's device and generate image and/or text previews without writing a single line of JavaScript code.
+- Enable or disable drop event notifications.
+- Specify the maximum number of files and total file size allowed to be dropped.
+- Display details about dropped files such as file name, size, type, last modified date, and image dimensions.
+- Option to store only the files without image preview generation and upload them on form submission.
+- Enable/disable resizing of image previews, set preferred width and height, preserve original aspect ratios.
+- Included built-in imageUtil.js plugin for basic image manipulation.
+- Individual file and total files reading progress indicators with elapsed time display.
 
-New helper components for file selection, displaying simple error messages, and generating image previews have been added.
-
-Accept only specific file extensions and/or types.
-So much more...</PackageReleaseNotes>
-    <Version>2.1.0</Version>
+For usage, clone the demo project on Github at https://github.com/bigabdoul/BlazorFormManager.</PackageReleaseNotes>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

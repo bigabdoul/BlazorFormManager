@@ -11,6 +11,26 @@ It is flexible enough to allow advanced control, such as setting HTTP request he
 over instances of the XMLHttpRequest object used to send requests, all from the C#/.NET
 perspective.
 
+# Drag and drop with dynamic image preview generation and resizing
+
+Using `AutoEditForm` it's very easy to add drag and drop support with simple image
+manipulation utilities.
+
+Drag and drop options are configurable both at design and run-time:
+
+- Enable or disable drop event notifications.
+- Specify the maximum number of files and total file size allowed to be dropped.
+- Display details about dropped files such as file name, size, type, last modified date,
+  and image dimensions.
+- Option to store only the files without image preview generation and upload them on form
+  submission.
+- Enable/disable resizing of image previews, set preferred width and height, preserve
+  original aspect ratios.
+- Included built-in imageUtil.js plugin for basic image manipulation.
+- Individual file and total files reading progress indicators with elapsed time display.
+
+For usage, clone this repo and launch the demo project.
+
 # Introducing AutoEditForm
 
 Automatically generate an EditForm with all appropriate inputs using only a model and
@@ -95,7 +115,7 @@ As you can see, you can still use validation attributes and have the form valida
 a validator such as the `<DataAnnotationsValidator />` component. For instance, the
 `RangeAttribute` not only makes sure that the user selects values between the mininum
 (Monday) and maximum (Friday) values but `AutoInputBase` also generates the appropriate
-enumeration values from Monday to Friday. This is only possible if we specify the 
+enumeration values from Monday to Friday. This is only possible if we specify the
 `UIHint` to be `select` or `radio`.
 
 ```C#
@@ -110,7 +130,7 @@ and `DateTime`.
 We can dynamically (at run-time) generate values for this property and others as well.
 This is what we'll do for the `AgeRange` and `FavouriteColor` properties.
 
-You'll probably have also noticed the properties `UIHint` and `UITypeHint` of the 
+You'll probably have also noticed the properties `UIHint` and `UITypeHint` of the
 `FormDisplayAttribute`.
 
 ```C#
@@ -127,7 +147,7 @@ Behaviour of some custom attribute properties of the `FormDisplayAttribute` clas
 - `UITypeHint` determines the type of an `input` element, e.g. `email`, `number`, `date`...
 - `Name` determines the `label` content. If it's an empty (not `null`) string, no label
   is displayed.
-- `GroupName` displays similiar or related properties on the same row (e.g. 
+- `GroupName` displays similiar or related properties on the same row (e.g.
   `<div class="row">...</div>`).
 
 If you don't specify these properties, `AutoInputBase`, based on the property type
@@ -188,9 +208,9 @@ public partial class AutoEditFormUpdate
       // required to submit 'authentication: Bearer...' and other useful request headers
       RequestHeaders = await HeadersProvider.CreateAsync();
 
-      // depending on the requirements, cache the options 
+      // depending on the requirements, cache the options
       // or request always fresh values from the server
-      if (_options == null) 
+      if (_options == null)
         _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
     }
     catch (AccessTokenNotAvailableException ex)
@@ -200,7 +220,7 @@ public partial class AutoEditFormUpdate
     await base.OnInitializedAsync();
   }
 
-  // AutoInputBase needs this function to filter out the 
+  // AutoInputBase needs this function to filter out the
   // appropriate options for a given HTML element being generated
   private IEnumerable<SelectOption> GetOptions(string propertyName)
     => _options?.Where(opt => opt.PropertyName == propertyName).FirstOrDefault()?.Items;
@@ -276,7 +296,7 @@ public class AccountController : ControllerBase
     display: flex;
     flex-direction: row;
   }
-      
+
     .auto-edit-form .form-body .col {
       width: 33.33333333%;
     }
@@ -305,11 +325,11 @@ public class AccountController : ControllerBase
 
 ### Produces this form layout!
 
-***
+---
 
 ![The output](https://github.com/bigabdoul/BlazorFormManager/blob/assets/images/auto-edit-form-003.jpg?raw=true)
 
-***
+---
 
 ## BlazorFormManager quick start
 

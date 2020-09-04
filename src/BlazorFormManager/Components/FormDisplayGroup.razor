@@ -9,6 +9,7 @@
         <div class="display-group-body @group.CssClass">
             @foreach (AutoInputMetadata data in group.Items)
             {
+                if (data.Attribute.Ignore) continue;
                 <div class="@data.Attribute.ColumnCssClass">
                     <AutoInput Metadata="data">@ChildContent</AutoInput>
                 </div>

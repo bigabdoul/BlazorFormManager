@@ -2,6 +2,7 @@
 using BlazorFormManager.Demo.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -232,7 +233,8 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [RequestFormLimits(MultipartBodyLengthLimit = Startup.BIG_FILE_SIZE_LIMIT)]
         public async Task<IActionResult> UploadBigFileTest([FromServices] IWebHostEnvironment env)
         {
-            var (filename, length) = await CopyFileToTempLocationAsync(env);
+            EnsureUploadsTempDirectoryCreated(env);
+            var (filename, size) = await CopyFileToTempLocationAsync(env, Request.Form.Files.FirstOrDefault());
             var success = !string.IsNullOrEmpty(filename);
 
             if (success)
@@ -249,13 +251,98 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 }
             }
 
-            return Ok(new
+            var result = success
+                ? new
+                {
+                    success,
+                    message = "File successfully saved.",
+                    filename,
+                    size,
+                }
+                : (object)new
+                {
+                    success,
+                    error = "Could not save the file.",
+                };
+
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("upload-files-anonymous")]
+        [RequestSizeLimit(Startup.BIG_FILE_SIZE_LIMIT)]
+        [RequestFormLimits(MultipartBodyLengthLimit = Startup.BIG_FILE_SIZE_LIMIT)]
+        public async Task<IActionResult> UploadFiles([FromForm] IFormFileCollection files, [FromServices] IWebHostEnvironment env)
+        {
+            bool success;
+
+            if (files.Count > 0)
             {
-                success,
-                error = success ? null : "Could not save the file.",
-                filename,
-                length
-            });
+                EnsureUploadsTempDirectoryCreated(env);
+
+                var fileInfo = new List<object>();
+                var totalSize = 0D;
+                var totalUploadedSize = 0D;
+
+                foreach (var file in files)
+                {
+                    totalUploadedSize += file.Length;
+
+                    var (filename, size) = await CopyFileToTempLocationAsync(env, file);
+                    success = !string.IsNullOrEmpty(filename);
+
+                    if (success)
+                    {
+                        totalSize += size;
+                        // don't keep the file
+                        await Task.Delay(100);
+                        try
+                        {
+                            IOFile.Delete(filename);
+                        }
+                        catch (Exception ex)
+                        {
+                            Trace.WriteLine(ex);
+                        }
+
+                        fileInfo.Add(new { name = Path.GetFileName(filename), size });
+                    }
+                }
+
+                var savedFiles = fileInfo.Take(20).ToArray();
+                var diff = files.Count - fileInfo.Count;
+                var truncated = files.Count - savedFiles.Length;
+                var truncatedMsg = truncated > 0 ? $" {truncated} file(s) were left off in the 'savedFiles' property." : null;
+
+                success = diff == 0;
+
+                if (success)
+                {
+                    var totalSizeString = FileSizeToString(totalSize);
+                    var totalUploadedSizeString = FileSizeToString(totalUploadedSize);
+                    
+                    return Ok(new
+                    {
+                        success,
+                        savedFiles,
+                        totalSize,
+                        message = $"All {files.Count} file(s) saved successfully " +
+                                $"to temporary uploads directory and deleted immediately." +
+                                $"{truncatedMsg} Total saved size: {totalSizeString} of {totalUploadedSizeString}.",
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        success,
+                        savedFiles,
+                        error = $"Could not save {diff} of {files.Count} file(s).",
+                    });
+                }
+            }
+
+            return Ok(new { success = false, error = "No files uploaded." });
         }
 
         [HttpPost("array-test")]
@@ -331,11 +418,10 @@ namespace BlazorFormManager.Demo.Server.Controllers
             return (success, message);
         }
 
-        private async Task<(string filename, long length)> CopyFileToTempLocationAsync(IWebHostEnvironment env)
+        private async Task<(string filename, long size)> CopyFileToTempLocationAsync(IWebHostEnvironment env, IFormFile file)
         {
             try
             {
-                var file = Request.Form.Files.FirstOrDefault();
                 if (file != null)
                 {
                     var tmpFile = ReplaceInvalidFileNameChars
@@ -374,6 +460,34 @@ namespace BlazorFormManager.Demo.Server.Controllers
             return string.Format(GENERIC_ERROR, ex.GetType().FullName, activity);
         }
 
+        private void EnsureUploadsTempDirectoryCreated(IWebHostEnvironment env)
+        {
+
+            var destinationFile = Path.Combine
+            (
+                env.ContentRootPath,
+                "Uploads",
+                "Temp"
+            );
+
+            var directory = Path.GetDirectoryName(destinationFile);
+            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+        }
+
+
+        /// <summary>
+        /// Converts the specified file size to a human-readable string representation.
+        /// </summary>
+        /// <param name="size">The size of a file.</param>
+        /// <returns></returns>
+        public static string FileSizeToString(double size)
+        {
+            if (size == 0) return string.Empty;
+            if (size < 1024) return $"{size} B";
+            if (size < 1024 * 1024) return $"{size / (double)1024:N2} KB";
+            if (size < 1024 * 1024 * 1024) return $"{size / (double)(1024 * 1024):N2} MB";
+            return $"{size / (1024 * 1024 * 1024):N2} GB";
+        }
         #endregion
     }
 }

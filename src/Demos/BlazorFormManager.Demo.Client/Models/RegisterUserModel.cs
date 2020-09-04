@@ -16,7 +16,7 @@ namespace BlazorFormManager.Demo.Client.Models
         public string ConfirmPassword { get; set; }
 
         [ImagePreview(Accept = ".jpg, .jpeg")]
-        [FormDisplay(Prompt = "Please browse your device and show your face!", InputCssClass = "", Order = 3)]
+        [DragDrop(Prompt = "Choose a photo or drop one here")]
         public string Photo { get; set; }
     }
 }

@@ -26,5 +26,10 @@
         /// Gets or sets the total number of bytes to read.
         /// </summary>
         public long TotalBytesToRead { get => TotalBytesToReadOrSend; set => TotalBytesToReadOrSend = value; }
+
+        /// <summary>
+        /// Gets or sets information about an input file currently being read.
+        /// </summary>
+        public InputFileInfo File { get; set; }
     }
 }

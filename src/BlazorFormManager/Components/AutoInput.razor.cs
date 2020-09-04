@@ -51,7 +51,16 @@ namespace BlazorFormManager.Components
             {
                 if (!string.Equals(_inputId, value))
                 {
-                    _inputId = value;
+                    if (!string.IsNullOrWhiteSpace(_inputId))
+                    {
+                        // Don't change the input identifier once it has been set.
+                        // This avoids errors when trying to access it in the DOM via
+                        // JavaScript.
+                    }
+                    else
+                    {
+                        _inputId = value;
+                    }
                 }
             }
         }
@@ -392,7 +401,7 @@ namespace BlazorFormManager.Components
             {
                 // Before we pass on the value, let's extract just the file name.
                 var filename = string.IsNullOrEmpty(__value) ? __value : Path.GetFileName(__value);
-
+                
                 NotifyFieldChanged(filename, isFile: true);
             }
 
@@ -402,13 +411,13 @@ namespace BlazorFormManager.Components
                 sequence = AddInputFileAttributes(builder, sequence, _metadataAttribute.FileAttribute);
 
             builder.CloseElement(); // /> (input)
-
+            
             return sequence;
         }
 
         /// <summary>
         /// Adds attributes to an input file from the custom attribute <see cref="InputFileAttribute"/>.
-        /// If the <see cref="InputFileAttribute.Method"/> value of the given <paramref name="fileAttr"/>
+        /// If the <see cref="FileCapableAttributeBase.Method"/> value of the given <paramref name="fileAttr"/>
         /// is different from <see cref="FileReaderMethod.None"/>, an attempt to register the current
         /// input with the <see cref="Form"/> is made.
         /// </summary>
@@ -501,7 +510,7 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Determines at run-time the disabled state of the current <see cref="AutoInputBase"/>
         /// if the associated property was statically-marked as disabled with the property
-        /// <see cref="FormDisplayAttribute.Disabled"/> set to true.
+        /// <see cref="FormAttributeBase.Disabled"/> set to true.
         /// </summary>
         /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
         /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>

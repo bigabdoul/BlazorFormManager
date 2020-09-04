@@ -1,0 +1,39 @@
+﻿@using BlazorFormManager.IO
+
+@if (Model != null)
+{
+    <CascadingValue Value="this">
+        <div class="mb-3">
+            <DragDropOptionsCard />
+            @if (Model.Files.Count > 0)
+            {
+                <div class="mt-3">
+                    <h6 class="border-bottom pb-2">
+                        <span>
+                            Files dropped onto the target area @(Model.FilesTruncated ? "(truncated)" : ""):
+                            @Model.FileCount (@InputFileInfo.FileSizeToString(Model.DroppedFileSize))
+                        </span>
+                        <span class="float-md-right">
+                            Upload size: @InputFileInfo.FileSizeToString(Model.UploadFileSize)
+                        </span>
+                    </h6>
+                    <div class="clearfix"></div>
+                    <InputFileInfoTable Files="Model.Files" />
+                    @if (!Model.DropResponse.Cancel)
+                    {
+                        <h6 class="border-bottom mt-4 pb-2">Files read</h6>
+                    }
+                </div>
+            }
+        </div>
+    </CascadingValue>
+}
+
+@code {
+    [Parameter] public DragDropOptions Model { get; set; }
+
+    public void NotifyStateChanged()
+    {
+        StateHasChanged();
+    }
+}

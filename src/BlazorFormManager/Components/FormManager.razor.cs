@@ -1,5 +1,7 @@
-﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+﻿using BlazorFormManager.ComponentModel;
+using BlazorFormManager.ComponentModel.ViewAnnotations;
 using BlazorFormManager.Debugging;
+using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -8,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorFormManager.Components
@@ -24,9 +28,13 @@ namespace BlazorFormManager.Components
         private bool _initializingScript;
         private ConsoleLogLevel _logLevel;
         FormManagerSubmitResult _submitResult;
+        private EventCallback<DomDragEventArgs> _onDragStart;
+        private EventCallback<DomDragEventArgs> _onDrop;
         private DotNetObjectReference<FormManagerBaseJSInvokable> _thisObjRef;
 
         [Inject] private IJSRuntime JS { get; set; }
+
+        private const string BlazorFormManagerNS = "BlazorFormManager";
 
         #endregion
 
@@ -78,7 +86,7 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// Gets or sets custom HTML attributes to render.
         /// </summary>
-        [Parameter]
+        [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalAttributes { get; set; }
 
         /// <summary>
@@ -131,6 +139,54 @@ namespace BlazorFormManager.Components
         /// </summary>
         [Parameter]
         public EventCallback<ModelRequestedEventArgs> OnModelRequested { get; set; }
+
+        /// <summary>
+        /// Event handler invoked when a drag action starts.
+        /// </summary>
+        [Parameter]
+        public EventCallback<DomDragEventArgs> OnDragStart
+        {
+            get => _onDragStart;
+            set
+            {
+                if (!Equals(_onDragStart, value))
+                {
+                    _onDragStart = value;
+                    if (_scriptInitialized)
+                    {
+                        // enable or disable the 'dragstart' JS event callback
+                        _ = UpdateScriptOptionsAsync(new
+                        {
+                            OnDragStart = _onDragStart.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnDragStart) : null
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Event handler invoked when a drop action occurs.
+        /// </summary>
+        [Parameter]
+        public EventCallback<DomDragEventArgs> OnDrop
+        {
+            get => _onDrop;
+            set
+            {
+                if (!Equals(_onDrop, value))
+                {
+                    _onDrop = value;
+                    if (_scriptInitialized)
+                    {
+                        // enable or disable the 'drop' JS event callback
+                        _ = UpdateScriptOptionsAsync(new
+                        {
+                            OnDrop = _onDrop.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnDrop) : null
+                        });
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets a dictionary of key-value pairs of request 
@@ -276,25 +332,34 @@ namespace BlazorFormManager.Components
                 _initializingScript = true;
                 try
                 {
+                    var hasProgressBar = EnableProgressBar;
+                    // script options
                     var options = new
                     {
                         FormId,
                         LogLevel,
                         RequireModel,
                         // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
-                        OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
-                        OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
-                        OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
-                        OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
+                        OnGetModel      = nameof(FormManagerBaseJSInvokable.OnGetModel),
+                        OnBeforeSubmit  = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
+                        OnBeforeSend    = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
+                        OnSendFailed    = nameof(FormManagerBaseJSInvokable.OnSendFailed),
                         OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
-                        OnUploadChanged = nameof(FormManagerBaseJSInvokable.OnUploadChanged),
-                        OnFileReaderChanged = nameof(FormManagerBaseJSInvokable.OnFileReaderChanged),
-                        OnFileReaderResult = nameof(FormManagerBaseJSInvokable.OnFileReaderResult),
+                        OnUploadChanged = hasProgressBar ? nameof(FormManagerBaseJSInvokable.OnUploadChanged) : null,
+
+                        // opt-in file reading event handlers
+                        OnReadFileList      = hasProgressBar || OnReadFileList.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnReadFileList) : null,
+                        OnFileReaderChanged = hasProgressBar || OnFileReaderProgressChanged.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnFileReaderChanged) : null,
+                        OnFileReaderResult  = OnFileReaderResult.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnFileReaderResult) : null,
+
+                        OnDragStart = nameof(FormManagerBaseJSInvokable.OnDragStart),
+                        OnDrop      = nameof(FormManagerBaseJSInvokable.OnDrop),
+
                         OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
                     };
 
                     _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
-                    _scriptInitialized = await JS.InvokeAsync<bool>("BlazorFormManager.init", options, _thisObjRef);
+                    _scriptInitialized = await JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.init", options, _thisObjRef);
 
                     AjaxUploadNotSupported = null;
 
@@ -353,8 +418,19 @@ namespace BlazorFormManager.Components
                         fileAttr.Method,
                         fileAttr.Accept,
                         fileAttr.AcceptType,
-                        imgAttr?.TargetElementId,
-                        imgAttr?.TargetElementAttributeName,
+                        fileAttr?.Multiple,
+                        imagePreviewOptions = new
+                        {
+                            AutoGenerate = imgAttr?.AutoGenerate ?? true,
+                            GenerateFileInfo = imgAttr?.GenerateFileInfo ?? true,
+                            TagClass = imgAttr?.InputCssClass,
+                            TagId = imgAttr?.TargetElementId,
+                            AttributeName = imgAttr?.TargetElementAttributeName,
+                            width = imgAttr?.Width,
+                            height = imgAttr?.Height,
+                            preserveAspectRatio = true,
+                            noResize = false,
+                        },
                     });
                 }
             }
@@ -368,7 +444,7 @@ namespace BlazorFormManager.Components
         public virtual async Task SubmitFormAsync()
         {
             EnsureScriptInitialized();
-            await JS.InvokeVoidAsync("BlazorFormManager.submitForm");
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.submitForm");
         }
 
         /// <summary>
@@ -380,9 +456,7 @@ namespace BlazorFormManager.Components
         {
             SubmitResult = null;
             HasValidationErrors = false;
-
             StateHasChanged();
-
             if (OnValidSubmit.HasDelegate) await OnValidSubmit.InvokeAsync(context);
         }
 
@@ -396,7 +470,6 @@ namespace BlazorFormManager.Components
             SubmitResult = null;
             HasValidationErrors = true;
             StateHasChanged();
-
             if (OnInvalidSubmit.HasDelegate) await OnInvalidSubmit.InvokeAsync(context);
         }
 
@@ -432,7 +505,7 @@ namespace BlazorFormManager.Components
         {
             if (_scriptInitialized)
             {
-                await JS.InvokeVoidAsync("BlazorFormManager.setLogLevel", level);
+                await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.setLogLevel", level);
                 _logLevel = level;
                 return true;
             }
@@ -611,8 +684,208 @@ namespace BlazorFormManager.Components
         {
             EnsureScriptInitialized();
             Console.WriteLine($"Invoking {nameof(RaiseAjaxUploadWithProgressNotSupportedAsync)}...");
-            await JS.InvokeVoidAsync("BlazorFormManager.raiseAjaxUploadWithProgressNotSupported");
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.raiseAjaxUploadWithProgressNotSupported");
             StateHasChanged();
+        }
+
+        #endregion
+
+        #region Drag and Drop
+
+        /// <summary>
+        /// Enables drag and drop support for files using the specified HTML element identifier as the drop target.
+        /// </summary>
+        /// <param name="dropTargetId">The identifier of the target HTML element that supports drag and drop.</param>
+        /// <param name="propertyName">
+        /// The name of the property used to retrieve the metadata of applicable custom attributes.
+        /// This parameter is also used as the form field name into which files are stored and used when the form is submitted.
+        /// </param>
+        /// <param name="inputFieldId">
+        /// The identifier of the input used to select a file on the disk. This value 
+        /// is used to reset the input's value when a drop event occurs.
+        /// </param>
+        /// <returns></returns>
+        public virtual ValueTask<FileReaderInvokeResult> RegisterFileDragDropTargetAsync(string dropTargetId, string propertyName, string inputFieldId = null)
+        {
+            // pick up the values of which ever custom attribute first gives a clue about
+            // what to accept; we'll start with the DragDropAttribute...
+            var fileAttr = GetFileCapableAttributes(propertyName, out var imgAttr);
+            var accept = fileAttr?.Accept ?? imgAttr?.Accept;
+            var acceptType = fileAttr?.AcceptType ?? imgAttr?.AcceptType;
+            var method = imgAttr?.Method ?? FileReaderMethod.ReadAsDataURL;
+
+            // ImagePreviewAttribute-specific settings
+            var autoGenerate = imgAttr?.AutoGenerate ?? true;
+            object imagePreviewOptions = imgAttr != null
+                ? new
+                {
+                    autoGenerate,
+                    generateFileInfo = imgAttr?.GenerateFileInfo ?? true,
+                    tagId = autoGenerate ? null : imgAttr?.TargetElementId,
+                    tagClass = imgAttr?.InputCssClass,
+                    attributeName = imgAttr?.TargetElementAttributeName,
+                    width = imgAttr?.Width,
+                    height = imgAttr?.Height,
+                    preserveAspectRatio = true,// imgAttr?.PreserveAspectRatio,
+                }
+                : null;
+
+            if (string.IsNullOrWhiteSpace(dropTargetId))
+                dropTargetId = fileAttr?.DropTargetId ?? $"{propertyName}{typeof(DragDropArea)}";
+
+            return RegisterFileDragDropTargetAsync(dropTargetId, propertyName, inputFieldId
+                , fileAttr?.DropEffect, accept, acceptType, fileAttr?.Multiple, method, imagePreviewOptions);
+        }
+
+        /// <summary>
+        /// Enables drag and drop support for files using the specified HTML element 
+        /// identifier as the drop target.
+        /// </summary>
+        /// <param name="dropTargetId">The identifier of the target HTML element that 
+        /// supports drag and drop.</param>
+        /// <param name="inputName">The store name of dropped files which is also 
+        /// used when the form is submitted.</param>
+        /// <param name="inputFileId">
+        /// The identifier of the input used to select a file on the disk. This value 
+        /// is used to reset the input's value when a drop event occurs.
+        /// </param>
+        /// <param name="dropEffect">The desired drop effect. Default is 'copy'.</param>
+        /// <param name="accept">A comma-separated list of allowed file name extensions.</param>
+        /// <param name="acceptType">A value that restricts the type of files allowed.</param>
+        /// <param name="multiple">
+        /// Indicates whether dropping multiple files onto the target is allowed.
+        /// If null, the value from the custom attribute attached to 
+        /// <paramref name="inputName"/> will be used.
+        /// </param>
+        /// <param name="method">
+        /// The method used to read files. If a file is an image then 
+        /// <see cref="FileReaderMethod.ReadAsDataURL"/> is used.
+        /// </param>
+        /// <param name="imagePreviewOptions">An object that specifies how image previews should be generated.</param>
+        /// <returns></returns>
+        public virtual ValueTask<FileReaderInvokeResult> RegisterFileDragDropTargetAsync(
+            string dropTargetId
+            , string inputName
+            , string inputFileId = null
+            , string dropEffect = null
+            , string accept = null
+            , string acceptType = null
+            , bool? multiple = null
+            , FileReaderMethod method = FileReaderMethod.ReadAsDataURL
+            , object imagePreviewOptions = null
+        )
+        {
+            // use passed parameters; otherwise, use values from the input file attribute
+            var options = new
+            {
+                dropTargetId,
+                dropEffect,
+                inputName,
+
+                // No change will be triggered when the user picks a file with the input
+                // file, then drags and drops a file onto the area, clicks the input file
+                // again and selects the same file. Setting the 'inputFileId' parameter
+                // allows resetting the corresponding input's value to an empty string
+                // when a drop event occurs.
+                inputFileId,
+
+                // these properties are for file reading operations when a drop event occurs
+                accept,
+                acceptType,
+                multiple = multiple ?? false,
+                method,
+
+                // if image preview is enabled for the property,
+                // this allows it to automatically show up
+                imagePreviewOptions,
+            };
+
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropEnable", options);
+        }
+
+        /// <summary>
+        /// Disables drag and drop support for the specified HTML element identifier.
+        /// </summary>
+        /// <param name="dropTargetId">
+        /// The identifier of the target HTML element that supports drag and drop.
+        /// </param>
+        /// <returns></returns>
+        public virtual ValueTask<FileReaderInvokeResult> UnregisterFileDragDropTargetAsync(string dropTargetId)
+        {
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropDisable", dropTargetId);
+        }
+
+        /// <summary>
+        /// Removes from the drag and drop storage the files that have 
+        /// been previously dropped onto the specified target element.
+        /// </summary>
+        /// <param name="dropTargetId">The identifier of the drop target element.</param>
+        /// <returns></returns>
+        public virtual ValueTask<bool> DeleteDragDropFileListAsync(string dropTargetId)
+        {
+            return JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.dragDropRemoveFileList", dropTargetId);
+        }
+
+        /// <summary>
+        /// Reads the files from an input file identified by <paramref name="inputId"/>
+        /// and stores them into the drag and drop settings for <paramref name="dropTargetId"/>.
+        /// This effectively simulates a 'drop' DOM event for the target element.
+        /// </summary>
+        /// <param name="inputId">The identifier of an input file element.</param>
+        /// <param name="dropTargetId">The identifier of a previously-registered drop target element.</param>
+        /// <param name="propertyName">
+        /// The name of the affected property. Is used to identify a concerned 
+        /// property when the operation completes. This parameter is optional.
+        /// </param>
+        /// <param name="method">The FileReader method to use for reading files.</param>
+        /// <returns></returns>
+        public virtual ValueTask<FileReaderInvokeResult> DropInputFilesOnTargetAsync(string inputId, string dropTargetId, string propertyName = null, FileReaderMethod method = FileReaderMethod.ReadAsDataURL)
+        {
+            var options = new
+            {
+                dropTargetId,
+                inputId,
+                InputName = propertyName,
+                Method = method,
+            };
+
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropInputFilesOnTarget", options);
+        }
+
+        /// <summary>
+        /// Invoked when a drag action starts.
+        /// </summary>
+        /// <param name="e">An object that holds event data related to the drag action.</param>
+        /// <returns></returns>
+        protected internal async Task<DragEventResponse> OnDragStartAsync(DomDragEventArgs e)
+        {
+            if (IsDebug) Console.WriteLine($"Drag started in {typeof(FormManagerBase)}. Event args: {e}");
+
+            if (OnDragStart.HasDelegate)
+            {
+                await OnDragStart.InvokeAsync(e);
+                return e.Response;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Invoked when a drop action occurs.
+        /// </summary>
+        /// <param name="e">n object that holds event data related to the drop action.</param>
+        /// <returns></returns>
+        protected internal async Task<DragEventResponse> OnDropAsync(DomDragEventArgs e)
+        {
+            if (IsDebug) Console.WriteLine($"Dropped in {typeof(FormManagerBase)}. Event args: {e}");
+
+            if (OnDrop.HasDelegate)
+            {
+                await OnDrop.InvokeAsync(e);
+                return e.Response;
+            }
+
+            return null;
         }
 
         #endregion
@@ -621,26 +894,50 @@ namespace BlazorFormManager.Components
 
         #region fields
 
+        private bool _abortRequested;
         private bool lastUploadHadFiles;
+        private bool _fileListReading;
+        private InputFileInfo _currentFile;
+        
+        #endregion
+
+        #region properties
 
         /// <summary>
         /// A flag that allows aborting the current upload operation.
         /// </summary>
-        protected bool AbortRequested;
+        public bool AbortRequested
+        {
+            get => _abortRequested;
+            set
+            {
+                if (_abortRequested != value)
+                {
+                    _abortRequested = value;
+                    StateHasChanged();
+                }
+            }
+        }
 
         /// <summary>
-        /// Indicates the current upload progress status text.
+        /// Indicates the current upload progress status message.
         /// </summary>
-        protected string UploadStatus = "Preparing...";
+        public string UploadStatus { get; protected set; } = "Preparing...";
 
         /// <summary>
-        /// Indicates the current upload progress status text.
+        /// Indicates the current file reading progress status message.
         /// </summary>
-        protected string ReadStatus = "Preparing...";
+        public string ReadStatus { get; protected set; } = "Preparing...";
 
-        #endregion
+        /// <summary>
+        /// Indicates the current file list reading progress status message.
+        /// </summary>
+        public string ReadFileListStatus { get; protected set; } = "Preparing...";
 
-        #region properties
+        /// <summary>
+        /// Gets the upload or file read status message.
+        /// </summary>
+        public string Status => IsUploadingFiles ? UploadStatus : (IsReadingFiles ? ReadStatus : string.Empty);
 
         /// <summary>
         /// Gets the stop watch used to measure a form submission duration.
@@ -656,6 +953,11 @@ namespace BlazorFormManager.Components
         /// Determines whether an active file read operation is in progress.
         /// </summary>
         public bool IsReadingFiles => ReadProgress != null;
+
+        /// <summary>
+        /// Determines whether an active file list  reading operation is in progress.
+        /// </summary>
+        public bool IsReadingFileList => ReadFileListProgress != null;
 
         /// <summary>
         /// Indicates that a form submission hasn't completed yet.
@@ -689,6 +991,11 @@ namespace BlazorFormManager.Components
         protected UploadProgressChangedEventArgs Progress { get; private set; }
 
         /// <summary>
+        /// Gets the current file list read progress event data.
+        /// </summary>
+        protected ReadFileListEventArgs ReadFileListProgress { get; private set; }
+
+        /// <summary>
         /// Gets the current file read progress' event data.
         /// </summary>
         protected FileReaderProgressChangedEventArgs ReadProgress { get; private set; }
@@ -713,6 +1020,7 @@ namespace BlazorFormManager.Components
                     UploadStatus = "Preparing to upload...";
                     StartStopWatch();
                     IsRunning = true;
+                    AbortRequested = false;
                     SubmitResult = null;
                     lastUploadHadFiles = e.HasFiles;
                     break;
@@ -720,7 +1028,6 @@ namespace BlazorFormManager.Components
                     if (AbortRequested)
                     {
                         e.Cancel = true;
-                        AbortRequested = false;
                         UploadStatus = "Aborting...";
                     }
                     else
@@ -744,6 +1051,7 @@ namespace BlazorFormManager.Components
                 case ProgressChangedEventType.End:
                     Progress = null;
                     UploadStatus = null;
+                    AbortRequested = false;
                     break;
                 default:
                     break;
@@ -754,6 +1062,11 @@ namespace BlazorFormManager.Components
         #region FileReader support
 
         #region parameters
+
+        /// <summary>
+        /// Event handler invoked when a file list reading operation occurs.
+        /// </summary>
+        [Parameter] public EventCallback<ReadFileListEventArgs> OnReadFileList { get; set; }
 
         /// <summary>
         /// Event handler invoked when a change in the file read process occurs.
@@ -775,23 +1088,48 @@ namespace BlazorFormManager.Components
         /// <paramref name="inputId"/>.
         /// </summary>
         /// <param name="inputId">The identifier of the input file to read.</param>
-        /// <param name="inputName">The name of the input file.</param>
         /// <param name="method">The FileReader method to use for reading files.</param>
+        /// <param name="inputName">The name of the input file.</param>
         /// <param name="acceptExtensions">A comma-separated list of allowed file extensions.</param>
         /// <param name="acceptFileType">The type of file allowed to be picked.</param>
-        /// <param name="targetElementId">
+        /// <param name="multiple">Indicates whether reading multiple files is allowed.</param>
+        /// <param name="autoGeneratePreview">Indicates whether image previews should be automatically generated.</param>
+        /// <param name="generateFileInfo">Indicates whether to include file metadata (name, size, etc.).</param>
+        /// <param name="imagePreviewId">
         /// The identifier of an HTML element (typically a &lt;img /> tag) that will display the image.
         /// </param>
-        /// <param name="targetElementAttributeName">
+        /// <param name="imagePreviewAttributeName">
         /// The name of the target element's attribute name that will receive the base64-encoded data URL.
         /// </param>
+        /// <param name="imagePreviewCssClass">The CSS class name for an auto-generated image preview.</param>
+        /// <param name="imagePreviewWrapper">the DOM query selector for the element that is wrapped around the auto-generated image.</param>
         /// <returns></returns>
-        public virtual Task<FileReaderInvokeResult> ReadFileAsync(string inputId, string inputName,
-            FileReaderMethod method, string acceptExtensions = null,
-            string acceptFileType = null,
-            string targetElementId = null,
-            string targetElementAttributeName = null)
+        public virtual Task<FileReaderInvokeResult> ReadFileAsync(string inputId
+            , FileReaderMethod method
+            , string inputName = null
+            , string acceptExtensions = null
+            , string acceptFileType = null
+            , bool multiple = false
+            , bool autoGeneratePreview = true
+            , bool generateFileInfo = true
+            , string imagePreviewId = null
+            , string imagePreviewAttributeName = null
+            , string imagePreviewCssClass = null
+            , string imagePreviewWrapper = null
+            )
         {
+            var previewOptions = method == FileReaderMethod.ReadAsDataURL
+                ? new ImagePreviewOptions
+                {
+                    AutoGenerate = autoGeneratePreview,
+                    GenerateFileInfo = true,
+                    TagId = imagePreviewId,
+                    TagClass = imagePreviewCssClass,
+                    AttributeName = imagePreviewAttributeName,
+                    WrapperSelector = imagePreviewWrapper,
+                }
+                : null;
+
             return ReadFileAsync(new FileReaderOptions
             {
                 InputId = inputId,
@@ -799,8 +1137,8 @@ namespace BlazorFormManager.Components
                 Method = method,
                 Accept = acceptExtensions,
                 AcceptType = acceptFileType,
-                TargetElementId = targetElementId,
-                TargetElementAttributeName = targetElementAttributeName,
+                Multiple = multiple,
+                ImagePreviewOptions = previewOptions,
             });
         }
 
@@ -810,21 +1148,11 @@ namespace BlazorFormManager.Components
         /// </summary>
         /// <param name="options">An configuration object for reading files.</param>
         /// <returns></returns>
-        public virtual async Task<FileReaderInvokeResult> ReadFileAsync(FileReaderOptions options)
+        public virtual Task<FileReaderInvokeResult> ReadFileAsync(FileReaderOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-
-            var result = await ReadFileAsync((object)options);
-
-            if (LogLevel >= ConsoleLogLevel.Error)
-            {
-                if (result.Succeeded)
-                    Console.WriteLine($"File from input #{options.InputId} ({options.InputName}) has been read successfully.");
-                else
-                    Console.WriteLine($"Failed to read file(s) from input #{options.InputId}: {result.Error}");
-            }
-
-            return result;
+            if (options.Method == FileReaderMethod.None) throw new InvalidOperationException("File reader method is not valid.");
+            return ReadFileAsync((object)options);
         }
 
         /// <summary>
@@ -836,45 +1164,99 @@ namespace BlazorFormManager.Components
         public virtual async Task<FileReaderInvokeResult> ReadFileAsync(object options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            var result = await JS.InvokeAsync<FileReaderInvokeResult>("BlazorFormManager.readInputFile", options);
-            return result;
+            return await JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.readInputFiles", options);
         }
 
         /// <summary>
-        /// Handles various file read-related event types.
+        /// Handle various event types related to a file list reading operation.
+        /// When subscribed to the corresponding event, this handler is invoked before the method
+        /// <see cref="HandleFileReaderProgressChanged(FileReaderProgressChangedEventArgs)"/>.
+        /// It fires at least the <see cref="ReadFileEventType.Start"/> and <see cref="ReadFileEventType.End"/>
+        /// events.
+        /// </summary>
+        /// <param name="e">The event data holder.</param>
+        protected virtual void HandleReadFileList(ReadFileListEventArgs e)
+        {
+            ReadFileListProgress = e;
+
+            switch (e.Type)
+            {
+                case ReadFileEventType.Start:
+                    _fileListReading = true;
+                    IsRunning = true;
+                    AbortRequested = false;
+                    ReadFileListStatus = $"File list reading started with {e.TotalFilesToRead} file(s).";
+                    
+                    StartStopWatch();
+                    StateHasChanged();
+                    break;
+                case ReadFileEventType.Rejected:
+                    switch (e.Reason)
+                    {
+                        case ReadFileRejection.Extension:
+                            ReadFileListStatus = $"File '{e.File.Name}' is not allowed because " +
+                                $"of its extension '{Path.GetExtension(e.File.Name)}'.";
+                            break;
+                        case ReadFileRejection.Type:
+                            ReadFileListStatus = $"File '{e.File.Name}' of type '{e.File.Type}' " +
+                                "is not allowed.";
+                            break;
+                        case ReadFileRejection.Multiple:
+                            ReadFileListStatus = $"Processing multiple files ({e.TotalFilesToRead}) " +
+                                "is not allowed.";
+                            break;
+                        default:
+                            break;
+                    }
+                    StateHasChanged();
+                    break;
+                case ReadFileEventType.Processed:
+                    ReadFileListStatus = $"{e.FilesRead} of {e.TotalFilesToRead} file(s) processed.";
+                    break;
+                case ReadFileEventType.End:
+                    FileReadStopped();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Handles various event types related to a single file reading operation.
         /// </summary>
         /// <param name="e">The event data holder.</param>
         protected virtual void HandleFileReaderProgressChanged(FileReaderProgressChangedEventArgs e)
         {
+            var changeState = true;
             ReadProgress = e;
-            
-            if (IsDebug) Console.WriteLine($"FileReader changed. {e.EventType} event: {e.ProgressPercentage}%");
+            if (IsDebug) Console.WriteLine($"FileReader event: {e.EventType} ({e.ProgressPercentage}%)");
 
             switch (e.EventType)
             {
                 case ProgressChangedEventType.Start:
-                    ReadStatus = "Preparing to read...";
-                    StartStopWatch();
-                    IsRunning = true;
-                    StateHasChanged();
+                    _currentFile = e.File;
+                    ReadStatus = $"Preparing to read {_currentFile?.Name}...";
+
+                    if (!_fileListReading)
+                    {
+                        StartStopWatch();
+                        AbortRequested = false;
+                        IsRunning = true;
+                    }
                     break;
                 case ProgressChangedEventType.Progress:
                     if (AbortRequested)
                     {
                         e.Cancel = true;
-                        AbortRequested = false;
                         ReadStatus = "Aborting...";
                     }
                     else
                     {
-                        ReadStatus = "Reading...";
+                        ReadStatus = $"Reading {_currentFile?.Name}...";
                     }
                     break;
                 case ProgressChangedEventType.Complete:
-                    IsRunning = false;
-                    Stopwatch?.Stop();
                     ReadStatus = "Done!";
-                    StateHasChanged();
                     break;
                 case ProgressChangedEventType.Error:
                     ReadStatus = "An error occurred during a file read operation.";
@@ -883,16 +1265,30 @@ namespace BlazorFormManager.Components
                     ReadStatus = "Operation aborted.";
                     break;
                 case ProgressChangedEventType.End:
-                    IsRunning = false;
-                    ReadProgress = null;
-                    ReadStatus = null;
-                    Stopwatch?.Stop();
-                    StateHasChanged();
+                    if (!_fileListReading)
+                    {
+                        FileReadStopped();
+                        changeState = false;
+                    }
                     break;
                 default:
                     break;
             }
-            StateHasChanged();
+
+            if (IsDebug && ReadStatus != null) Console.WriteLine(ReadStatus);
+            if (changeState) StateHasChanged();
+        }
+
+        /// <summary>
+        /// Event fired each time a file list reading operation occurs.
+        /// </summary>
+        /// <param name="e">An object that holds event data related to the read operation.</param>
+        /// <returns></returns>
+        protected internal async Task<bool> OnReadFileListAsync(ReadFileListEventArgs e)
+        {
+            HandleReadFileList(e);
+            if (OnReadFileList.HasDelegate) await OnReadFileList.InvokeAsync(e);
+            return e.Cancel;
         }
 
         /// <summary>
@@ -928,13 +1324,27 @@ namespace BlazorFormManager.Components
         #region helpers
 
         /// <summary>
+        /// Updates a subset or all options that were used during script initialization.
+        /// </summary>
+        /// <param name="options">
+        /// An object containing properties and values used to update 
+        /// their respective matching properties in the script's option.
+        /// </param>
+        /// <returns></returns>
+        protected ValueTask<bool> UpdateScriptOptionsAsync(object options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            return JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.updateOptions", options);
+        }
+
+        /// <summary>
         /// Throws <see cref="InvalidOperationException"/> if the BlazorFormManager.js
         /// script has not been initialized.
         /// </summary>
         protected virtual void EnsureScriptInitialized()
         {
             if (!_scriptInitialized)
-                throw new InvalidOperationException("BlazorFormManager.js script has not been initialized.");
+                throw new InvalidOperationException($"{BlazorFormManagerNS}.js script has not been initialized.");
         }
 
         /// <summary>
@@ -949,9 +1359,44 @@ namespace BlazorFormManager.Components
             Stopwatch.Start();
         }
 
+        internal IEnumerable<FormAttributeBase> GetAttributes(string propertyName, params Type[] attributeTypes)
+        {
+            return GetModel()?
+                .GetType()
+                .GetAttributes(propertyName, attributeTypes)
+                ?? Enumerable.Empty<FormAttributeBase>();
+        }
+
+        internal FileCapableAttributeBase GetFileCapableAttribute(string propertyName)
+        {
+            return GetFileCapableAttributes(propertyName, out _);
+        }
+
+        internal FileCapableAttributeBase GetFileCapableAttributes(string propertyName, out ImagePreviewAttribute imgAttr)
+        {
+            var attributes = GetAttributes(propertyName).ToArray();
+            var attr = attributes.OfType<DragDropAttribute>().FirstOrDefault() ?? attributes.OfType<FileCapableAttributeBase>().FirstOrDefault();
+            imgAttr = attributes.OfType<ImagePreviewAttribute>().FirstOrDefault();
+            return attr;
+        }
+
+        private void FileReadStopped()
+        {
+            _fileListReading = false;
+            AbortRequested = false;
+            IsRunning = false;
+            ReadProgress = null;
+            ReadStatus = null;
+            ReadFileListProgress = null;
+            ReadFileListStatus = null;
+            _currentFile = null;
+            Stopwatch?.Stop();
+            StateHasChanged();
+        }
+
         #endregion
 
-        #region IDisposable implementation
+        #region IDisposable
 
         /// <summary>
         /// <inheritdoc/>

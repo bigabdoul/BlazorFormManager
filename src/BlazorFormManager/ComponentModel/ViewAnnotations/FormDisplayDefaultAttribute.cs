@@ -16,6 +16,7 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         public FormDisplayDefaultAttribute()
         {
+            InputCssClass = "form-control";
         }
 
         /// <summary>
@@ -29,12 +30,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// The default value is "col".
         /// </summary>
         public string ColumnCssClass { get; set; } = "col";
-
-        /// <summary>
-        /// Gets or sets the CSS class (e.g. form-control) added to the input.
-        /// The default value is "form-control".
-        /// </summary>
-        public string InputCssClass { get; set; } = "form-control";
 
         /// <summary>
         /// Indicates whether to display the name of a group.

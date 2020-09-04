@@ -1,0 +1,30 @@
+﻿@page "/drag-drop"
+@using BlazorFormManager.Demo.Client.Extensions
+@using BlazorFormManager.Demo.Client.Shared.DragDrop 
+ 
+<AutoEditForm class="drag-drop-page"
+              @ref="Manager"
+              Model="Model"
+              FormAction="api/account/upload-files-anonymous"
+              OnFieldChanged="HandleFieldChanged"
+              OnDragStart="HandleDragStart"
+              OnDrop="HandleDrop"
+              OnReadFileList="HandleReadFileList"
+              OnModelRequested="e => e.Model = null" 
+              OnSubmitDone="Manager.ProcessCustomServerResponse" 
+              EnableChangeTracking 
+              EnableProgressBar>
+    <FormHeader>
+        <DemoHeader Title="Drag & Drop with Auto Edit Form" LogLevel="LogLevel" 
+                    OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
+    </FormHeader>
+    <AfterDisplayGroups>
+        <DragDropArea PropertyName="@nameof(DragDropOptions.Files)" @ref="DragDropAreaRef">
+            <BeforeDropArea>
+                <DragDropOptionsManager Model="Model" />
+            </BeforeDropArea>
+        </DragDropArea>
+        <SubmitButton Manager="Manager" Text="Upload" />
+    </AfterDisplayGroups>
+</AutoEditForm>
+<ErrorDisplay Error="Error" />

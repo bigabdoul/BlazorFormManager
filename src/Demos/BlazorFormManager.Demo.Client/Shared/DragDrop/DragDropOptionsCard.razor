@@ -1,0 +1,16 @@
+﻿<div class="card@(DisabledClass)">
+    <div class="card-header bg-white border-0">
+        <DragDropOptionsHeader />
+    </div>
+    <div class="card-body p-0">
+        <DragDropOptionsBody />
+    </div>
+    <div class="card-footer bg-dark">
+        <DragDropOptionsFooter />
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private DragDropOptionsManager OptionsManager { get; set; }
+    private string DisabledClass => true == OptionsManager?.Model?.Disabled ? " bg-muted" : string.Empty;
+}

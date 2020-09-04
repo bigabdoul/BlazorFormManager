@@ -6,7 +6,7 @@ namespace BlazorFormManager.IO
     /// <summary>
     /// Provides data for cancelable file read/upload event.
     /// </summary>
-    public class ProgressChangedEventArgs : CancelEventArgs
+    public class ProgressChangedEventArgs : CancelEventArgs, IProgressTrack
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ProgressChangedEventArgs"/> class.
@@ -46,5 +46,8 @@ namespace BlazorFormManager.IO
         public int ProgressPercentage => TotalBytesToReadOrSend > 0L
             ? Convert.ToInt32(100 * BytesReadOrSent / Convert.ToDouble(TotalBytesToReadOrSend))
             : 0;
+
+        long IProgressTrack.Current { get => BytesReadOrSent; set => BytesReadOrSent = value; }
+        long IProgressTrack.Total { get => TotalBytesToReadOrSend; set => TotalBytesToReadOrSend = value; }
     }
 }

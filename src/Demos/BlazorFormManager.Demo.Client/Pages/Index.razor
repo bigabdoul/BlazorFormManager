@@ -1,29 +1,38 @@
 ﻿@page "/"
 
-<h3 class="pb-3 border-bottom">Welcome to Blazor Form Manager</h3>
-<p>Pick up a demo activity to get started.</p>
-<ul>
-    <li>Composition Demo: <a href="account/register">User registration</a></li>
-    <li>
-        Inheritance Demo: <a href="account/update">Update user info</a>
-        <AuthorizeView>
-            <NotAuthorized>(authentication required)</NotAuthorized>
-        </AuthorizeView>
-    </li>
-    <li>
-        <a href="model-with-array">Model with array test</a>
-    </li>
-</ul>
+<div class="home-page">
+    <h3 class="pb-3 border-bottom">Welcome to Blazor Form Manager</h3>
+    <p>Pick up a demo activity to get started.</p>
+    <ul class="list-unstyled">
+        <li><i class="fas fa-user"></i> Composition Demo: <a href="account/register">User registration</a></li>
+        <li>
+            <i class="fas fa-edit"></i> Inheritance Demo: <a href="account/update">Update user info</a>
+            <AuthorizeView>
+                <NotAuthorized>(authentication required)</NotAuthorized>
+            </AuthorizeView>
+        </li>
+        <li><i class="fas fa-play"></i> <a href="model-with-array">Model with array test</a></li>
+    </ul>
 
-<h4 class="pb-3 border-bottom">Auto Edit Form</h4>
-<ul>
-    <li><a href="account/auto-edit-form/register">User registration</a></li>
-    <li>
-        <a href="account/autoeditform">Update user info</a>
-        <AuthorizeView>
-            <NotAuthorized>(authentication required)</NotAuthorized>
-        </AuthorizeView>
-    </li>
-</ul>
+    <h4 class="mt-4 pb-3 border-bottom">Auto Edit Form</h4>
+    <ul class="list-unstyled">
+        <li><i class="fas fa-user"></i> <a href="account/auto-edit-form/register">User registration</a></li>
+        <li>
+            <i class="fas fa-edit"></i> <a href="account/autoeditform">Update user info</a>
+            <AuthorizeView>
+                <NotAuthorized>(authentication required)</NotAuthorized>
+            </AuthorizeView>
+        </li>
+        <li>
+            <i class="fas fa-hand-pointer"></i> <a href="drag-drop">Drag &amp; Drop</a>
+            <p class="description">
+                Find out how your browser performs when you drag and drop files on a target element
+                and automatic preview generation of huge amounts of images occur on the fly.
+                You'll be surprised by how the vendor-specific JavaScript Engine of different 
+                browsers behaves!
+            </p>
+        </li>
+    </ul>
+</div>
 
 

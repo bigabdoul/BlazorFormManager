@@ -2,20 +2,19 @@
 
 @if (Progress != null)
 {
-    <div class="row mb-5">
-        <div class="col-md-4">
-            <small class="upload-status">
-                @UploadStatusMessage @Progress.ProgressPercentage%
-            </small>
-            <div class="progress mb-3">
-                <div class="progress-bar" role="progressbar" style="@ProgressStyle"
-                     aria-valuenow="@Progress.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
-                </div>
+    <div class="blazor-form-manager-progress">
+        <small class="status-text">@UploadStatusMessage @Progress.ProgressPercentage%</small>
+        <div class="progress mb-3">
+            <div class="progress-bar" role="progressbar" style="@ProgressStyle"
+                    aria-valuenow="@Progress.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
             </div>
+        </div>
+        @if (OnCancelRequested.HasDelegate)
+        {
             <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
                 <i class="fa fa-ban"></i> @CancelButtonText
             </button>
-        </div>
+        }
     </div>
 }
 
@@ -23,7 +22,7 @@
     /// <summary>
     /// Gets or sets an object that contains information about the current form submission progress.
     /// </summary>
-    [Parameter] public UploadProgressChangedEventArgs Progress { get; set; }
+    [Parameter] public ProgressChangedEventArgs Progress { get; set; }
 
     /// <summary>
     /// Gets or sets the upload status message.

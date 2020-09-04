@@ -1,6 +1,6 @@
 ﻿@page "/account/auto-edit-form/register"
 @inject NavigationManager NavigationManager
-<AutoEditForm @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" OnFileReaderResult="HandleFileReaderResult" EnableChangeTracking EnableProgressBar>
+<AutoEditForm @ref="Manager" Model="Model" FormAction="api/account/register" OnSubmitDone="HandleSubmitDone" OnFieldChanged="HandleFieldChanged" EnableChangeTracking EnableProgressBar>
     <FormHeader>
         <DemoHeader Title="Auto Edit Form Demo: Create a new account" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     </FormHeader>
@@ -10,7 +10,6 @@
         <DataAnnotationsValidator />
     </AfterDisplayGroups>
     <ChildContent>
-        <ImagePreview PropertyName="@nameof(RegisterUserModel.Photo)" Visible="FileSelected"/>
+        <DragDropArea PropertyName="@nameof(RegisterUserModel.Photo)" @ref="DragDropAreaRef" />
     </ChildContent>
 </AutoEditForm>
-<ErrorDisplay Error="Error"/>

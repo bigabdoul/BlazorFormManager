@@ -16,6 +16,10 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
+.bg-muted, .bg-muted .bg-white {
+    background-color: #eaeaea !important;
+}
+
 app {
     position: relative;
     display: flex;
@@ -99,6 +103,24 @@ app {
                 color: white;
             }
 
+/* Home Page */
+.home-page li {
+    margin-bottom: 1rem;
+}
+
+    .home-page li .description {
+        font-size: 80%;
+        color: #6c757d !important;
+        margin-left: 2.5rem !important;
+        max-width: 450px;
+        text-align: justify;
+    }
+
+.home-page .fa, .home-page .fas, .home-page svg:not(:root).svg-inline--fa {
+    font-size: 22pt;
+    margin-right: .5rem;
+}
+
 .content {
     padding-top: 1.1rem;
 }
@@ -146,6 +168,13 @@ app {
 
 .auto-edit-form .form-body .child-content {
     padding: 1rem 2rem !important;
+}
+
+.drag-drop-options-body {
+    padding: 1rem;
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 @media (max-width: 767.98px) {

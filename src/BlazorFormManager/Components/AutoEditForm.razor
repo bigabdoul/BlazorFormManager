@@ -5,8 +5,10 @@
 {
     <div class="auto-edit-form">
         <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit" id="@FormId" action="@FormAction" method="@FormMethod" enctype="multipart/form-data" @attributes="AdditionalAttributes">
-            // This issues a cascaded parameter to instances of the AutoInputBase component
-            // so that it can access FormManagerBase-related members, such as OptionsGetter, etc.
+            @*
+            This issues a cascaded parameter to instances of the AutoInputBase component
+            so that it can access FormManagerBase-related members, such as OptionsGetter, etc.
+            *@
             <CascadingValue Value="this">
                 @if (FormHeader != null)
                 {
@@ -32,9 +34,12 @@
                             <div class="after-display-groups">@AfterDisplayGroups</div>
                         }
                     </div>
-                    <div class="child-content">
-                        @ChildContent
-                    </div>
+                    @if (ChildContent != null)
+                    {
+                        <div class="child-content">
+                            @ChildContent
+                        </div>
+                    }
                 </div>
                 @if (FormFooter != null)
                 {
@@ -43,9 +48,21 @@
             </CascadingValue>
         </EditForm>
         <FormSubmitResultView Result="SubmitResult" />
-        @if (EnableProgressBar && IsUploadingFiles)
+        @if (EnableProgressBar && IsRunning)
         {
-            <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" OnCancelRequested="() => AbortRequested = true" />
+            <Html5ProgressBar Progress="(Progress ?? (BlazorFormManager.IO.ProgressChangedEventArgs)ReadProgress)" 
+                              StatusMessage="@Status" 
+                              OnCancelRequested="() => AbortRequested = true"
+                              ElapsedMilliseconds="Stopwatch?.ElapsedMilliseconds"
+                              HideCancelButton="IsReadingFileList"
+                              HideElapsedMilliseconds="IsReadingFileList"/>
+            if (IsReadingFileList)
+            {
+                <Html5ProgressBar Progress="ReadFileListProgress"
+                                  StatusMessage="@ReadFileListStatus"
+                                  OnCancelRequested="() => AbortRequested = true"
+                                  ElapsedMilliseconds="Stopwatch?.ElapsedMilliseconds" />
+            }
         }
         @if (IsDebug)
         {

@@ -19,9 +19,11 @@
     /// </summary>
     [Parameter] public int? MaxHeight { get; set; }
 
-    private string Id => $"{PropertyName}{ImagePreviewAttribute.TargetElementIdSuffix}";
+    [CascadingParameter] private DragDropArea DropTarget { get; set; }
+
+    private string Id => $"{DropTarget?.PropertyName ?? PropertyName}{ImagePreviewAttribute.TargetElementIdSuffix}";
 
     private string Style =>
         $"max-height: {(MaxHeight.HasValue ? $"{MaxHeight.Value}px" : "100%")};" +
-        $"display: {(Visible ? "block" : "none")};";
+        $"display: {(DropTarget != null || Visible ? "block" : "none")};";
 }

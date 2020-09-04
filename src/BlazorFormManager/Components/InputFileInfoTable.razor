@@ -1,0 +1,67 @@
+﻿@using BlazorFormManager.IO
+
+@if (Files?.Count > 0)
+{
+    var row = 1;
+    var totalSize = 0D;
+    <div class="input-file-info-table">
+        <div class="table-responsive">
+            <table class="table table-light table-striped table-hover table-sm table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>#</th>
+                        <th scope="col" class="file-name" title="File name">Name</th>
+                        <th scope="col" class="file-size" title="File size">Size</th>
+                        <th scope="col" class="file-size" title="Width and Height">Dimensions</th>
+                        <th scope="col" class="file-type" title="File type">Type</th>
+                        <th scope="col" class="file-date" title="Last modified date">Last modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Files)
+                    {
+                        totalSize += f.Size;
+                    <tr>
+                        <th scope="row">@(row++)</th>
+                        <td class="file-name">@f.Name</td>
+                        <td class="file-size">@f.SizeAsString</td>
+                        <td class="file-size">@f.Dimensions</td>
+                        <td class="file-type">
+                            <i class="@GetIcon(f)"></i> <span class="file">@f.Type</span>
+                        </td>
+                        <td class="file-date">@f.LastModifiedDateAsString</td>
+                    </tr>
+                    }
+                </tbody>
+                @if (row > 2)
+                {
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-right">Total size</td>
+                            <td class="text-right"><strong>@InputFileInfo.FileSizeToString(totalSize)</strong></td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public IReadOnlyCollection<InputFileInfo> Files { get; set; }
+
+    private string GetIcon(InputFileInfo file)
+    {
+        if (file.IsImage) return "fas fa-image";
+        if (file.IsVideo) return "fas fa-video";
+        if (file.IsArchive) return "fas fa-file-archive";
+        if (file.HasExtension(".pdf")) return "fas fa-file-pdf";
+        if (file.HasExtension(".xls", ".xlsx")) return "fas fa-file-excel";
+        if (file.HasExtension(".doc", ".docx")) return "fas fa-file-word";
+        if (file.HasExtension(".mdb", ".accdb")) return "fas fa-file-access";
+        if (file.HasExtension(".ppt", ".pptx", ".pps", ".ppsx", ".ppsm", ".pptm", ".pot", ".potx", "potm", ".ppa", ".ppam", ".odp")) return "fas fa-file-powerpoint";
+
+        return "fas fa-file";
+    }
+}

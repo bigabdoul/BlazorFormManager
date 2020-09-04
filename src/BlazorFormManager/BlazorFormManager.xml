@@ -110,6 +110,36 @@
             <param name="result">Returns a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> objects.</param>
             <returns></returns>
         </member>
+        <member name="M:BlazorFormManager.ComponentModel.MetadataExtensions.TryGetMetadata(System.Type,System.String,BlazorFormManager.ComponentModel.AutoInputMetadata@)">
+            <summary>
+            Attempts to get a cached instance of the <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/>
+            class whose <see cref="P:BlazorFormManager.ComponentModel.AutoInputMetadata.PropertyInfo"/>.Name matches the
+            specified <paramref name="propertyName"/>.
+            </summary>
+            <param name="type">The type of the object to which <paramref name="propertyName"/> belongs.</param>
+            <param name="propertyName">The name of the property for which to retrieve the metadata.</param>
+            <param name="result">Returns the cached <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/>, if any.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.MetadataExtensions.TryGetMetadata(System.Type,System.Collections.Generic.IReadOnlyCollection{BlazorFormManager.ComponentModel.FormDisplayGroupMetadata}@)">
+            <summary>
+            Attempts to get the metadata value associated with the specified type.
+            </summary>
+            <param name="type">The type of the object from which to extract metadata.</param>
+            <param name="result">Returns a grouped collection of <see cref="T:BlazorFormManager.ComponentModel.AutoInputMetadata"/> objects.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.MetadataExtensions.RemoveIgnoredPropertiesFromObjectToBeSerialized(System.Object)">
+            <summary>
+            Make sure that properties decorated with an ignorable 
+            custom attribute are NOT included for serialization.
+            </summary>
+            <param name="obj">The object to scan.</param>
+            <returns>
+            An initialized instance of the <see cref="T:BlazorFormManager.Collections.ObjectDictionary"/> class if 
+            there are properties to be ignored; otherwise, <paramref name="obj"/>.
+            </returns>
+        </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.CustomRenderMode">
             <summary>
             Specifies if components should support custom rendering or not.
@@ -140,6 +170,58 @@
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.DisplayIgnoreAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.DragDropAttribute">
+            <summary>
+            Indicates that an object supports drag and drop operations.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.DragDropAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.DragDropAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase">
+            <summary>
+            Represents the base attribute for members capable of handling files.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.Accept">
+            <summary>
+            Gets or sets a comma-separated list of file name extensions that limits the 
+            types of files a user can pick. If the value is null or empty (or only 
+            whitespace) then any file can be picked.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.AcceptType">
+            <summary>
+            Gets or sets the type of file that can be picked up.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.Multiple">
+            <summary>
+            Indicates whether multiple file selection is allowed.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.DropTargetId">
+            <summary>
+            Gets or sets the identifier of an element that supports drag and drop.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.DropEffect">
+            <summary>
+            Gets or sets the icon that identifies a drag and drop operation. The default is 'copy'.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.Method">
+            <summary>
+            Gets or sets the method of the FileReader API (in JavaScript) to use.
             </summary>
         </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod">
@@ -181,6 +263,36 @@
             An optional encoding name can be specified.
             </summary>
         </member>
+        <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase">
+            <summary>
+            Represents the base class for form-related custom attributes.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.#ctor">
+            <summary>
+            Intializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.InputCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. form-control) added to the input.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.Prompt">
+            <summary>
+            Gets or sets a value that will be used to set the watermark for prompts in the UI.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.Disabled">
+            <summary>
+            Indicates whether the input is disabled.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.Ignore">
+            <summary>
+            Indicates whether this custom attribute should be ignored during rendering.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute">
             <summary>
             Represents a custom attribute that specifies layout for a form input.
@@ -217,9 +329,10 @@
              Gets or sets a value that is used to display a description in the UI.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Prompt">
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ResourceType">
             <summary>
-            Gets or sets a value that will be used to set the watermark for prompts in the UI.
+            Gets or sets the type that contains the resources for the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ShortName"/>,
+            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Name"/>, <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.Prompt"/>, and <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Description"/> properties.
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Order">
@@ -227,21 +340,10 @@
             Gets or sets the order weight of the column.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ResourceType">
-            <summary>
-            Gets or sets the type that contains the resources for the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ShortName"/>,
-            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Name"/>, <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Prompt"/>, and <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Description"/> properties.
-            </summary>
-        </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.ColumnCssClass">
             <summary>
             Gets or sets the CSS class (e.g. col-md-4) used for an element (column)
             wrapped around the input.
-            </summary>
-        </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.InputCssClass">
-            <summary>
-            Gets or sets the CSS class (e.g. form-control) added to the input.
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.UIHint">
@@ -296,11 +398,6 @@
             Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Disabled">
-            <summary>
-            Indicates whether the input is disabled.
-            </summary>
-        </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckboxOrRadio">
             <summary>
             Returns true if either of <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputCheckbox"/> or <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.IsInputRadio"/> is true.
@@ -347,12 +444,6 @@
             The default value is "col".
             </summary>
         </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.InputCssClass">
-            <summary>
-            Gets or sets the CSS class (e.g. form-control) added to the input.
-            The default value is "form-control".
-            </summary>
-        </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayDefaultAttribute.ShowGroupName">
             <summary>
             Indicates whether to display the name of a group.
@@ -386,8 +477,8 @@
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute"/> class
-            by setting the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.AcceptType"/> property value to
-            'image' and the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Method"/> property value to
+            by setting the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.AcceptType"/> property value to
+            'image' and the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.Method"/> property value to
             <see cref="F:BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod.ReadAsDataURL"/>.
             </summary>
         </member>
@@ -401,12 +492,24 @@
             that it decorates is used with the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.TargetElementIdSuffix"/> value
             (e.g. the property 'Photo' will have a target element id of 'PhotoPreview').
             If the value is empty, then the target element id should not be used.
+            If specified, this property takes precedence over <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.AutoGenerate"/>.
             </summary>
         </member>
         <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.TargetElementAttributeName">
             <summary>
             Gets or sets the name of the target element's attribute name that will 
             receive the base64-encoded data URL. The default value is 'src'.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.AutoGenerate">
+            <summary>
+            Indicates whether a preview should be automatically generated for every
+            selected image. The default value is true.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.GenerateFileInfo">
+            <summary>
+            Indicates whether to include file metadata (name, size, etc.).
             </summary>
         </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute">
@@ -418,28 +521,6 @@
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.#ctor">
             <summary>
             Initializes a new instance of the <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute"/> class.
-            </summary>
-        </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Accept">
-            <summary>
-            Gets or sets a comma-separated list of file name extensions that limits the 
-            types of files a user can pick. If the value is null or empty (or only 
-            whitespace) then any file can be picked.
-            </summary>
-        </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.AcceptType">
-            <summary>
-            Gets or sets the type of file that can be picked up.
-            </summary>
-        </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Multiple">
-            <summary>
-            Indicates whether multiple file selection is allowed.
-            </summary>
-        </member>
-        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Method">
-            <summary>
-            Gets or sets the method of the FileReader API (in JavaScript) to use.
             </summary>
         </member>
         <member name="M:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Clone">
@@ -498,6 +579,9 @@
             This method does nothing on purpose to avoid detaching from something that 
             was never attached to.
             </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.AutoEditFormBase`1.OnGetModelAsync">
+            <inheritdoc/>
         </member>
         <member name="T:BlazorFormManager.Components.AutoInputBase">
             <summary>
@@ -590,7 +674,7 @@
         <member name="M:BlazorFormManager.Components.AutoInputBase.AddInputFileAttributes(Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder,System.Int32,BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute)">
             <summary>
             Adds attributes to an input file from the custom attribute <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute"/>.
-            If the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute.Method"/> value of the given <paramref name="fileAttr"/>
+            If the <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FileCapableAttributeBase.Method"/> value of the given <paramref name="fileAttr"/>
             is different from <see cref="F:BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod.None"/>, an attempt to register the current
             input with the <see cref="P:BlazorFormManager.Components.AutoInputBase.Form"/> is made.
             </summary>
@@ -624,7 +708,7 @@
             <summary>
             Determines at run-time the disabled state of the current <see cref="T:BlazorFormManager.Components.AutoInputBase"/>
             if the associated property was statically-marked as disabled with the property
-            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormDisplayAttribute.Disabled"/> set to true.
+            <see cref="P:BlazorFormManager.ComponentModel.ViewAnnotations.FormAttributeBase.Disabled"/> set to true.
             </summary>
             <param name="builder">A <see cref="T:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder"/> that will receive the render output.</param>
             <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
@@ -752,6 +836,16 @@
         <member name="P:BlazorFormManager.Components.FormManagerBase.OnModelRequested">
             <summary>
             Event handler invoked when the model to be submitted is requested.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OnDragStart">
+            <summary>
+            Event handler invoked when a drag action starts.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OnDrop">
+            <summary>
+            Event handler invoked when a drop action occurs.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.RequestHeaders">
@@ -997,19 +1091,118 @@
             BlazorFormManager.js script has not been initialized.
             </exception>
         </member>
-        <member name="F:BlazorFormManager.Components.FormManagerBase.AbortRequested">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.RegisterFileDragDropTargetAsync(System.String,System.String,System.String)">
+            <summary>
+            Enables drag and drop support for files using the specified HTML element identifier as the drop target.
+            </summary>
+            <param name="dropTargetId">The identifier of the target HTML element that supports drag and drop.</param>
+            <param name="propertyName">
+            The name of the property used to retrieve the metadata of applicable custom attributes.
+            This parameter is also used as the form field name into which files are stored and used when the form is submitted.
+            </param>
+            <param name="inputFieldId">
+            The identifier of the input used to select a file on the disk. This value 
+            is used to reset the input's value when a drop event occurs.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.RegisterFileDragDropTargetAsync(System.String,System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Boolean},BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod,System.Object)">
+            <summary>
+            Enables drag and drop support for files using the specified HTML element 
+            identifier as the drop target.
+            </summary>
+            <param name="dropTargetId">The identifier of the target HTML element that 
+            supports drag and drop.</param>
+            <param name="inputName">The store name of dropped files which is also 
+            used when the form is submitted.</param>
+            <param name="inputFileId">
+            The identifier of the input used to select a file on the disk. This value 
+            is used to reset the input's value when a drop event occurs.
+            </param>
+            <param name="dropEffect">The desired drop effect. Default is 'copy'.</param>
+            <param name="accept">A comma-separated list of allowed file name extensions.</param>
+            <param name="acceptType">A value that restricts the type of files allowed.</param>
+            <param name="multiple">
+            Indicates whether dropping multiple files onto the target is allowed.
+            If null, the value from the custom attribute attached to 
+            <paramref name="inputName"/> will be used.
+            </param>
+            <param name="method">
+            The method used to read files. If a file is an image then 
+            <see cref="F:BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod.ReadAsDataURL"/> is used.
+            </param>
+            <param name="imagePreviewOptions">An object that specifies how image previews should be generated.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.UnregisterFileDragDropTargetAsync(System.String)">
+            <summary>
+            Disables drag and drop support for the specified HTML element identifier.
+            </summary>
+            <param name="dropTargetId">
+            The identifier of the target HTML element that supports drag and drop.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.DeleteDragDropFileListAsync(System.String)">
+            <summary>
+            Removes from the drag and drop storage the files that have 
+            been previously dropped onto the specified target element.
+            </summary>
+            <param name="dropTargetId">The identifier of the drop target element.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.DropInputFilesOnTargetAsync(System.String,System.String,System.String,BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod)">
+            <summary>
+            Reads the files from an input file identified by <paramref name="inputId"/>
+            and stores them into the drag and drop settings for <paramref name="dropTargetId"/>.
+            This effectively simulates a 'drop' DOM event for the target element.
+            </summary>
+            <param name="inputId">The identifier of an input file element.</param>
+            <param name="dropTargetId">The identifier of a previously-registered drop target element.</param>
+            <param name="propertyName">
+            The name of the affected property. Is used to identify a concerned 
+            property when the operation completes. This parameter is optional.
+            </param>
+            <param name="method">The FileReader method to use for reading files.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnDragStartAsync(BlazorFormManager.DOM.DomDragEventArgs)">
+            <summary>
+            Invoked when a drag action starts.
+            </summary>
+            <param name="e">An object that holds event data related to the drag action.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnDropAsync(BlazorFormManager.DOM.DomDragEventArgs)">
+            <summary>
+            Invoked when a drop action occurs.
+            </summary>
+            <param name="e">n object that holds event data related to the drop action.</param>
+            <returns></returns>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.AbortRequested">
             <summary>
             A flag that allows aborting the current upload operation.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Components.FormManagerBase.UploadStatus">
+        <member name="P:BlazorFormManager.Components.FormManagerBase.UploadStatus">
             <summary>
-            Indicates the current upload progress status text.
+            Indicates the current upload progress status message.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.Components.FormManagerBase.ReadStatus">
+        <member name="P:BlazorFormManager.Components.FormManagerBase.ReadStatus">
             <summary>
-            Indicates the current upload progress status text.
+            Indicates the current file reading progress status message.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.ReadFileListStatus">
+            <summary>
+            Indicates the current file list reading progress status message.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.Status">
+            <summary>
+            Gets the upload or file read status message.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.Stopwatch">
@@ -1025,6 +1218,11 @@
         <member name="P:BlazorFormManager.Components.FormManagerBase.IsReadingFiles">
             <summary>
             Determines whether an active file read operation is in progress.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.IsReadingFileList">
+            <summary>
+            Determines whether an active file list  reading operation is in progress.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.IsRunning">
@@ -1056,6 +1254,11 @@
             Gets the current progress' event data.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.ReadFileListProgress">
+            <summary>
+            Gets the current file list read progress event data.
+            </summary>
+        </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.ReadProgress">
             <summary>
             Gets the current file read progress' event data.
@@ -1066,6 +1269,11 @@
             Handles various upload-related event types.
             </summary>
             <param name="e">The event data holder.</param>
+        </member>
+        <member name="P:BlazorFormManager.Components.FormManagerBase.OnReadFileList">
+            <summary>
+            Event handler invoked when a file list reading operation occurs.
+            </summary>
         </member>
         <member name="P:BlazorFormManager.Components.FormManagerBase.OnFileReaderProgressChanged">
             <summary>
@@ -1079,22 +1287,27 @@
             flag to find out if the operation completed successfully.
             </summary>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.ReadFileAsync(System.String,System.String,BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod,System.String,System.String,System.String,System.String)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.ReadFileAsync(System.String,BlazorFormManager.ComponentModel.ViewAnnotations.FileReaderMethod,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.String,System.String,System.String,System.String)">
             <summary>
             Reads files via JavaScript found in an input tag identified in the DOM by 
             <paramref name="inputId"/>.
             </summary>
             <param name="inputId">The identifier of the input file to read.</param>
-            <param name="inputName">The name of the input file.</param>
             <param name="method">The FileReader method to use for reading files.</param>
+            <param name="inputName">The name of the input file.</param>
             <param name="acceptExtensions">A comma-separated list of allowed file extensions.</param>
             <param name="acceptFileType">The type of file allowed to be picked.</param>
-            <param name="targetElementId">
+            <param name="multiple">Indicates whether reading multiple files is allowed.</param>
+            <param name="autoGeneratePreview">Indicates whether image previews should be automatically generated.</param>
+            <param name="generateFileInfo">Indicates whether to include file metadata (name, size, etc.).</param>
+            <param name="imagePreviewId">
             The identifier of an HTML element (typically a &lt;img /> tag) that will display the image.
             </param>
-            <param name="targetElementAttributeName">
+            <param name="imagePreviewAttributeName">
             The name of the target element's attribute name that will receive the base64-encoded data URL.
             </param>
+            <param name="imagePreviewCssClass">The CSS class name for an auto-generated image preview.</param>
+            <param name="imagePreviewWrapper">the DOM query selector for the element that is wrapped around the auto-generated image.</param>
             <returns></returns>
         </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase.ReadFileAsync(BlazorFormManager.IO.FileReaderOptions)">
@@ -1113,11 +1326,28 @@
             <param name="options"></param>
             <returns></returns>
         </member>
-        <member name="M:BlazorFormManager.Components.FormManagerBase.HandleFileReaderProgressChanged(BlazorFormManager.IO.FileReaderProgressChangedEventArgs)">
+        <member name="M:BlazorFormManager.Components.FormManagerBase.HandleReadFileList(BlazorFormManager.IO.ReadFileListEventArgs)">
             <summary>
-            Handles various file read-related event types.
+            Handle various event types related to a file list reading operation.
+            When subscribed to the corresponding event, this handler is invoked before the method
+            <see cref="M:BlazorFormManager.Components.FormManagerBase.HandleFileReaderProgressChanged(BlazorFormManager.IO.FileReaderProgressChangedEventArgs)"/>.
+            It fires at least the <see cref="F:BlazorFormManager.IO.ReadFileEventType.Start"/> and <see cref="F:BlazorFormManager.IO.ReadFileEventType.End"/>
+            events.
             </summary>
             <param name="e">The event data holder.</param>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.HandleFileReaderProgressChanged(BlazorFormManager.IO.FileReaderProgressChangedEventArgs)">
+            <summary>
+            Handles various event types related to a single file reading operation.
+            </summary>
+            <param name="e">The event data holder.</param>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.OnReadFileListAsync(BlazorFormManager.IO.ReadFileListEventArgs)">
+            <summary>
+            Event fired each time a file list reading operation occurs.
+            </summary>
+            <param name="e">An object that holds event data related to the read operation.</param>
+            <returns></returns>
         </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase.OnFileReaderChangedAsync(BlazorFormManager.IO.FileReaderProgressChangedEventArgs)">
             <summary>
@@ -1131,6 +1361,16 @@
             Invokes the <see cref="P:BlazorFormManager.Components.FormManagerBase.OnFileReaderResult"/> event callback.
             </summary>
             <param name="result">The result of a successful file reading operation.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.FormManagerBase.UpdateScriptOptionsAsync(System.Object)">
+            <summary>
+            Updates a subset or all options that were used during script initialization.
+            </summary>
+            <param name="options">
+            An object containing properties and values used to update 
+            their respective matching properties in the script's option.
+            </param>
             <returns></returns>
         </member>
         <member name="M:BlazorFormManager.Components.FormManagerBase.EnsureScriptInitialized">
@@ -1244,9 +1484,81 @@
             Indicates whether to hide the message 'AJAX Upload Not Supported!...'.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.Components.DragDropArea.PropertyName">
+            <summary>
+            Gets or sets the name of the property that was decorated with a custom attribute
+            of type <see cref="T:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute"/> or descending from it.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.DragDropArea.WatermarkText">
+            <summary>
+            Gets or sets the text displayed when there are no selected files.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.DragDropArea.HasEventListeners">
+            <summary>
+            Indicates whether the current drag and drop area has event listeners.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Components.DragDropArea.DeleteFileListAsync">
+            <summary>
+            Deletes the files that have been previously dropped onto the current area.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.DragDropArea.AddEventListenersAsync">
+            <summary>
+            Enables drag and drop support for the current area.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.DragDropArea.RemoveEventListenersAsync">
+            <summary>
+            Disables drag and drop support for the current area.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.Components.DragDropArea.OnInitialized">
+            <inheritdoc/>
+        </member>
         <member name="P:BlazorFormManager.Components.FormSubmitResultView.Result">
             <summary>
             Gets or sets the form submission result.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.Progress">
+            <summary>
+            Gets or sets an object that contains information about the current progress.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.StatusMessage">
+            <summary>
+            Gets or sets the progress status message.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.CancelButtonText">
+            <summary>
+            Gets or sets the text of the cancel button.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.HideCancelButton">
+            <summary>
+            Indicates whether to hide the cancel button.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.ElapsedMilliseconds">
+             <summary>
+            Gets or sets the total amount of milliseconds elapsed.
+             </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.HideElapsedMilliseconds">
+            <summary>
+            Indicates whether to hide the elapsed milliseconds value.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Components.Html5ProgressBar.OnCancelRequested">
+            <summary>
+            Gets or sets the event callback used to handle a cancellation request.
             </summary>
         </member>
         <member name="P:BlazorFormManager.Components.IFrameSourceDocument.Html">
@@ -1568,6 +1880,256 @@
             supported by Internet Explorer.
             </summary>
         </member>
+        <member name="T:BlazorFormManager.DOM.DomDataTransfer">
+            <summary>
+            Represents an object used to hold the data that is being dragged during a drag
+            and drop operation. This is a more strongly-typed version of the <see cref="T:Microsoft.AspNetCore.Components.Web.DataTransfer"/>
+            class. It may hold one or more <see cref="T:Microsoft.AspNetCore.Components.Web.DataTransferItem"/>, each of one or more
+            data types. For more information about drag and drop, see HTML Drag and Drop API.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.DOM.DomDataTransfer.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.DOM.DomDataTransfer"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDataTransfer.EffectAllowed">
+            <summary>
+            Gets or sets the kinds of operations that are to be allowed.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDataTransfer.DropEffect">
+            <summary>
+            Gets or sets the kind of operation that is currently selected. If the kind of
+            operation isn't one of those that is allowed by the effectAllowed attribute,
+            then the operation will fail.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDataTransfer.Files">
+            <summary>
+            Contains a list of all the local files available on the data transfer. If the
+            drag operation doesn't involve dragging files, this property is an empty list.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDataTransfer.Items">
+            <summary>
+            Gives a <see cref="T:Microsoft.AspNetCore.Components.Web.DataTransferItem"/> array which is a list of all of the drag data.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDataTransfer.Types">
+            <summary>
+            An array of <see cref="T:System.String"/> giving the formats that were set in the dragstart event.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.DOM.DomDragEventArgs">
+            <summary>
+            A DOM event that represents a drag and drop interaction. The user initiates a
+            drag by placing a pointer device (such as a mouse) on the touch surface and then
+            dragging the pointer to a new location (such as another DOM element).
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.DOM.DomDragEventArgs.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.DOM.DomDragEventArgs"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDragEventArgs.DataTransfer">
+            <summary>
+            The data that underlies a drag-and-drop operation, known as the drag data store.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomDragEventArgs.Response">
+            <summary>
+            Gets or sets the response to a drag and drop operation.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.DOM.DomMouseEventArgs">
+            <summary>
+            Provides information about a mouse-related event.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.DOM.DomMouseEventArgs.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.DOM.DomMouseEventArgs"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.MovementX">
+            <summary>
+            Indicates the X-movement coordinate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.MovementY">
+            <summary>
+            Indicates the Y-movement coordinate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.OffsetX">
+            <summary>
+            Indicates the X-offset coordinate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.OffsetY">
+            <summary>
+            Indicates the Y-offset coordinate.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.PageX">
+            <summary>
+            The X coordinate of the mouse pointer in page (DOM content) coordinates.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.PageY">
+            <summary>
+            The Y coordinate of the mouse pointer in page (DOM content) coordinates.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.Which">
+            <summary>
+            Provides additional info about a key press.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.X">
+            <summary>
+            The X coordinate of the mouse pointer coordinates.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DomMouseEventArgs.Y">
+            <summary>
+            The Y coordinate of the mouse pointer coordinates.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.DOM.DragEventResponse">
+            <summary>
+            Represents an object used to provide data as a response to a 'drag' DOM event.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.DOM.DragEventResponse.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.DOM.DragEventResponse"/> class.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.DOM.DragEventResponse.#ctor(System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.DOM.DragEventResponse"/> class
+            with the <see cref="P:BlazorFormManager.DOM.DragEventResponse.Cancel"/> property set to the given value.
+            </summary>
+            <param name="cancel">true to cancel the event; otherwise, false.</param>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.EffectAllowed">
+            <summary>
+            Gets or sets the kinds of operations that are to be allowed.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.Data">
+            <summary>
+            Gets or sets the drag event data.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.DataFormat">
+            <summary>
+            Gets or sets the drag event data format.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.Cancel">
+            <summary>
+            true to cancel the event; otherwise, false.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.AcceptedFiles">
+            <summary>
+            Gets or sets an array of files accepted on a drop event.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.StoreOnly">
+            <summary>
+            Indicates whether to store dropped files without reading their content.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.MaxFileCount">
+            <summary>
+            Gets or sets the maximum number of files that is allowed to be dropped.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.MaxTotalSize">
+            <summary>
+            Gets or sets the maximum size (in megabytes) of all files allowed to be dropped.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.DOM.DropEffect">
+            <summary>
+            Provides enumerated values for the kinds of operations that are to be allowed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.DropEffect.None">
+            <summary>
+            None.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.DropEffect.Copy">
+            <summary>
+            Copy.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.DropEffect.Link">
+            <summary>
+            Link.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.DropEffect.Move">
+            <summary>
+            Move.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.DOM.EffectAllowed">
+            <summary>
+            Provides enumerated values for the kinds of operations that are to be allowed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.None">
+            <summary>
+            None.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.Copy">
+            <summary>
+            Copy.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.CopyLink">
+            <summary>
+            CopyLink.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.CopyMove">
+            <summary>
+            CopyMove.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.Link">
+            <summary>
+            Link.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.LinkMove">
+            <summary>
+            LinkMove.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.Move">
+            <summary>
+            Move.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.All">
+            <summary>
+            All.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.DOM.EffectAllowed.Uninitialized">
+            <summary>
+            Uninitialized.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.FormFieldChangedEventArgs">
             <summary>
             Encapsulates data related to an event raised when a form field changes.
@@ -1721,6 +2283,11 @@
             Gets or sets the error that might have occurred during the operation.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.IO.FileReaderInvokeResult.Code">
+            <summary>
+            Gets or sets the error code.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.IO.FileReaderOptions">
             <summary>
             Represents options for reading a file in JavaScript.
@@ -1752,16 +2319,14 @@
             Gets or sets the type of file allowed to be picked.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.IO.FileReaderOptions.TargetElementId">
+        <member name="P:BlazorFormManager.IO.FileReaderOptions.Multiple">
             <summary>
-            Gets or sets the identifier of an HTML element (typically a &lt;img /> tag)
-            that will display the image.
+            Indicates whether reading multiple files is allowed.
             </summary>
         </member>
-        <member name="P:BlazorFormManager.IO.FileReaderOptions.TargetElementAttributeName">
+        <member name="P:BlazorFormManager.IO.FileReaderOptions.ImagePreviewOptions">
             <summary>
-            Gets or sets the name of the target element's attribute name that will 
-            receive the base64-encoded data URL.
+            Gets or sets the preview options for image file of types.
             </summary>
         </member>
         <member name="T:BlazorFormManager.IO.FileReaderProgressChangedEventArgs">
@@ -1785,6 +2350,11 @@
         <member name="P:BlazorFormManager.IO.FileReaderProgressChangedEventArgs.TotalBytesToRead">
             <summary>
             Gets or sets the total number of bytes to read.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.FileReaderProgressChangedEventArgs.File">
+            <summary>
+            Gets or sets information about an input file currently being read.
             </summary>
         </member>
         <member name="T:BlazorFormManager.IO.FileReaderResult">
@@ -1842,6 +2412,159 @@
         <member name="P:BlazorFormManager.IO.FileReaderResult.CompletedInScript">
             <summary>
             Indicates whether the UI interaction was done in JavaScript.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.IO.ImagePreviewOptions">
+            <summary>
+            Encapsulates data used for generating an image preview from a file.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.IO.ImagePreviewOptions.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.IO.ImagePreviewOptions"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.AutoGenerate">
+            <summary>
+            Indicates whether image previews should be automatically generated.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.GenerateFileInfo">
+            <summary>
+            Indicates whether to include file metadata (name, size, etc.).
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.TagName">
+            <summary>
+            Gets or sets the name of the HTML element (typically a &lt;img /> tag)
+            that will hold the image. The default value is 'img'.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.TagClass">
+            <summary>
+            Gets or sets the CSS class name for an auto-generated image.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.TagId">
+            <summary>
+            Gets or sets the identifier of an HTML element (typically a &lt;img /> tag)
+            that will display the image.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.AttributeName">
+            <summary>
+            Gets or sets the name of the target element's attribute name that will 
+            receive the base64-encoded data URL.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.WrapperSelector">
+            <summary>
+            Gets or sets the DOM query selector for the element that is wrapped around
+            the auto-generated image (e.g. '#auto-image-wrapper', '.image-wrapper', etc.)
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.IO.InputFileInfo">
+            <summary>
+            Represents information about a read input file.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.IO.InputFileInfo.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.IO.InputFileInfo"/> class.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.LastModifiedDate">
+            <summary>
+            Gets or sets the last date on which a file was modified.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.Name">
+            <summary>
+            Gets or sets the name of a file.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.Size">
+            <summary>
+            Gets or sets the size in bytes of a file.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.Type">
+            <summary>
+            Gets or sets the type of a file.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.SizeAsString">
+            <summary>
+            Returns the string representation of the <see cref="P:BlazorFormManager.IO.InputFileInfo.Size"/> property value.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.LastModifiedDateAsString">
+            <summary>
+            Returns the string representation of the <see cref="P:BlazorFormManager.IO.InputFileInfo.LastModifiedDate"/> property value.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.IsImage">
+            <summary>
+            Determines whether this file is an image.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.IsVideo">
+            <summary>
+            Determines whether this file is a video.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.IsArchive">
+            <summary>
+            Determines whether this file is archived, compressed/zipped.
+            This is a non-exhaustive test for the most common formats.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.IO.InputFileInfo.HasExtension(System.String[])">
+            <summary>
+            Determines whether this file has an extension of one of the specified <paramref name="extensions"/>.
+            </summary>
+            <param name="extensions">A list of file extensions to compare against.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.IO.InputFileInfo.HasTypeIndexOf(System.String[])">
+            <summary>
+            Determines whether this file's <see cref="P:BlazorFormManager.IO.InputFileInfo.Type"/> 
+            contains a string in the specified <paramref name="types"/>.
+            </summary>
+            <param name="types">A list of string to compare against.</param>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.IO.InputFileInfo.ToString">
+            <summary>
+            Returns the string representation of the current <see cref="T:BlazorFormManager.IO.InputFileInfo"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:BlazorFormManager.IO.InputFileInfo.FileSizeToString(System.Double)">
+            <summary>
+            Converts the specified file size to a human-readable string representation.
+            </summary>
+            <param name="size">The size of a file.</param>
+            <returns></returns>
+        </member>
+        <member name="T:BlazorFormManager.IO.IProgressTrack">
+            <summary>
+            When implemented by class, represents an object that keeps track of an ongoing operation.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.IProgressTrack.Current">
+            <summary>
+            Gets or sets the current value of the progress.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.IProgressTrack.Total">
+            <summary>
+            Gets or sets the total amount to completion.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.IProgressTrack.ProgressPercentage">
+            <summary>
+            Gets the progress percentage.
             </summary>
         </member>
         <member name="T:BlazorFormManager.IO.ProgressChangedEventArgs">
@@ -1925,6 +2648,105 @@
             of the outcome. Prior to this event, one of <see cref="F:BlazorFormManager.IO.ProgressChangedEventType.Start"/>,
             <see cref="F:BlazorFormManager.IO.ProgressChangedEventType.Error"/>, <see cref="F:BlazorFormManager.IO.ProgressChangedEventType.Abort"/>, or <see cref="F:BlazorFormManager.IO.ProgressChangedEventType.Timeout"/>
             will already have been delivered to indicate why the upload ended.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.IO.ReadFileEventType">
+            <summary>
+            Provides enumerated values for a file reading event type.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileEventType.Start">
+            <summary>
+            The operation has started.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileEventType.Denied">
+            <summary>
+            A file reading has been denied.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileEventType.Processed">
+            <summary>
+            A file (not necessarily read) has been processed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileEventType.End">
+            <summary>
+            The operation completed, regardless of success or failure.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.IO.ReadFileListEventArgs">
+            <summary>
+            Encapsulates data related to a file list read event.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.IO.ReadFileListEventArgs.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BlazorFormManager.IO.ReadFileListEventArgs"/> class.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.IO.ReadFileListEventArgs.#ctor(System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.Type">
+            <summary>
+            Gets or sets the type of the reading event.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.Reason">
+            <summary>
+            Gets or sets the reason of a file reading rejection.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.File">
+            <summary>
+            Gets or sets the file that was denied reading.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.Files">
+            <summary>
+            Gets or sets the files that were denied reading due to the 'multiple' 
+            attribute restrictions.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.FilesRead">
+            <summary>
+            Gets or sets the number of files read so far.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ReadFileListEventArgs.TotalFilesToRead">
+            <summary>
+            Gets or sets the number of files prepared to be read.
+            </summary>
+        </member>
+        <member name="T:BlazorFormManager.IO.ReadFileRejection">
+            <summary>
+            Provides enumerated values for reasons a file reading operation was rejected.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileRejection.None">
+            <summary>
+            No reason.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileRejection.Extension">
+            <summary>
+            File extension is not allowed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileRejection.Type">
+            <summary>
+            File type is not allowed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileRejection.Multiple">
+            <summary>
+            Multiple files are not allowed.
+            </summary>
+        </member>
+        <member name="F:BlazorFormManager.IO.ReadFileRejection.Aborted">
+            <summary>
+            Operation was aborted.
             </summary>
         </member>
         <member name="T:BlazorFormManager.IO.UploadProgressChangedEventArgs">

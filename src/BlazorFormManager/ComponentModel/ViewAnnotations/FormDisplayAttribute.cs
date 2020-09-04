@@ -51,6 +51,12 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         public string Description { get; set; }
 
         /// <summary>
+        /// Gets or sets the type that contains the resources for the <see cref="ShortName"/>,
+        /// <see cref="Name"/>, <see cref="FormAttributeBase.Prompt"/>, and <see cref="Description"/> properties.
+        /// </summary>
+        public Type ResourceType { get; set; }
+
+        /// <summary>
         /// Gets or sets the order weight of the column.
         /// </summary>
         public int Order { get; set; }
@@ -60,11 +66,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// wrapped around the input.
         /// </summary>
         public string ColumnCssClass { get; set; }
-
-        /// <summary>
-        /// Gets or sets the CSS class (e.g. form-control) added to the input.
-        /// </summary>
-        public string InputCssClass { get; set; }
 
         /// <summary>
         /// Gets or sets a suggestion for the HTML element to generate. Supported
@@ -123,13 +124,15 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         public bool IsInputCheckboxOrRadio => IsInputCheckbox || IsInputRadio;
 
+        #region internal
+
         /// <summary>
         /// Gets or sets the <see cref="InputFileAttribute"/> associated with the 
         /// property that this <see cref="FormDisplayAttribute"/> decorates.
         /// </summary>
         protected internal InputFileAttribute FileAttribute { get; set; }
 
-        #region internal
+        internal DragDropAttribute DragDropAttribute { get; set; }
 
         private PropertyInfo _property;
 
@@ -148,11 +151,6 @@ namespace BlazorFormManager.ComponentModel.ViewAnnotations
         /// </summary>
         /// <param name="value"></param>
         internal void SetProperty(PropertyInfo value) => _property = value;
-
-        /// <summary>
-        /// Indicates whether this custom attribute should be ignored during rendering.
-        /// </summary>
-        internal bool Ignore { get; set; }
 
         #endregion
     }

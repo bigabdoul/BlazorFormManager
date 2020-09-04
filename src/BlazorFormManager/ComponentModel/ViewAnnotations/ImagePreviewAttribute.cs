@@ -14,14 +14,15 @@
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImagePreviewAttribute"/> class
-        /// by setting the <see cref="InputFileAttribute.AcceptType"/> property value to
-        /// 'image' and the <see cref="InputFileAttribute.Method"/> property value to
+        /// by setting the <see cref="FileCapableAttributeBase.AcceptType"/> property value to
+        /// 'image' and the <see cref="FileCapableAttributeBase.Method"/> property value to
         /// <see cref="FileReaderMethod.ReadAsDataURL"/>.
         /// </summary>
         public ImagePreviewAttribute()
         {
             AcceptType = "image";
             Method = FileReaderMethod.ReadAsDataURL;
+            InputCssClass = "blazor-form-manager-image-preview";
         }
 
         /// <summary>
@@ -33,6 +34,7 @@
         /// that it decorates is used with the <see cref="TargetElementIdSuffix"/> value
         /// (e.g. the property 'Photo' will have a target element id of 'PhotoPreview').
         /// If the value is empty, then the target element id should not be used.
+        /// If specified, this property takes precedence over <see cref="AutoGenerate"/>.
         /// </summary>
         public string TargetElementId { get; set; }
 
@@ -41,5 +43,26 @@
         /// receive the base64-encoded data URL. The default value is 'src'.
         /// </summary>
         public string TargetElementAttributeName { get; set; } = "src";
+
+        /// <summary>
+        /// Indicates whether a preview should be automatically generated for every
+        /// selected image. The default value is true.
+        /// </summary>
+        public bool AutoGenerate { get; set; } = true;
+
+        /// <summary>
+        /// Indicates whether to include file metadata (name, size, etc.).
+        /// </summary>
+        public bool GenerateFileInfo { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the preferred width of the thumbnail to be generated.
+        /// </summary>
+        public int Width { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preferred height of the thumbnail to be generated.
+        /// </summary>
+        public int Height { get; set; }
     }
 }
