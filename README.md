@@ -26,10 +26,10 @@ Drag and drop options are configurable both at design and run-time:
   submission.
 - Enable/disable resizing of image previews, set preferred width and height, preserve
   original aspect ratios.
+- Individual file and total files reading progress indicators with elapsed time display.
 - Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic
   thumbnail generation, include this script into your index.html file before the
   BlazorFormManager.js script.
-- Individual file and total files reading progress indicators with elapsed time display.
 
 For usage, clone this repo and launch the demo project.
 
