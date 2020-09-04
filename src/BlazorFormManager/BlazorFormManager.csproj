@@ -23,7 +23,7 @@ Drag and drop options are configurable both at design and run-time:
 - Display details about dropped files such as file name, size, type, last modified date, and image dimensions.
 - Option to store only the files without image preview generation and upload them on form submission.
 - Enable/disable resizing of image previews, set preferred width and height, preserve original aspect ratios.
-- Included built-in imageUtil.js plugin for basic image manipulation.
+- Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic thumbnail generation, include this script into your index.html file before the BlazorFormManager.js script.
 - Individual file and total files reading progress indicators with elapsed time display.
 
 For usage, clone the demo project on Github at https://github.com/bigabdoul/BlazorFormManager.</PackageReleaseNotes>
