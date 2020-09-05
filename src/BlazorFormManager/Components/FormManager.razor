@@ -12,7 +12,7 @@
         <FormSubmitResultView Result="SubmitResult" />
         @if (EnableProgressBar && IsUploadingFiles)
         {
-            <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" OnCancelRequested="() => AbortRequested = true" />
+            <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" CanCancel="CanCancelUpload" OnCancelRequested="() => AbortRequested = true" />
         }
         @if (IsDebug)
         {

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace BlazorFormManager.Components
 {
@@ -26,6 +27,7 @@ namespace BlazorFormManager.Components
 
         private bool _scriptInitialized;
         private bool _initializingScript;
+        private bool _disposed;
         private ConsoleLogLevel _logLevel;
         FormManagerSubmitResult _submitResult;
         private EventCallback<DomDragEventArgs> _onDragStart;
@@ -35,6 +37,20 @@ namespace BlazorFormManager.Components
         [Inject] private IJSRuntime JS { get; set; }
 
         private const string BlazorFormManagerNS = "BlazorFormManager";
+        private Timer _stopWatchTimer;
+        private readonly ElapsedEventHandler _stopWatchTimerElapsedHandler;
+
+        #endregion
+
+        #region constructor
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormManagerBase"/> class.
+        /// </summary>
+        protected FormManagerBase()
+        {
+            _stopWatchTimerElapsedHandler = (s, e) => StateHasChanged();
+        }
 
         #endregion
 
@@ -481,7 +497,9 @@ namespace BlazorFormManager.Components
         protected virtual Task HandleSubmitDoneAsync(FormManagerSubmitResult result)
         {
             Stopwatch?.Stop();
+            _stopWatchTimer.Enabled = false;
             IsRunning = false;
+            Progress = null;
             StateHasChanged();
             return Task.CompletedTask;
         }
@@ -601,7 +619,7 @@ namespace BlazorFormManager.Components
             SubmitResult = FormManagerSubmitResult.Failed(
                 xhr,
                 string.IsNullOrWhiteSpace(message) ? ErrorMessage : message,
-                lastUploadHadFiles
+                _lastUploadHadFiles
             );
 
             await HandleSubmitDoneAsync(SubmitResult);
@@ -627,7 +645,7 @@ namespace BlazorFormManager.Components
             SubmitResult = FormManagerSubmitResult.Success(
                 xhr,
                 string.IsNullOrWhiteSpace(message) ? SuccessMessage : message,
-                lastUploadHadFiles
+                _lastUploadHadFiles
             );
 
             await HandleSubmitDoneAsync(SubmitResult);
@@ -895,7 +913,7 @@ namespace BlazorFormManager.Components
         #region fields
 
         private bool _abortRequested;
-        private bool lastUploadHadFiles;
+        private bool _lastUploadHadFiles;
         private bool _fileListReading;
         private InputFileInfo _currentFile;
         
@@ -945,7 +963,8 @@ namespace BlazorFormManager.Components
         public Stopwatch Stopwatch { get; private set; }
 
         /// <summary>
-        /// Determines whether an active upload containing one or more files is in progress.
+        /// Determines whether an active upload containing one or more files is in progress
+        /// and the form submission is not finished yet.
         /// </summary>
         public bool IsUploadingFiles => Progress != null && Progress.HasFiles;
 
@@ -960,7 +979,7 @@ namespace BlazorFormManager.Components
         public bool IsReadingFileList => ReadFileListProgress != null;
 
         /// <summary>
-        /// Indicates that a form submission hasn't completed yet.
+        /// Indicates whether a form submission or a file reading operation is in progress.
         /// </summary>
         public bool IsRunning { get; private set; }
 
@@ -977,6 +996,12 @@ namespace BlazorFormManager.Components
         /// to be long running. Defaults to 2000 milliseconds.
         /// </summary>
         public int LongRunningDelay { get; set; } = 2000;
+
+        /// <summary>
+        /// Indicates whether an active form submission can be cancelled.
+        /// Returns true if an upload is ongoing; otherwise, false.
+        /// </summary>
+        public bool CanCancelUpload { get; private set; }
 
         /// <summary>
         /// Returns true if <see cref="EnableChangeTracking"/> is true and 
@@ -1019,10 +1044,11 @@ namespace BlazorFormManager.Components
                 case ProgressChangedEventType.Start:
                     UploadStatus = "Preparing to upload...";
                     StartStopWatch();
+                    CanCancelUpload = true;
                     IsRunning = true;
                     AbortRequested = false;
                     SubmitResult = null;
-                    lastUploadHadFiles = e.HasFiles;
+                    _lastUploadHadFiles = e.HasFiles;
                     break;
                 case ProgressChangedEventType.Progress:
                     if (AbortRequested)
@@ -1049,9 +1075,14 @@ namespace BlazorFormManager.Components
                         "within the time interval specified by the XMLHttpRequest.timeout.";
                     break;
                 case ProgressChangedEventType.End:
-                    Progress = null;
-                    UploadStatus = null;
+                    CanCancelUpload = false;
                     AbortRequested = false;
+                    // the server is handling the rest; clean up is done in 
+                    // method HandleSubmitDoneAsync(FormManagerSubmitResult)
+                    UploadStatus = "Upload done! Finalizing...";
+
+                    // Start a timer to report stop watch updates
+                    _stopWatchTimer.Enabled = true;
                     break;
                 default:
                     break;
@@ -1353,9 +1384,14 @@ namespace BlazorFormManager.Components
         private void StartStopWatch()
         {
             if (Stopwatch == null)
+            {
                 Stopwatch = new Stopwatch();
+                _stopWatchTimer = new Timer(1000) { AutoReset = true };
+                _stopWatchTimer.Elapsed += _stopWatchTimerElapsedHandler;
+            }
             else
                 Stopwatch.Reset();
+
             Stopwatch.Start();
         }
 
@@ -1401,7 +1437,11 @@ namespace BlazorFormManager.Components
         /// <summary>
         /// <inheritdoc/>
         /// </summary>
-        public void Dispose() => Dispose(true);
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Releases used resources.
@@ -1412,9 +1452,21 @@ namespace BlazorFormManager.Components
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!_disposed)
             {
-                _thisObjRef?.Dispose();
+                if (disposing)
+                {
+                    _thisObjRef?.Dispose();
+                    
+                    Stopwatch?.Stop();
+
+                    if (_stopWatchTimer != null)
+                    {
+                        _stopWatchTimer.Enabled = false;
+                        _stopWatchTimer.Elapsed -= _stopWatchTimerElapsedHandler;
+                    }
+                }
+                _disposed = true;
             }
         }
 
