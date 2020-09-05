@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager
- Version:       1.4.0
+ Version:       1.4.1
  Author:        Abdourahamane Kaba
  Description:   Handle AJAX form data submission with zero or more files, and
                 report back data upload activities to a .NET Blazor Component.
@@ -1540,7 +1540,7 @@
 
     /**
      * Add the list of files to the drag and drop store.
-     * @param {FileList} fileList The list of files to add.
+     * @param {File[]} files The list of files to add.
      * @param {string} dropTargetId The identifier of the drop target element.
      * @param {string} inputName The name of the form field associated with the files.
      * @param {HTMLElement} dropTargetElement Optional: An HTML element that represents the drop target.
@@ -1548,12 +1548,19 @@
      * the CSS class 'drag-drop-area-empty' from it.
      * @param {boolean} keepEmtpyClass true to keep the 'drag-drop-area-empty' class on the drop target.
      */
-    function dragDropAfterFilesProcessed(fileList, dropTargetId, inputName, dropTargetElement, keepEmtpyClass) {
-        if (fileList && fileList.length) {
+    function dragDropAfterFilesProcessed(files, dropTargetId, inputName, dropTargetElement, keepEmtpyClass) {
+        if (files && files.length) {
             // store the dropped files for later use when submitting the form
             const cfg = _dragDropStorage[dropTargetId];
             if (!!cfg) {
-                cfg.droppedFiles = { [inputName]: fileList, fileCount: fileList.length };
+                // make sure to add to any previously-dropped files
+                const { droppedFiles } = cfg;
+                if (!!droppedFiles) {
+                    const existingFiles = droppedFiles[inputName];
+                    if (existingFiles instanceof Array)
+                        files = existingFiles.concat(files);
+                }
+                cfg.droppedFiles = { [inputName]: files, fileCount: files.length };
                 logDebug(`Dropped files stored for target #${dropTargetId} and input ${inputName}.`);
                 if (!keepEmtpyClass) {
                     dropTargetElement || (dropTargetElement = _document.getElementById(dropTargetId));
