@@ -14,7 +14,7 @@ namespace BlazorFormManager.Demo.Client.Pages
         #region fields & properties
 
         private const int PAGE_SIZE = 20;
-        private bool _disposedValue;
+        private bool _disposed;
         private readonly DragDropOptions Model = new DragDropOptions();
 
         private Exception Error { get; set; }
@@ -58,10 +58,11 @@ namespace BlazorFormManager.Demo.Client.Pages
                 case ReadFileEventType.End:
                     var files = Model.Files;
                     var processedFiles = Model.ProcessedFiles;
-                    var max = processedFiles.Count > PAGE_SIZE ? PAGE_SIZE : processedFiles.Count;
                     
                     files.Clear();
                     StateHasChanged(); // force data pager to re-render
+
+                    var max = processedFiles.Count > PAGE_SIZE ? PAGE_SIZE : processedFiles.Count;
 
                     for (int i = 0; i < max; i++)
                         files.Add(processedFiles[i]);
@@ -89,14 +90,14 @@ namespace BlazorFormManager.Demo.Client.Pages
 
         private void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (!_disposed)
             {
                 if (disposing)
                 {
                     Model.ClearFiles();
                     ((IDisposable)DragDropAreaRef)?.Dispose();
                 }
-                _disposedValue = true;
+                _disposed = true;
             }
         }
 
