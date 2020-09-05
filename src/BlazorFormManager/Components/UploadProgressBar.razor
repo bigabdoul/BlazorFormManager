@@ -9,9 +9,9 @@
                     aria-valuenow="@Progress.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
             </div>
         </div>
-        @if (!HideCancelButton && OnCancelRequested.HasDelegate)
+        @if (!HideCancelButton && CanCancel && OnCancelRequested.HasDelegate)
         {
-            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested" disabled="@(!CanCancel)">
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
                 <i class="fas fa-ban"></i> @CancelButtonText
             </button>
         }
