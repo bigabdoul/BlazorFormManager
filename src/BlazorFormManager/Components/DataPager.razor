@@ -33,7 +33,7 @@
     /// <summary>
     /// Gets or sets the total number of items. Should not be less than 0.
     /// </summary>
-    [Parameter] public int TotalItems { get; set; }
+    [Parameter] public int TotalItemCount { get; set; }
 
     /// <summary>
     /// Gets or sets the maximum number of items per page. Should not be less than 1.
@@ -74,6 +74,6 @@
         if (CurrentPage < 1)
             CurrentPage = 1;
 
-        _pagination.Initialize(OnPageChange, PageSize, CurrentPage, TotalItems);
+        _pagination.Initialize(OnPageChange, TotalItemCount, PageSize, CurrentPage);
     }
 }

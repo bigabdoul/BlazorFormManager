@@ -14,7 +14,7 @@ namespace BlazorFormManager.Collections
         
         private int _currentPage;
         private int _pageSize;
-        private int _totalItems;
+        private int _totalItemCount;
 
         #endregion
 
@@ -71,18 +71,18 @@ namespace BlazorFormManager.Collections
         /// <summary>
         /// Gets or sets the total number of items.
         /// </summary>
-        public int TotalItems
+        public int TotalItemCount
         {
-            get => _totalItems;
+            get => _totalItemCount;
             set
             {
-                if (_totalItems != value)
+                if (_totalItemCount != value)
                 {
                     if (value < 0)
-                        throw new ArgumentOutOfRangeException(nameof(TotalItems),
-                            $"{nameof(TotalItems)} cannot be less than 0.");
+                        throw new ArgumentOutOfRangeException(nameof(TotalItemCount),
+                            $"{nameof(TotalItemCount)} cannot be less than 0.");
 
-                    _totalItems = value;
+                    _totalItemCount = value;
                     SetPage(CurrentPage);
                 }
             }
@@ -96,7 +96,7 @@ namespace BlazorFormManager.Collections
         /// <summary>
         /// Calculates the number of pages.
         /// </summary>
-        public int PageCount => Convert.ToInt32(Math.Ceiling((double)TotalItems / PageSize));
+        public int PageCount => Convert.ToInt32(Math.Ceiling((double)TotalItemCount / PageSize));
 
         /// <summary>
         /// Indicates whether there are more than one page.
@@ -116,13 +116,13 @@ namespace BlazorFormManager.Collections
         /// Initializes this <see cref="Pagination"/> instance with the specified parameters.
         /// </summary>
         /// <param name="onPageChange">The event callback to invoke when the current page or related property changes.</param>
+        /// <param name="totalItemCount">The total number of items.</param>
         /// <param name="pageSize">The maximum number of items per page.</param>
         /// <param name="currentPage">A one-based integer representing the current page number.</param>
-        /// <param name="totalItems">The total number of items.</param>
-        public void Initialize(EventCallback<int> onPageChange, int pageSize, int currentPage, int totalItems)
+        public void Initialize(EventCallback<int> onPageChange, int totalItemCount, int pageSize, int currentPage = 1)
         {
             PageSize = pageSize;
-            TotalItems = totalItems;
+            TotalItemCount = totalItemCount;
             OnPageChange = onPageChange;
             SetPage(currentPage);
         }
