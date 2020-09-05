@@ -507,8 +507,9 @@ namespace BlazorFormManager.Components
         #endregion
 
         /// <summary>
-        /// Notifies the component that its state has changed.
-        /// When applicable, this will cause the component to be re-rendered.
+        /// Notifies the component that its state has changed. When applicable, this will
+        /// cause the component to be re-rendered. This method should only be called from
+        /// a child component that modifies state that lies higher up in the hierarchy.
         /// </summary>
         public virtual void NotifyStateChanged() => StateHasChanged();
 
