@@ -13,7 +13,7 @@
         </div>
         @if (!HideCancelButton && OnCancelRequested.HasDelegate)
         {
-            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested" disabled="@(!CanCancel)">
                 <i class="fa fa-ban"></i> @CancelButtonText
             </button>
         }
@@ -34,6 +34,11 @@
     /// Gets or sets the progress status message.
     /// </summary>
     [Parameter] public string StatusMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether an ongoing progress can be cancelled.
+    /// </summary>
+    [Parameter] public bool CanCancel { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the text of the cancel button.
