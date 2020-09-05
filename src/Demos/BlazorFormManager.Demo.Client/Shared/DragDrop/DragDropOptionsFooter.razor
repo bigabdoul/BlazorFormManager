@@ -1,6 +1,6 @@
 ﻿
-<button type="button" class="@EventListenersClass" title="@EventListenersTitle"
-        @onclick="HandleEventListeners" disabled="@NoDropArea">
+<button type="button" class="@EventListenersClass" aria-label="@EventListenersTitle"
+        @onclick="HandleEventListeners" disabled="@ClearDisabled">
     @if (Disabled)
     {
         <span><i class="fas fa-bolt" aria-hidden="true"></i> Enable drag &amp; drop</span>
@@ -13,17 +13,17 @@
 
 @if (OptionsManager?.Model?.Files.Count > 0)
 {
-    <button type="button" class="btn btn-sm btn-secondary ml-2" title="Clear drag & drop store, and file list"
-            @onclick="DeleteFileList" disabled="@NoDropArea">
+    <button type="button" class="btn btn-sm btn-secondary ml-2" aria-label="Clear drag & drop store, and file list"
+            @onclick="DeleteFileList" disabled="@ClearDisabled">
         <span><i class="fas fa-trash" aria-hidden="true"></i> Clear</span>
     </button>
 }
 
-@if (true == Manager?.IsReadingFiles)
+@if (Processing)
 {
-    <button type="button" class="btn btn-secondary ml-2" title="Abort file reading operation"
+    <button type="button" class="btn btn-sm btn-secondary ml-2" aria-label="Abort file reading operation"
             @onclick="() => Manager.AbortRequested = true" disabled="@Manager.AbortRequested">
-        <span><i class="fas fa-stop" aria-hidden="true"></i> Abort!</span>
+        <span><i class="fas fa-stop text-danger" aria-hidden="true"></i> Abort!</span>
     </button>
 }
 
@@ -32,8 +32,10 @@
     [CascadingParameter] private FormManagerBase Manager { get; set; }
     [CascadingParameter] private DragDropOptionsManager OptionsManager { get; set; }
 
-    private bool NoDropArea => DropArea == null;
+    private bool Processing => true == Manager?.IsReadingFiles;
     private bool Disabled => true == OptionsManager?.Model?.Disabled;
+    private bool ClearDisabled => DropArea == null || Processing;
+
     private string EventListenersClass => $"btn btn-sm btn-{(Disabled ? "warning" : "success")}";
     private string EventListenersTitle => $"{(Disabled ? "Re-enables" : "Disables")} drag and drop support";
 

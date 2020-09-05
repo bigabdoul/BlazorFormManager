@@ -14,7 +14,8 @@
                             @Model.FileCount (@InputFileInfo.FileSizeToString(Model.DroppedFileSize))
                         </span>
                         <span class="float-md-right">
-                            Upload size: @InputFileInfo.FileSizeToString(Model.UploadFileSize)
+                            Processed files:
+                            @Model.ProcessedFiles.Count (@InputFileInfo.FileSizeToString(Model.UploadFileSize))
                         </span>
                     </h6>
                     <div class="clearfix"></div>
