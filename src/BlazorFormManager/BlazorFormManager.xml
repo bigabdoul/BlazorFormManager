@@ -512,6 +512,16 @@
             Indicates whether to include file metadata (name, size, etc.).
             </summary>
         </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.Width">
+            <summary>
+            Gets or sets the preferred width of the thumbnail to be generated.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.ComponentModel.ViewAnnotations.ImagePreviewAttribute.Height">
+            <summary>
+            Gets or sets the preferred height of the thumbnail to be generated.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.ComponentModel.ViewAnnotations.InputFileAttribute">
             <summary>
             Represents a custom attribute that is used to generate inputs of type file and
@@ -2055,6 +2065,11 @@
             Gets or sets the maximum size (in megabytes) of all files allowed to be dropped.
             </summary>
         </member>
+        <member name="P:BlazorFormManager.DOM.DragEventResponse.ImagePreviewOptions">
+            <summary>
+            Gets or sets the options for dynamically generating image previews.
+            </summary>
+        </member>
         <member name="T:BlazorFormManager.DOM.DropEffect">
             <summary>
             Provides enumerated values for the kinds of operations that are to be allowed.
@@ -2129,6 +2144,32 @@
             <summary>
             Uninitialized.
             </summary>
+        </member>
+        <member name="T:BlazorFormManager.Drawing.ImageSize">
+            <summary>
+            Stores an ordered pair of integers, which specify a <see cref="P:BlazorFormManager.Drawing.ImageSize.Width"/> and <see cref="P:BlazorFormManager.Drawing.ImageSize.Height"/>.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Drawing.ImageSize.Width">
+            <summary>
+            Gets or sets the horizontal component of this <see cref="T:BlazorFormManager.Drawing.ImageSize"/> class, typically measured in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Drawing.ImageSize.Height">
+            <summary>
+            Gets or sets the vertical component of this <see cref="T:BlazorFormManager.Drawing.ImageSize"/> class, typically measured in pixels.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.Drawing.ImageSize.IsEmpty">
+            <summary>
+            Tests whether this <see cref="T:BlazorFormManager.Drawing.ImageSize"/> class has width and height of 0.
+            </summary>
+        </member>
+        <member name="M:BlazorFormManager.Drawing.ImageSize.ToString">
+            <summary>
+            Returns the string representation of this <see cref="T:BlazorFormManager.Drawing.ImageSize"/> class.
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:BlazorFormManager.FormFieldChangedEventArgs">
             <summary>
@@ -2426,18 +2467,18 @@
         </member>
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.AutoGenerate">
             <summary>
-            Indicates whether image previews should be automatically generated.
+            Indicates whether image previews should be automatically generated. The default value is true.
             </summary>
         </member>
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.GenerateFileInfo">
             <summary>
-            Indicates whether to include file metadata (name, size, etc.).
+            Indicates whether to include file metadata (name, size, etc.). The default value is true.
             </summary>
         </member>
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.TagName">
             <summary>
             Gets or sets the name of the HTML element (typically a &lt;img /> tag)
-            that will hold the image. The default value is 'img'.
+            that will hold the image. The default value is "img".
             </summary>
         </member>
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.TagClass">
@@ -2454,13 +2495,35 @@
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.AttributeName">
             <summary>
             Gets or sets the name of the target element's attribute name that will 
-            receive the base64-encoded data URL.
+            receive the base64-encoded data URL. The default value is "src".
             </summary>
         </member>
         <member name="P:BlazorFormManager.IO.ImagePreviewOptions.WrapperSelector">
             <summary>
             Gets or sets the DOM query selector for the element that is wrapped around
             the auto-generated image (e.g. '#auto-image-wrapper', '.image-wrapper', etc.)
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.Width">
+            <summary>
+            Gets or sets the preferred width of the thumbnail to be generated.
+            If <see cref="P:BlazorFormManager.IO.ImagePreviewOptions.PreserveAspectRatio"/> is true, it's enough to set only the <see cref="P:BlazorFormManager.IO.ImagePreviewOptions.Width"/>.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.Height">
+            <summary>
+            Gets or sets the preferred height of the thumbnail to be generated.
+            If <see cref="P:BlazorFormManager.IO.ImagePreviewOptions.PreserveAspectRatio"/> is true, it's enough to set only the <see cref="P:BlazorFormManager.IO.ImagePreviewOptions.Height"/>.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.NoResize">
+            <summary>
+            Indicates whether to disable dynamic image resizing.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.ImagePreviewOptions.PreserveAspectRatio">
+            <summary>
+            Indicates whether to keep the original aspect ratio. The default value is true.
             </summary>
         </member>
         <member name="T:BlazorFormManager.IO.InputFileInfo">
@@ -2491,6 +2554,11 @@
         <member name="P:BlazorFormManager.IO.InputFileInfo.Type">
             <summary>
             Gets or sets the type of a file.
+            </summary>
+        </member>
+        <member name="P:BlazorFormManager.IO.InputFileInfo.Dimensions">
+            <summary>
+            Gets or sets the dimensions of this <see cref="T:BlazorFormManager.IO.InputFileInfo"/> if it's an image.
             </summary>
         </member>
         <member name="P:BlazorFormManager.IO.InputFileInfo.SizeAsString">
@@ -2660,9 +2728,9 @@
             The operation has started.
             </summary>
         </member>
-        <member name="F:BlazorFormManager.IO.ReadFileEventType.Denied">
+        <member name="F:BlazorFormManager.IO.ReadFileEventType.Rejected">
             <summary>
-            A file reading has been denied.
+            A file reading has been rejected.
             </summary>
         </member>
         <member name="F:BlazorFormManager.IO.ReadFileEventType.Processed">

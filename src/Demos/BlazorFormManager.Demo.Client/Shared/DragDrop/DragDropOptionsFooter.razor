@@ -40,7 +40,7 @@
     private async Task DeleteFileList()
     {
         await DropArea.DeleteFileListAsync();
-        OptionsManager.Model.Files.Clear();
+        OptionsManager.Model.ClearFiles();
         InvokeStateChanged();
     }
 
@@ -52,7 +52,7 @@
             if (await DropArea.RemoveEventListenersAsync())
             {
                 OptionsManager.Model.Disabled = true;
-                OptionsManager.Model.Files.Clear();
+                OptionsManager.Model.ClearFiles();
                 InvokeStateChanged();
             }
         }

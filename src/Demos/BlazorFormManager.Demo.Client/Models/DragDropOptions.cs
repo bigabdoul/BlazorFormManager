@@ -12,12 +12,20 @@ namespace BlazorFormManager.Demo.Client.Models
         [DragDrop(Prompt = "Choose files or drop them here", Multiple = true, Accept = ".jpg, .jpeg")]
         public List<InputFileInfo> Files { get; } = new List<InputFileInfo>();
 
+        public List<InputFileInfo> ProcessedFiles { get; } = new List<InputFileInfo>();
         public DragEventResponse DropResponse { get; } = new DragEventResponse { ImagePreviewOptions = new ImagePreviewOptions() };
-
         public bool Disabled { get; set; }
         public int FileCount { get; set; }
         public double DroppedFileSize { get; set; }
         public double UploadFileSize { get; set; }
-        public bool FilesTruncated => Files.Count < FileCount;
+
+        public void ClearFiles()
+        {
+            Files.Clear();
+            ProcessedFiles.Clear();
+            FileCount = 0;
+            DroppedFileSize = 0d;
+            UploadFileSize = 0d;
+        }
     }
 }

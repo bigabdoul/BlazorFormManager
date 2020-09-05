@@ -10,7 +10,7 @@
                 <div class="mt-3">
                     <h6 class="border-bottom pb-2">
                         <span>
-                            Files dropped onto the target area @(Model.FilesTruncated ? "(truncated)" : ""):
+                            Files dropped onto the target area:
                             @Model.FileCount (@InputFileInfo.FileSizeToString(Model.DroppedFileSize))
                         </span>
                         <span class="float-md-right">
@@ -18,7 +18,7 @@
                         </span>
                     </h6>
                     <div class="clearfix"></div>
-                    <InputFileInfoTable Files="Model.Files" />
+                    <InputFileInfoTable Files="Model.Files" FileCount="Model.ProcessedFiles.Count" PageSize="PAGE_SIZE" OnPageChange="HandlePageChange"/>
                     @if (!Model.DropResponse.Cancel)
                     {
                         <h6 class="border-bottom mt-4 pb-2">Files read</h6>
@@ -34,6 +34,16 @@
 
     public void NotifyStateChanged()
     {
+        StateHasChanged();
+    }
+
+    private const int PAGE_SIZE = 20;
+
+    private void HandlePageChange(int page)
+    {
+        var files = Model.Files;
+        files.Clear();
+        files.AddRange(Model.ProcessedFiles.Skip((page - 1) * PAGE_SIZE).Take(PAGE_SIZE));
         StateHasChanged();
     }
 }

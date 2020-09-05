@@ -4,7 +4,6 @@ using BlazorFormManager.Demo.Client.Models;
 using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,10 +13,9 @@ namespace BlazorFormManager.Demo.Client.Pages
     {
         #region fields & properties
 
-        private const int SHOW_MAX_FILES = 20;
+        private const int PAGE_SIZE = 20;
         private bool _disposedValue;
         private readonly DragDropOptions Model = new DragDropOptions();
-        private readonly List<InputFileInfo> _tempFiles = new List<InputFileInfo>();
 
         private Exception Error { get; set; }
         private DragDropArea DragDropAreaRef { get; set; }
@@ -32,7 +30,7 @@ namespace BlazorFormManager.Demo.Client.Pages
         {
             if (Model.Files.Count > 0)
             {
-                Model.Files.Clear();
+                Model.ClearFiles();
                 StateHasChanged();
             }
         }
@@ -41,18 +39,13 @@ namespace BlazorFormManager.Demo.Client.Pages
         {
             var files = e.DataTransfer.Files;
             var count = files?.Length ?? 0;
-            
-            Model.FileCount = count;
-            Model.UploadFileSize = 0D;
 
+            Model.FileCount += count;
+            
             if (count > 0)
             {
                 e.Response = Model.DropResponse;
                 Model.DroppedFileSize = files.Sum(f => f.Size);
-            }
-            else
-            {
-                Model.DroppedFileSize = 0D;
             }
 
             Manager.SubmitResult = null;
@@ -64,20 +57,20 @@ namespace BlazorFormManager.Demo.Client.Pages
             switch (e.Type)
             {
                 case ReadFileEventType.Start:
-                    Model.Files.Clear();
+                    //Model.Files.Clear();
+                    //Model.ProcessedFiles.Clear();
                     break;
                 case ReadFileEventType.Rejected:
                     break;
                 case ReadFileEventType.Processed:
-                    _tempFiles.Add(e.File);
+                    Model.ProcessedFiles.Add(e.File);
                     Model.UploadFileSize += e.File.Size;
                     break;
                 case ReadFileEventType.End:
-                    // For performance reasons list just top SHOW_MAX_FILES of dropped
-                    // files; virtual scroll may be implemented to support rendering of
-                    // the rest of the dropped files.
-                    var max = _tempFiles.Count > SHOW_MAX_FILES ? SHOW_MAX_FILES : _tempFiles.Count;
-                    for (int i = 0; i < max; i++) Model.Files.Add(_tempFiles[i]);
+                    var processedFiles = Model.ProcessedFiles;
+                    var max = processedFiles.Count > PAGE_SIZE ? PAGE_SIZE : processedFiles.Count;
+                    for (int i = 0; i < max; i++)
+                        Model.Files.Add(processedFiles[i]);
                     break;
                 default:
                     break;
@@ -90,9 +83,7 @@ namespace BlazorFormManager.Demo.Client.Pages
             if (e.IsEmptyFile(nameof(DragDropOptions.Files)))
             {
                 Error = null;
-                Model.FileCount = 0;
-                Model.Files.Clear();
-                _tempFiles.Clear();
+                Model.ClearFiles();
                 if (DragDropAreaRef != null) await DragDropAreaRef.DeleteFileListAsync();
                 StateHasChanged();
             }
@@ -108,8 +99,7 @@ namespace BlazorFormManager.Demo.Client.Pages
             {
                 if (disposing)
                 {
-                    _tempFiles.Clear();
-                    Model.Files.Clear();
+                    Model.ClearFiles();
                     ((IDisposable)DragDropAreaRef)?.Dispose();
                 }
                 _disposedValue = true;

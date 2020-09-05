@@ -192,6 +192,10 @@
         max-width: 100px;
     }
 
+.input-file-info-table tfoot td {
+    vertical-align: middle;
+}
+
 /** Progress bars */
 .blazor-form-manager-progress {
     margin-bottom: .8rem;
