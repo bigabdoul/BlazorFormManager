@@ -7,7 +7,6 @@
               Model="Model"
               FormAction="api/account/upload-files-anonymous"
               OnFieldChanged="HandleFieldChanged"
-              OnDragStart="HandleDragStart"
               OnDrop="HandleDrop"
               OnReadFileList="HandleReadFileList"
               OnModelRequested="e => e.Model = null" 
@@ -24,7 +23,7 @@
                 <DragDropOptionsManager Model="Model" />
             </BeforeDropArea>
         </DragDropArea>
-        <SubmitButton Manager="Manager" Text="Upload" />
+        <SubmitButton Manager="Manager" Text="Upload & Save" Disabled="Model.ProcessedFiles.Count == 0"/>
     </AfterDisplayGroups>
 </AutoEditForm>
 <ErrorDisplay Error="Error" />

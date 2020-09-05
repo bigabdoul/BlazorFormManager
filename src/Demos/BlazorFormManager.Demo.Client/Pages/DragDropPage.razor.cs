@@ -26,15 +26,6 @@ namespace BlazorFormManager.Demo.Client.Pages
 
         #region event handlers
 
-        private void HandleDragStart(DomDragEventArgs e)
-        {
-            if (Model.Files.Count > 0)
-            {
-                Model.ClearFiles();
-                StateHasChanged();
-            }
-        }
-
         private void HandleDrop(DomDragEventArgs e)
         {
             var files = e.DataTransfer.Files;
@@ -45,7 +36,7 @@ namespace BlazorFormManager.Demo.Client.Pages
             if (count > 0)
             {
                 e.Response = Model.DropResponse;
-                Model.DroppedFileSize = files.Sum(f => f.Size);
+                Model.DroppedFileSize += files.Sum(f => f.Size);
             }
 
             Manager.SubmitResult = null;
@@ -57,8 +48,6 @@ namespace BlazorFormManager.Demo.Client.Pages
             switch (e.Type)
             {
                 case ReadFileEventType.Start:
-                    //Model.Files.Clear();
-                    //Model.ProcessedFiles.Clear();
                     break;
                 case ReadFileEventType.Rejected:
                     break;
@@ -67,10 +56,15 @@ namespace BlazorFormManager.Demo.Client.Pages
                     Model.UploadFileSize += e.File.Size;
                     break;
                 case ReadFileEventType.End:
+                    var files = Model.Files;
                     var processedFiles = Model.ProcessedFiles;
                     var max = processedFiles.Count > PAGE_SIZE ? PAGE_SIZE : processedFiles.Count;
+                    
+                    files.Clear();
+                    StateHasChanged(); // force data pager to re-render
+
                     for (int i = 0; i < max; i++)
-                        Model.Files.Add(processedFiles[i]);
+                        files.Add(processedFiles[i]);
                     break;
                 default:
                     break;
