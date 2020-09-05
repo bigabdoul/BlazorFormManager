@@ -33,11 +33,6 @@
 @code {
     [Parameter] public DragDropOptions Model { get; set; }
 
-    public void NotifyStateChanged()
-    {
-        StateHasChanged();
-    }
-
     private const int PAGE_SIZE = 20;
 
     private void HandlePageChange(int page)
