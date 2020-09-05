@@ -1001,7 +1001,7 @@ namespace BlazorFormManager.Components
         /// Indicates whether an active form submission can be cancelled.
         /// Returns true if an upload is ongoing; otherwise, false.
         /// </summary>
-        public bool CanCancelUpload { get; private set; }
+        public bool CanAbortUpload { get; private set; }
 
         /// <summary>
         /// Returns true if <see cref="EnableChangeTracking"/> is true and 
@@ -1044,7 +1044,7 @@ namespace BlazorFormManager.Components
                 case ProgressChangedEventType.Start:
                     UploadStatus = "Preparing to upload...";
                     StartStopWatch();
-                    CanCancelUpload = true;
+                    CanAbortUpload = true;
                     IsRunning = true;
                     AbortRequested = false;
                     SubmitResult = null;
@@ -1075,7 +1075,7 @@ namespace BlazorFormManager.Components
                         "within the time interval specified by the XMLHttpRequest.timeout.";
                     break;
                 case ProgressChangedEventType.End:
-                    CanCancelUpload = false;
+                    CanAbortUpload = false;
                     AbortRequested = false;
                     // the server is handling the rest; clean up is done in 
                     // method HandleSubmitDoneAsync(FormManagerSubmitResult)

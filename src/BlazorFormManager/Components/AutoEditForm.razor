@@ -52,7 +52,7 @@
         {
             <Html5ProgressBar Progress="(Progress ?? (BlazorFormManager.IO.ProgressChangedEventArgs)ReadProgress)" 
                               StatusMessage="@Status" 
-                              CanCancel="CanCancelUpload" 
+                              CanCancel="CanAbortUpload" 
                               OnCancelRequested="() => AbortRequested = true"
                               ElapsedMilliseconds="Stopwatch?.ElapsedMilliseconds"
                               HideCancelButton="IsReadingFileList"
