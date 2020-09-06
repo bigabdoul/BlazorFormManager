@@ -36,7 +36,9 @@
             font-size: 90%;
         }
 
-.blazor-form-manager-drag-drop-area {
+/* Drag & Drop Area */
+
+.blazor-form-manager-drag-drop-area.multiple {
     margin-bottom: 1rem;
     max-height: 400px;
     overflow-y: auto;
@@ -73,7 +75,7 @@
             display: block;
         }
 
-    .blazor-form-manager-drag-drop-area .image-wrapper {
+    .blazor-form-manager-drag-drop-area .image-wrapper.multiple {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
         grid-gap: 10px;
@@ -108,7 +110,12 @@
         transition: all .3s ease-out;
     }
 
-    .form-manager-auto-generated img, .form-manager-auto-generated canvas {
+    .form-manager-auto-generated:not(.gallery) img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .form-manager-auto-generated.gallery img, .form-manager-auto-generated.gallery canvas {
         width: 150px;
         height: 150px;
         object-fit: cover;
@@ -131,6 +138,10 @@
         color: rgba(0, 0, 0, 0.9);
         line-height: 130%;
         padding: 1em;
+    }
+
+    .form-manager-auto-generated:not(.gallery) .file-info {
+        top: 48%;
     }
 
     .form-manager-auto-generated:hover .file-info {
@@ -243,7 +254,7 @@ progress, progress::-webkit-progress-bar {
     }
 
 @media (max-width:767px) {
-    .blazor-form-manager-drag-drop-area .image-wrapper {
+    .blazor-form-manager-drag-drop-area .image-wrapper.multiple {
         grid-template-columns: repeat(2, 1fr);
     }
 
@@ -254,7 +265,7 @@ progress, progress::-webkit-progress-bar {
 }
 
 @media (max-width:480px) {
-    .blazor-form-manager-drag-drop-area .image-wrapper {
+    .blazor-form-manager-drag-drop-area .image-wrapper.multiple {
         grid-template-columns: repeat(1, 1fr);
     }
 }

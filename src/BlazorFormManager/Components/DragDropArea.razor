@@ -5,8 +5,8 @@
     {
         @BeforeDropArea
     }
-    <div id="@Id" class="blazor-form-manager-drag-drop-area drag-drop-area-empty">
-        <label for="@_inputId" class="image-wrapper">@ChildContent</label>
+    <div id="@Id" class="blazor-form-manager-drag-drop-area drag-drop-area-empty@(MultipleClass)">
+        <label for="@_inputId" class="image-wrapper@(MultipleClass)">@ChildContent</label>
         @if (!string.IsNullOrWhiteSpace(WatermarkText))
         {
             <label for="@_inputId" class="watermark">@WatermarkText</label>
@@ -22,7 +22,7 @@
 </CascadingValue>
 
 @code {
-    #region private fields / parameters
+    #region private fields / properties
 
     private string _inputId;
     private string _waterMark;
@@ -30,6 +30,7 @@
     private bool _multiple;
     private bool _hasEventListeners;
     private string Id => $"{PropertyName}{typeof(DragDropArea).Name}";
+    private string MultipleClass => _multiple ? " multiple" : string.Empty;
     private FormManagerBase FormManagerRef => (Form ?? Manager);
     [CascadingParameter] private FormManagerBase Form { get; set; }
 
