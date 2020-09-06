@@ -295,7 +295,6 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     {
                         totalSize += size;
                         // don't keep the file
-                        await Task.Delay(100);
                         try
                         {
                             IOFile.Delete(filename);
