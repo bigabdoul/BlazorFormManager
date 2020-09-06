@@ -12,7 +12,7 @@
             <label for="@_inputId" class="watermark">@WatermarkText</label>
         }
         <div class="input-file-wrapper">
-            <input type="file" id="@_inputId" @onchange="HandleInputFileChanged" _accept="@_accept" _multiple="@BindConverter.FormatValue(_multiple)" />
+            <input type="file" id="@_inputId" @onchange="HandleInputFileChanged" accept="@_accept" multiple="@BindConverter.FormatValue(_multiple)" />
         </div>
     </div>
     @if (AfterDropArea != null)
