@@ -38,11 +38,44 @@
 
 /* Drag & Drop Area */
 
-.blazor-form-manager-drag-drop-area.multiple {
-    margin-bottom: 1rem;
-    max-height: 400px;
-    overflow-y: auto;
+.blazor-form-manager-drag-drop-area {
+    position: relative;
+    min-height: 200px;
+    width: 100%;
+    max-width: 100%;
 }
+
+    .blazor-form-manager-drag-drop-area.multiple {
+        margin-bottom: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .blazor-form-manager-drag-drop-area .bfm-ddz-clear {
+        display: none;
+        position: absolute;
+        opacity: 0;
+        z-index: 7;
+        top: 10px;
+        right: 10px;
+        background: 0 0;
+        border: 1px solid #FFF;
+        text-transform: uppercase;
+        font-size: 16px;
+        padding: 4px 8px;
+        font-weight: 700;
+        color: #FFF;
+        -webkit-transition: all .15s linear;
+        transition: all .15s linear;
+    }
+
+    .blazor-form-manager-drag-drop-area:hover .bfm-ddz-clear {
+        opacity: 1;
+    }
+
+    .blazor-form-manager-drag-drop-area:not(.drag-drop-area-empty) .bfm-ddz-clear {
+        display: block;
+    }
 
     .blazor-form-manager-drag-drop-area .watermark {
         width: 100%;
@@ -59,12 +92,12 @@
     .blazor-form-manager-drag-drop-area.drag-drop-area-empty,
     .blazor-form-manager-drag-drop-area.drag-drop-area-empty .watermark,
     .blazor-form-manager-drag-drop-area .image-wrapper,
-    .blazor-form-manager-drag-drop-area .input-file-wrapper input[type=file] {
+    .blazor-form-manager-drag-drop-area input[type=file] {
         cursor: pointer;
     }
 
-    .blazor-form-manager-drag-drop-area .input-file-wrapper input[type=file] {
-        opacity: .01;
+    .blazor-form-manager-drag-drop-area input[type=file] {
+        opacity: 0;
     }
 
     .blazor-form-manager-drag-drop-area.drag-drop-area-empty {
@@ -73,6 +106,9 @@
 
         .blazor-form-manager-drag-drop-area.drag-drop-area-empty .watermark {
             display: block;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
     .blazor-form-manager-drag-drop-area .image-wrapper.multiple {
@@ -96,7 +132,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 10;
+        z-index: 3;
         opacity: 0;
     }
 

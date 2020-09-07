@@ -11,9 +11,13 @@
         {
             <label for="@_inputId" class="watermark">@WatermarkText</label>
         }
-        <div class="input-file-wrapper">
-            <input type="file" id="@_inputId" @onchange="HandleInputFileChanged" accept="@_accept" multiple="@BindConverter.FormatValue(_multiple)" />
-        </div>
+        <input type="file" id="@_inputId" @onchange="HandleInputFileChanged" accept="@_accept" multiple="@BindConverter.FormatValue(_multiple)" />
+        @if (!_multiple)
+        {
+            <button type="button" class="bfm-ddz-clear" @onclick="() => DeleteFileListAsync()" aria-label="Remove">
+                <i class="fas fa-trash"></i>
+            </button>
+        }
     </div>
     @if (AfterDropArea != null)
     {
