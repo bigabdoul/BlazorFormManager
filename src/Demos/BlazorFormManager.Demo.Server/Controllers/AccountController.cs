@@ -65,10 +65,13 @@ namespace BlazorFormManager.Demo.Server.Controllers
             _logger = logger;
         }
 
-        [HttpGet("info")]
-        public async Task<IActionResult> GetInfo()
+        [HttpGet("info/{id?}")]
+        public async Task<IActionResult> GetInfo(string id)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = string.IsNullOrWhiteSpace(id) 
+                ? await _userManager.FindByNameAsync(User.Identity.Name)
+                : await _userManager.FindByIdAsync(id);
+
             if (user != null)
             {
                 return Ok(new
@@ -84,6 +87,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
                     user.TwoFactorEnabled,
                 });
             }
+
             return NotFound();
         }
 

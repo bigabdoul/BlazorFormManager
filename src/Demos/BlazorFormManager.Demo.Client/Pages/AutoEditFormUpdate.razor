@@ -1,7 +1,9 @@
 ﻿@attribute [Authorize]
 @page "/account/autoeditform"
+@page "/account/autoeditform/{ModelId}"
+@using BlazorFormManager.Demo.Client.Extensions
 
-<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="HandleSubmitDone" OptionsGetter="GetOptions" @ref="Manager">
+<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="Manager.ProcessCustomServerResponse" OptionsGetter="GetOptions" @ref="Manager">
     <FormHeader>
         <DemoHeader Title="Auto Edit Form Demo" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     </FormHeader>
@@ -10,7 +12,7 @@
         <SubmitButton Manager="Manager" Text="Update" />
     </AfterDisplayGroups>
     <ChildContent>
-        <Base64RemoteImage Src="api/account/photo" @ref="RemoteImgRef" />
+        <DynamicPhoto Controller="account" ModelId="Model.Id" />
         <CustomInputFile Name="Photo" />
         <DataAnnotationsValidator />
     </ChildContent>

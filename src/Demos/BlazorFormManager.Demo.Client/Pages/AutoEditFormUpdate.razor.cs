@@ -1,9 +1,7 @@
 ﻿using BlazorFormManager.Components;
 using BlazorFormManager.Debugging;
-using BlazorFormManager.Demo.Client.Extensions;
 using BlazorFormManager.Demo.Client.Models;
 using BlazorFormManager.Demo.Client.Services;
-using BlazorFormManager.Demo.Client.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using System;
@@ -18,7 +16,6 @@ namespace BlazorFormManager.Demo.Client.Pages
     public partial class AutoEditFormUpdate
     {
         private static IEnumerable<SelectOptionList> _options;
-        private Base64RemoteImage RemoteImgRef { get; set; }
         private AutoEditForm<AutoUpdateUserModel> Manager { get; set; }
         private IDictionary<string, object> RequestHeaders { get; set; }
         private AutoUpdateUserModel Model { get; set; }
@@ -26,11 +23,13 @@ namespace BlazorFormManager.Demo.Client.Pages
         [Inject] private HttpClient Http { get; set; }
         [Inject] private IRequestHeadersProvider HeadersProvider { get; set; }
 
+        [Parameter] public string ModelId { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             try
             {
-                Model = await Http.GetFromJsonAsync<AutoUpdateUserModel>("api/account/info");
+                Model = await Http.GetFromJsonAsync<AutoUpdateUserModel>($"api/account/info/{ModelId}");
                 RequestHeaders = await HeadersProvider.CreateAsync();
                 if (_options == null) _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
             }
@@ -43,15 +42,6 @@ namespace BlazorFormManager.Demo.Client.Pages
                 if (Manager != null) Manager.SubmitResult = FormManagerSubmitResult.Failed(null, ex.ToString(), false);
             }
             await base.OnInitializedAsync();
-        }
-
-        private async Task HandleSubmitDone(FormManagerSubmitResult result)
-        {
-            if (result.Succeeded)
-            {
-                Manager.ProcessCustomServerResponse(result);
-                if (result.UploadContainedFiles) await RemoteImgRef?.RefreshAsync();
-            }
         }
 
         private IEnumerable<SelectOption> GetOptions(string propertyName) 
