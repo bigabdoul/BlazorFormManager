@@ -39,9 +39,27 @@ namespace BlazorFormManager.Demo.Server.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AccountController> _logger;
 
-        #endregion
+        // These options could be retrieved from a database or another server-side store;
+        // otherwise, there would be no point in making an HTTP request just to retrieve
+        // static / hard-coded values. But hey, this is a demo project!
+        private static readonly SelectOption[] AgeRangeOptions = new[]
+        {
+            new SelectOption(id: 0, value: "[Your most appropriate age]", isPrompt: true),
+            new SelectOption(1, "Minor (< 18)"),
+            new SelectOption(2, "Below or 25"),
+            new SelectOption(3, "Below or 30"),
+            new SelectOption(4, "Below or 40"),
+            new SelectOption(5, "Below 50"),
+            new SelectOption(6, "Between 50 and 54"),
+            new SelectOption(7, "Between 55 and 60"),
+            new SelectOption(8, "Above 60"),
+            new SelectOption(9, "Above 70"),
+            new SelectOption(10, "Above 80"),
+        };
 
-        public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
+    #endregion
+
+    public AccountController(UserManager<ApplicationUser> userManager, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _logger = logger;
@@ -66,6 +84,34 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 });
             }
             return NotFound();
+        }
+
+        [HttpGet("Users")]
+        public async Task<IActionResult> GetUsers([FromQuery] PaginationRequestModel model)
+        {
+            var userQuery = _userManager.Users;
+
+            if (model.Sort.HasValue && !string.IsNullOrWhiteSpace(model.Column))
+                userQuery = SortUsers(userQuery, model.Column, ascending: model.Sort.Value);
+
+            var items = await model.GetPageAsync(userQuery);
+            
+            return Ok(new
+            {
+                model.TotalItemCount,
+                Items = items.Select(user => new
+                {
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    user.PhoneNumber,
+                    user.AgeRange,
+                    user.FavouriteColor,
+                    user.FavouriteWorkingDay,
+                    user.TwoFactorEnabled,
+                })
+            });
         }
 
         /// <summary>
@@ -217,15 +263,17 @@ namespace BlazorFormManager.Demo.Server.Controllers
             return Ok(new { success = false, error = message });
         }
 
-        [HttpGet("Photo")]
-        public async Task<IActionResult> Photo()
+        [HttpGet("Photo/{id?}")]
+        public async Task<FileContentResult> Photo(string id)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            if (user != null && user.Photo != null)
-            {
-                return File(user.Photo, "image/jpeg");
-            }
-            return NotFound();
+            ApplicationUser user;
+
+            if (!string.IsNullOrWhiteSpace(id))
+                user = await _userManager.FindByIdAsync(id);
+            else
+                user = await _userManager.FindByNameAsync(User.Identity.Name);
+            
+            return File(user?.Photo ?? new byte[0], "image/jpeg");
         }
 
         [HttpPost("UploadBigFileTest")]
@@ -319,7 +367,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
                 {
                     var totalSizeString = FileSizeToString(totalSize);
                     var totalUploadedSizeString = FileSizeToString(totalUploadedSize);
-                    
+
                     return Ok(new
                     {
                         success,
@@ -357,24 +405,6 @@ namespace BlazorFormManager.Demo.Server.Controllers
         [HttpGet("options")]
         public IEnumerable<SelectOptionList> GetOptions()
         {
-            // These options could be retrieved from a database or another server-side store;
-            // otherwise, there would be no point in making an HTTP request just to retrieve
-            // static / hard-coded values. But hey, this is a demo project!
-            var ageOptions = new[]
-            {
-                new SelectOption(id: 0, value: "[Your most appropriate age]", isPrompt: true),
-                new SelectOption(1, "Minor (< 18)"),
-                new SelectOption(2, "Below or 25"),
-                new SelectOption(3, "Below or 30"),
-                new SelectOption(4, "Below or 40"),
-                new SelectOption(5, "Below 50"),
-                new SelectOption(6, "Between 50 and 54"),
-                new SelectOption(7, "Between 55 and 60"),
-                new SelectOption(8, "Above 60"),
-                new SelectOption(9, "Above 70"),
-                new SelectOption(10, "Above 80"),
-            };
-
             var colorOptions = new[]
             {
                 new SelectOption("red", "Red"),
@@ -384,7 +414,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
 
             return new[]
             {
-                new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), ageOptions),
+                new SelectOptionList(nameof(AutoUpdateUserModel.AgeRange), AgeRangeOptions),
                 new SelectOptionList(nameof(AutoUpdateUserModel.FavouriteColor), colorOptions),
             };
         }
@@ -473,6 +503,19 @@ namespace BlazorFormManager.Demo.Server.Controllers
             if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
         }
 
+        private IQueryable<ApplicationUser> SortUsers(IQueryable<ApplicationUser> q, string column, bool ascending)
+        {
+            return column switch
+            {
+                nameof(ApplicationUser.FirstName)        => ascending ? q.OrderBy(u => u.FirstName)        : q.OrderByDescending(u => u.FirstName),
+                nameof(ApplicationUser.LastName)         => ascending ? q.OrderBy(u => u.LastName)         : q.OrderByDescending(u => u.LastName),
+                nameof(ApplicationUser.Email)            => ascending ? q.OrderBy(u => u.Email)            : q.OrderByDescending(u => u.Email),
+                nameof(ApplicationUser.PhoneNumber)      => ascending ? q.OrderBy(u => u.PhoneNumber)      : q.OrderByDescending(u => u.PhoneNumber),
+                nameof(ApplicationUser.FavouriteColor)   => ascending ? q.OrderBy(u => u.FavouriteColor)   : q.OrderByDescending(u => u.FavouriteColor),
+                nameof(ApplicationUser.TwoFactorEnabled) => ascending ? q.OrderBy(u => u.TwoFactorEnabled) : q.OrderByDescending(u => u.TwoFactorEnabled),
+                _ => q,
+            };
+        }
 
         /// <summary>
         /// Converts the specified file size to a human-readable string representation.
