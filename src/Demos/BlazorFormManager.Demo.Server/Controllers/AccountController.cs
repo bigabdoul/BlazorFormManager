@@ -215,7 +215,7 @@ namespace BlazorFormManager.Demo.Server.Controllers
             string message;
             try
             {
-                var user = await _userManager.FindByNameAsync(User.Identity.Name);
+                var user = await _userManager.FindByIdAsync(model.Id);
 
                 if (user != null)
                 {
