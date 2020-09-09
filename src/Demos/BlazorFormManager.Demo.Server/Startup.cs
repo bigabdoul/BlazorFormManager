@@ -1,4 +1,5 @@
 using BlazorFormManager.Demo.Server.Data;
+using BlazorFormManager.Demo.Server.Extensions;
 using BlazorFormManager.Demo.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -95,6 +95,7 @@ namespace BlazorFormManager.Demo.Server
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
+            app.UseDynamicFiles();
             app.UseStaticFiles();
 
             app.UseRouting();
