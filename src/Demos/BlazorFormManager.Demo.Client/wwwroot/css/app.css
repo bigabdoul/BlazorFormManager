@@ -177,6 +177,10 @@ app {
     overflow-x: hidden;
 }
 
+.img-fit-cover {
+    object-fit: cover;
+}
+
 @media (max-width: 767.98px) {
     .main .top-row:not(.auth) {
         display: none;
