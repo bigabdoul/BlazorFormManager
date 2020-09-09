@@ -48,11 +48,11 @@ namespace BlazorFormManager.Demo.Server.Services
         {
             // sample request path pattern: /dynamic/account/photo/1045.jpg
             var parts = context.Request.Path.Value.Split('/');
-            if (parts.Length > 4)
+            if (parts.Length > 3)
             {
                 var controllerName = $"{parts[2][0]}".ToUpper() + $"{parts[2][1..]}Controller"; // AccountController
                 var actionName = parts[3]; // photo
-                string actionId = parts[4]; // 1045.jpg
+                string actionId = parts.Length > 4 ? parts[4] : string.Empty; // 1045.jpg
 
                 if (actionId.EndsWith(".jpg", IgnoreCase)) actionId = actionId[0..^4]; // actionId.Substring(0, actionId.Length - 4);
 
