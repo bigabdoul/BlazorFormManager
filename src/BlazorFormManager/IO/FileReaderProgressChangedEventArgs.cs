@@ -30,6 +30,6 @@
         /// <summary>
         /// Gets or sets information about an input file currently being read.
         /// </summary>
-        public InputFileInfo File { get; set; }
+        public InputFileInfo? File { get; set; }
     }
 }

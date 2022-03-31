@@ -1,0 +1,21 @@
+﻿@{
+	var attrs = GetAttributes(
+		("id", Id),
+		("class", "nav-link" + (IsActive ? " active" : "")),
+		("aria-current", IsActive ? "page" : ""),
+		("aria-controls", TargetId),
+		("aria-selected", IsActive ? "true" : "false"),
+		("data-bs-toggle", "tab"),
+		("data-bs-target", $"#{TargetId}")
+	);
+}
+<li class="nav-item" role="presentation">
+	<button @attributes="attrs" type="button" role="tab">@ChildContent</button>
+</li>
+
+@code {
+	[Parameter] public string? Id { get; set; }
+	[Parameter] public string? TargetId { get; set; }
+	[Parameter] public bool IsActive { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+}

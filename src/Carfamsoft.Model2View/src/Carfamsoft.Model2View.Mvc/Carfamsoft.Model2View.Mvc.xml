@@ -1,0 +1,278 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Carfamsoft.Model2View.Mvc</name>
+    </assembly>
+    <members>
+        <member name="T:Carfamsoft.Model2View.Mvc.AutoInputMetadataExtensions">
+            <summary>
+            Provides extension methods for instances of the <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> class.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.AutoInputMetadataExtensions.Render(Carfamsoft.Model2View.Annotations.AutoInputMetadata,System.Object,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified <paramref name="metadata"/> to the render output.
+            </summary>
+            <param name="metadata">The metadata to render.</param>
+            <param name="viewModel">
+            An object used to obtain the value of the associated 
+            property defined in <paramref name="metadata"/>.
+            </param>
+            <returns>An HTML-encoded string that should not be encoded again.</returns>
+            <param name="options">An object that controls a part of the HTML generation process.</param>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Mvc.HtmlHelperExtensions">
+            <summary>
+            Provides extension methods for HTML helpers.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.HtmlHelperExtensions.RenderAsHtml(System.Web.Mvc.HtmlHelper,System.Object,System.String)">
+            <summary>
+            Renders the specified model as an HTML-encoded string that should not be encoded again.
+            </summary>
+            <param name="_">The unused HtmlHelper.</param>
+            <param name="model">The model to render.</param>
+            <param name="ngModel">
+            The model prefix for the AngularJS ng-model attribute.
+            If the value is null the ng-mnodel attribute is not added.
+            If the value is empty the attribute is added without the prefix.
+            </param>
+            <returns>An HTML-encoded string that should not be encoded again.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.HtmlHelperExtensions.AutoEditForm(System.Web.Mvc.HtmlHelper,System.Object,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.IDictionary{System.String,System.String},System.Web.IHtmlString,System.Boolean)">
+            <summary>
+            Renders the specified model as an HTML form-encoded string that should not be encoded again.
+            </summary>
+            <param name="helper">The used HtmlHelper.</param>
+            <param name="model">The model to render.</param>
+            <param name="ngModel">
+            The model prefix for the AngularJS ng-model attribute.
+            If the value is null the ng-mnodel attribute is not added.
+            If the value is empty the attribute is added without the prefix.
+            </param>
+            <param name="formName">The name of the form to use. If not specified, a randomly-generated name will be used.</param>
+            <param name="ngSubmitFunctionName">The name of the AngularJS function used to submit the form.</param>
+            <param name="submitText">The text of the submit button, if included.</param>
+            <param name="submitUrl">The URL of the form action. Is ignored if <paramref name="ngModel"/> is specified.</param>
+            <param name="omitSubmitButton">true to omit the submit button, otherwise, false.</param>
+            <param name="additionalFormAttributes">Additional form attributes to include.</param>
+            <param name="additionalHtml">Additional HTML content to include into the form.</param>
+            <param name="generateNameAttributes">true to generate the 'name' atribute for rendrered form controls.</param>
+            <returns>An HTML-encoded string that should not be encoded again.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.HtmlHelperExtensions.AutoEditForm(System.Web.Mvc.HtmlHelper,System.Object,Carfamsoft.Model2View.Shared.FormAttributes,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified model as an HTML-encoded string that should not be encoded again.
+            </summary>
+            <param name="_">Unused</param>
+            <param name="viewModel">The view model to render.</param>
+            <param name="formAttrs">An object that encapsulates form attribute values.</param>
+            <param name="renderOptions">An object that controls a part of the HTML generation process.</param>
+            <returns>An HTML-encoded string that should not be encoded again.</returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Mvc.NestedTagBuilder">
+            <summary>
+            Contains classes and properties that are used to create nested HTML elements.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="P:Carfamsoft.Model2View.Mvc.NestedTagBuilder.InnerTags">
+            <summary>
+            Gets a new read-only collection of <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> elements.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.Create(System.String)">
+            <summary>
+            Creates a new <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> class that has the specified tag name.
+            </summary>
+            <param name="tagName">
+            The tag name without the "&lt;", "/", or "&gt;" delimiters.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddChild(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Adds an initialized <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> to the underlying collection.
+            </summary>
+            <param name="tag">An initialized <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> to add.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="tag"/> is null.</exception>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddChildIf(System.Boolean,System.Func{Carfamsoft.Model2View.Shared.INestedTagBuilder})">
+            <summary>
+            Adds an initialized <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> to the underlying collection
+            if the <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="callback">
+            A function that creates a <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> if the <paramref name="condition"/> is true.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddChildIf(System.Boolean,Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Adds an initialized <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> to the underlying collection
+            if the <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="child">The child tag to add.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.ToString">
+            <summary>
+            Renders the HTML tag using a self closing or normal mode.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddMultipleAttributes(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Adds multiple attributes.
+            </summary>
+            <param name="additionalAttributes">A collection of key-value pairs representing attributes.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddClass(System.String)">
+            <summary>
+            Adds a CSS class to the list of CSS classes in the tag.
+            </summary>
+            <param name="name">The name of the CSS class to add.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddClassIf(System.Boolean,System.String)">
+            <summary>
+            Adds a CSS class to the list of CSS classes in the tag if <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="name">The name of the CSS class to add.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddChildForEach``1(System.Collections.Generic.IEnumerable{``0},System.Func{``0,Carfamsoft.Model2View.Shared.INestedTagBuilder})">
+            <summary>
+            Invokes the specified <paramref name="callback"/> for each item contained in the given <paramref name="collection"/>.
+            </summary>
+            <typeparam name="T">The type of the elements contained in <paramref name="collection"/>.</typeparam>
+            <param name="collection">A collection of elements for which to invoke the <paramref name="callback"/>.</param>
+            <param name="callback">
+            A function that creates a <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> for each item contained in the 
+            <paramref name="collection"/>. If the return value for an item is null, no child tag will be added.
+            </param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>
+            Invokes the specified <paramref name="callback"/> for each item contained 
+            in the given <paramref name="collection"/>.
+            </summary>
+            <typeparam name="T">The type of the elements contained in <paramref name="collection"/>.</typeparam>
+            <param name="collection">A collection of elements for which to invoke the <paramref name="callback"/>.</param>
+            <param name="callback">
+            A function that is invoked for each item contained in the <paramref name="collection"/>.
+            </param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0,Carfamsoft.Model2View.Shared.INestedTagBuilder})">
+            <summary>
+            Invokes the specified <paramref name="callback"/> for each item contained 
+            in the given <paramref name="collection"/> and additionally passes a reference
+            to the current <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> instance in the callback arguments.
+            </summary>
+            <typeparam name="T">The type of the elements contained in <paramref name="collection"/>.</typeparam>
+            <param name="collection">A collection of elements for which to invoke the <paramref name="callback"/>.</param>
+            <param name="callback">
+            A function that is invoked for each item contained in the <paramref name="collection"/>.
+            The second argument contains a reference to the current <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddAttribute(System.String,System.String)">
+            <summary>
+             Adds a new attribute to the tag.
+            </summary>
+            <param name="key">The key for the attribute.</param>
+            <param name="value">The value of the attribute.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddAttributeIf(System.Boolean,System.String)">
+            <summary>
+            Adds an attribute to the tag if <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="keyAndValue">The key and value for the attribute.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddAttributeIf(System.Boolean,System.String,System.String)">
+            <summary>
+            Adds an attribute to the tag if <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="key">The key for the attribute.</param>
+            <param name="value">The value for the attribute.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddAttributeIfNotBlank(System.String)">
+            <summary>
+            Adds an attribute to the tag if <paramref name="keyAndValue"/> is not empty.
+            </summary>
+            <param name="keyAndValue">The key and value for the attribute.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddAttributeIfNotBlank(System.String,System.String)">
+            <summary>
+            Adds an attribute to the tag if <paramref name="value"/> is not empty.
+            </summary>
+            <param name="key">The key for the attribute.</param>
+            <param name="value">The value for the attribute.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.SetText(System.String)">
+            <summary>
+            Sets an HTML-encoded string to the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> property.
+            </summary>
+            <param name="text">The string to HTML-encode.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.SetInnerHtml(System.String)">
+            <summary>
+            Sets the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> property of the 
+            element to a non HTML-encoded version of the specified string.
+            </summary>
+            <param name="html">The inner HTML value for the element.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddContent(System.String)">
+            <summary>
+            Appends the specified content to the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> property.
+            </summary>
+            <param name="content">The content to append.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddContentIf(System.Boolean,System.Func{System.String})">
+            <summary>
+            Appends the specified content to the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> 
+            property only if <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to test.</param>
+            <param name="createContentCallback">A function that creates the content to append.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddContentIf(System.Boolean,System.String)">
+            <summary>
+            Appends the specified content to the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> 
+            property only if <paramref name="condition"/> is true.
+            </summary>
+            <param name="condition">The condition to test.</param>
+            <param name="content">The content to append if the <paramref name="condition"/> is true.</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilder.AddContentIfNotBlank(System.String)">
+            <summary>
+            Appends the specified content to the <see cref="P:System.Web.Mvc.TagBuilder.InnerHtml"/> 
+            property only if <paramref name="content"/> is not blank.
+            </summary>
+            <param name="content">The content to append</param>
+            <returns>A reference to this <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.</returns>
+        </member>
+    </members>
+</doc>

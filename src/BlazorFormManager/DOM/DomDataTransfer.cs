@@ -34,16 +34,16 @@ namespace BlazorFormManager.DOM
         /// Contains a list of all the local files available on the data transfer. If the
         /// drag operation doesn't involve dragging files, this property is an empty list.
         /// </summary>
-        public InputFileInfo[] Files { get; set; }
+        public InputFileInfo[]? Files { get; set; }
 
         /// <summary>
         /// Gives a <see cref="DataTransferItem"/> array which is a list of all of the drag data.
         /// </summary>
-        public DataTransferItem[] Items { get; set; }
+        public DataTransferItem[]? Items { get; set; }
 
         /// <summary>
         /// An array of <see cref="string"/> giving the formats that were set in the dragstart event.
         /// </summary>
-        public string[] Types { get; set; }
+        public string[]? Types { get; set; }
     }
 }

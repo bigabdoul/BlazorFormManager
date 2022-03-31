@@ -1,0 +1,52 @@
+﻿
+@if (Items?.Count > 0)
+{
+    <tfoot class="@CssClass">
+        <tr>
+            @foreach (var hdr in Items)
+            {
+                if (hdr.OnClick.HasDelegate)
+                {
+                    if (hdr.ColSpan > 0)
+                    {
+                        <td scope="col" title="@hdr.Description" @onclick="hdr.OnClick" colspan="@hdr.ColSpan">
+                            @if (!string.IsNullOrEmpty(hdr.Icon))
+                            {<i class="@hdr.Icon"></i>} @hdr.Text
+                        </td>
+                    }
+                    else
+                    {
+                        <td scope="col" title="@hdr.Description" @onclick="hdr.OnClick">
+                            @if (!string.IsNullOrEmpty(hdr.Icon))
+                            {<i class="@hdr.Icon"></i>} @hdr.Text
+                        </td>
+                    }
+                }
+                else if (hdr.ColSpan > 0)
+                {
+                    <td scope="col" title="@hdr.Description" colspan="@hdr.ColSpan">
+                        @if (!string.IsNullOrEmpty(hdr.Icon))
+                        {<i class="@hdr.Icon"></i>} @hdr.Text
+                    </td>
+                }
+                else
+                {
+                    <td scope="col" title="@hdr.Description">
+                        @if (!string.IsNullOrEmpty(hdr.Icon))
+                        {<i class="@hdr.Icon"></i>} @hdr.Text
+                    </td>
+                }
+            }
+        </tr>
+    </tfoot>
+}
+else if (ChildContent != null)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public IReadOnlyCollection<TableCell>? Items { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+}

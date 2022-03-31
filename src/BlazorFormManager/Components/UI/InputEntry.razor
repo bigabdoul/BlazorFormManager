@@ -1,0 +1,149 @@
+﻿@inject Microsoft.JSInterop.IJSRuntime JS
+@implements IAsyncDisposable
+
+@{
+    var attrs =  GetAttributes(
+        ("id", Id),
+        ("class", "form-control")
+    );
+
+    <InputGroupContainer PrependText="@LabelText" Id="@Id">
+        <input @attributes="AdditionalAttributes.Merge(attrs)" @bind-value="Value">
+    </InputGroupContainer>
+}
+
+@code {
+    [Parameter] public string? LabelText { get; set; }
+    [Parameter] public object? Value { get; set; }
+    [Parameter] public string Id { get; set; } = typeof(InputEntry).Name.GenerateId();
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter] public EventCallback<JSEventArgs> OnInput { get; set; }
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyDown { get; set; }
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyPress { get; set; }
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyUp { get; set; }
+    [Parameter] public FilterKeyType AllowKeyType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the configuration options for this input search text box.
+    /// </summary>
+    [Parameter]
+    public InputSearchOptions? SearchOptions
+    {
+        get => _searchOptions;
+        set
+        {
+            if (_searchOptions != value)
+            {
+                // do this to prevent memory leaks
+                RemoveEventHandlersAsync().ContinueWith(t =>
+                {
+                    _searchOptions = value;
+                    if (_renderedOnce)
+                    {
+                        _ = SetupEventHandlersAsync();
+                    }
+                });
+            }
+        }
+    }
+
+    #region fields
+
+    private bool _settingUp;
+    private bool _renderedOnce;
+    private bool _disposed;
+    private InputSearchOptions? _searchOptions;
+
+    #endregion
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _renderedOnce = true;
+            await SetupEventHandlersAsync();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task SetupEventHandlersAsync()
+    {
+        if (_settingUp) return;
+
+        _settingUp = true;
+
+        if (OnInput.HasDelegate)
+        {
+            await JS.AddEventListenerAsync(Id, "input", HandleInput);
+        }
+
+        var filters = GetFilters();
+
+        if (OnKeyDown.HasDelegate)
+        {
+            await JS.FilterKeysAsync(Id, DomEventType.KeyDown, HandleKeyDown, filters);
+        }
+
+        if (OnKeyPress.HasDelegate)
+        {
+            await JS.FilterKeysAsync(Id, DomEventType.KeyPress, HandleKeyPress, filters);
+        }
+
+        if (OnKeyUp.HasDelegate)
+        {
+            await JS.FilterKeysAsync(Id, DomEventType.KeyUp, HandleKeyUp, filters);
+        }
+
+        _settingUp = false;
+    }
+
+    private FilterKeyOptions? GetFilters()
+    {
+        return SearchOptions?.KeyFilters ?? 
+            (AllowKeyType != FilterKeyType.None 
+            ? new FilterKeyOptions { AllowKeyType = AllowKeyType } 
+            : null);
+    }
+
+    private Task HandleInput(JSEventArgs e)
+    {
+        Value = e.Value;
+        return OnInput.InvokeAsync(e);
+    }
+
+    private Task HandleKeyDown(JSKeyboardEventArgs e)
+    {
+        return OnKeyDown.InvokeAsync(e);
+    }
+
+    private Task HandleKeyPress(JSKeyboardEventArgs e)
+    {
+        return OnKeyPress.InvokeAsync(e);
+    }
+
+    private Task HandleKeyUp(JSKeyboardEventArgs e)
+    {
+        return OnKeyUp.InvokeAsync(e);
+    }
+
+    private async Task RemoveEventHandlersAsync()
+    {
+        await JS.RemoveEventListenerAsync(Id, "input");
+        await JS.RemoveEventListenerAsync(Id, "keydown");
+        await JS.RemoveEventListenerAsync(Id, "keypress");
+        await JS.RemoveEventListenerAsync(Id, "keyup");
+    }
+
+    public virtual async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+            await RemoveEventHandlersAsync();
+            _disposed = true;
+            GC.SuppressFinalize(this);
+        }
+    }
+}

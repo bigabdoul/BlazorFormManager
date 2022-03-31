@@ -1,0 +1,42 @@
+﻿<div class="form-group mb-3">
+    @if (!string.IsNullOrWhiteSpace(LabelText))
+    {
+        <label for="@Id" class="control-label">@LabelText</label>
+    }
+    else if (LabelContent != null)
+    {
+        @LabelContent
+    }
+    <div class="input-group">
+        @if (!string.IsNullOrWhiteSpace(Icon) || !string.IsNullOrWhiteSpace(PrependText))
+        {
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    @if (!string.IsNullOrWhiteSpace(Icon))
+                    {
+                        <i class="@Icon"></i>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(PrependText))
+                    {
+                        <span>@PrependText</span>
+                    }
+                </span>
+            </div>
+        }
+        @ChildContent
+    </div>
+    @if (ValidationContent != null)
+    {
+        @ValidationContent
+    }
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = typeof(InputGroupContainer).Name.GenerateId();
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? LabelText { get; set; }
+    [Parameter] public string? PrependText { get; set; }
+    [Parameter] public RenderFragment? LabelContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? ValidationContent { get; set; }
+}

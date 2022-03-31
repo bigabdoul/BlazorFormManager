@@ -1,0 +1,155 @@
+﻿@typeparam TItem
+@using Carfamsoft.Model2View.Shared.Collections
+ 
+@if (DisplayItems == null)
+{
+    @Loading
+}
+else
+{
+    <div @attributes="Styles?.ResponsiveCssClass?.GetCssClass()">
+        @if (DisplayItems.Count == 0)
+        {
+            @Empty
+        }
+        else
+        {
+            <table @attributes="Styles?.CssClass?.GetCssClass()">
+                @if (TableHeader != null)
+                {
+                    @TableHeader
+                }
+                @if (TableBody != null)
+                {
+                <tbody @attributes="Styles?.BodyCssClass?.GetCssClass()">
+                    @foreach (var item in DisplayItems)
+                    {
+                        @TableBody(item)
+                    }
+                </tbody>
+                }
+                @if (TableFooter != null)
+                {
+                    @TableFooter
+                }
+            </table>
+        }
+    </div>
+    <DataPager TotalItemCount="TotalItemCount" PageSize="ItemsPerPage" OnPageChange="OnPageChange" Size="DataPagerSize" SearchOptions="SearchOptions" />
+}
+
+@code {
+    private IReadOnlyCollection<TItem>? _items;
+    private IReadOnlyCollection<TItem>? DisplayItems => FilteredItems ?? _items;
+
+    #region parameters
+
+    /// <summary>
+    /// If specified, prevails over the <see cref="ItemsLoader"/> function.
+    /// Specify either <see cref="Items"/> or <see cref="ItemsLoader"/>.
+    /// <see cref="Items"/> takes precedence over the latter.
+    /// </summary>
+    [Parameter] public IReadOnlyCollection<TItem>? Items { get; set; }
+
+    /// <summary>
+    /// Gets or sets a collection of items that have been filtered.
+    /// </summary>
+    [Parameter] public IReadOnlyCollection<TItem>? FilteredItems { get; set; }
+
+    /// <summary>
+    /// A function to load items to be rendered. Specify either <see cref="Items"/> or
+    /// <see cref="ItemsLoader"/>. <see cref="Items"/> takes precedence over the latter.
+    /// </summary>
+    [Parameter] public Func<Task<IReadOnlyCollection<TItem>?>>? ItemsLoader { get; set; }
+
+    /// <summary>
+    /// Gets or sets the render fragment when items are being loaded.
+    /// </summary>
+    [Parameter] public RenderFragment? Loading { get; set; }
+
+    /// <summary>
+    /// Gets or sets the render fragment when there are no items retrieved.
+    /// </summary>
+    [Parameter] public RenderFragment? Empty { get; set; }
+
+    /// <summary>
+    /// A template consisting of a single &lt;thead>&lt;tr>&lt;/tr>&lt;/thead>
+    /// and one or more &lt;th>&lt;/th> HTML elements.
+    /// </summary>
+    [Parameter] public RenderFragment? TableHeader { get; set; }
+
+    /// <summary>
+    /// A template renderer consisting of &lt;tr>&lt;td>&lt;/td>&lt;/tr> HTML elements.
+    /// </summary>
+    [Parameter] public RenderFragment<TItem>? TableBody { get; set; }
+
+    /// <summary>
+    /// A template consisting of &lt;tr>&lt;td>&lt;/td>&lt;/tr> HTML elements.
+    /// You should wrap a single &lt;tfoot> element around its child elements.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? TableFooter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the CSS styles to apply to the table.
+    /// </summary>
+    [Parameter] public TableStyles? Styles { get; set; }
+
+    // DataPager options
+    /*
+    /// <summary>
+    /// Gets or sets a one-based integer representing the current page number.
+    /// </summary>
+    [Parameter] public int CurrentPage { get; set; }
+    */
+    /// <summary>
+    /// Gets or sets the total number of items for the <see cref="DataPager"/> to render.
+    /// If positive, the data pager is rendered; otherwise, it is omitted.
+    /// </summary>
+    [Parameter] public int TotalItemCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of items rendered per page.
+    /// </summary>
+    [Parameter] public int ItemsPerPage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size of the <see cref="DataPager"/> component.
+    /// </summary>
+    [Parameter] public ComponentSize DataPagerSize { get; set; }
+
+    /// <summary>
+    /// Gets or sets an event handler delegate to invoke when the current page changes.
+    /// </summary>
+    [Parameter] public EventCallback<int> OnPageChange { get; set; }
+
+    /// <summary>
+    /// Gets or sets the configuration options for an embedded input search text box.
+    /// </summary>
+    [Parameter] public InputSearchOptions? SearchOptions { get; set; }
+
+    #endregion
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        if (FilteredItems != null || Items != null)
+        {
+            _items = FilteredItems ?? Items;
+        }
+        else if (ItemsLoader != null)
+        {
+            _items = await ItemsLoader();
+        }
+        else if (!OnPageChange.HasDelegate)
+        {
+            throw new InvalidOperationException(
+                "At least one of the following properties must be set: " +
+                $"{nameof(Items)}, {nameof(ItemsLoader)}, and {nameof(OnPageChange)}."
+            );
+        }
+
+        if (Styles == null)
+            Styles  = new TableStyles();
+    }
+}

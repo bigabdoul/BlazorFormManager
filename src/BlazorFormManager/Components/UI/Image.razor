@@ -1,0 +1,16 @@
+﻿@if (Model != null)
+{
+	var image = Model;
+	var attrs1 = GetAttributes(
+		("src", image.Src),
+		("alt", image.Alt),
+		("width", image.Width),
+		("height", image.Height),
+		("class", image.CssClass),
+		("style", image.Style));
+	<img @attributes="attrs1" />
+}
+
+@code {
+	[Parameter] public ComponentImage? Model { get; set; }
+}

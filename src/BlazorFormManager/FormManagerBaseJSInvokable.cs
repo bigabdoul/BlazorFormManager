@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Karfamsoft. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using BlazorFormManager.Components;
+using BlazorFormManager.Components.Forms;
 using BlazorFormManager.Debugging;
 using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
@@ -25,7 +25,7 @@ namespace BlazorFormManager
         }
 
         [JSInvokable]
-        public Task<object> OnGetModel()
+        public Task<object?> OnGetModel()
         {
             return _formManager.OnGetModelAsync();
         }
@@ -49,23 +49,23 @@ namespace BlazorFormManager
         }
 
         [JSInvokable]
-        public async Task OnSendSucceeded(FormManagerXhrResult xhr)
+        public Task OnSendSucceeded(FormManagerXhrResult xhr)
         {
             if (_formManager.IsDebug)
                 Console.WriteLine($"{nameof(OnSendSucceeded)} invoked.");
 
-            await _formManager.OnSendSucceededAsync(xhr);
+            return _formManager.OnSendSucceededAsync(xhr);
         }
 
         [JSInvokable]
-        public async Task OnSendFailed(FormManagerXhrResult xhr)
+        public Task OnSendFailed(FormManagerXhrResult xhr)
         {
-            var responseText = xhr?.ResponseText;
+            var responseText = xhr.ResponseText;
 
             if (_formManager.LogLevel >= ConsoleLogLevel.Error)
                 Console.WriteLine($"{nameof(OnSendFailed)} invoked: {responseText}");
 
-            await _formManager.OnSendFailedAsync(xhr);
+            return _formManager.OnSendFailedAsync(xhr);
         }
 
         [JSInvokable]
@@ -73,7 +73,7 @@ namespace BlazorFormManager
             => _formManager.OnUploadChangedAsync(e);
 
         [JSInvokable]
-        public Task<bool> OnReadFileList(ReadFileListEventArgs e)
+        public Task<int> OnReadFileList(ReadFileListEventArgs e)
             => _formManager.OnReadFileListAsync(e);
 
         [JSInvokable]
@@ -89,10 +89,19 @@ namespace BlazorFormManager
             => _formManager.OnAjaxUploadWithProgressNotSupportedAsync(e);
 
         [JSInvokable]
-        public Task<DragEventResponse> OnDragStart(DomDragEventArgs e) 
+        public Task<DragEventResponse?> OnDragStart(DomDragEventArgs e) 
             => _formManager.OnDragStartAsync(e);
         
         [JSInvokable]
-        public Task<DragEventResponse> OnDrop(DomDragEventArgs e) => _formManager.OnDropAsync(e);
+        public Task<DragEventResponse?> OnDrop(DomDragEventArgs e) => _formManager.OnDropAsync(e);
+
+        [JSInvokable]
+        public Task OnReCaptchaActivity(ReCaptchaActivity activity)
+        {
+            if (_formManager.LogLevel >= ConsoleLogLevel.Error)
+                Console.WriteLine($"{nameof(OnReCaptchaActivity)} invoked: [{activity.Type}]: {activity.Message}");
+
+            return _formManager.OnReCaptchaActivityAsync(activity);
+        }
     }
 }

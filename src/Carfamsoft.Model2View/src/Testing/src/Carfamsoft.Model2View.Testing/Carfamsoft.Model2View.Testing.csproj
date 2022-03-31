@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48</TargetFrameworks>
+    <AssemblyName>Carfamsoft.Model2View.Testing</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+	  <Reference Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
+    <ProjectReference Include="..\..\..\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\DisplayStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DisplayStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\DisplayStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DisplayStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

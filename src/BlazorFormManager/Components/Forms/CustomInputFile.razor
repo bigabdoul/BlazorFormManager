@@ -1,0 +1,30 @@
+﻿@if (Legacy)
+{
+<div class="form-group mb-3">
+    <div class="custom-file mt-3 mb-3">
+        <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
+        @if (Text.IsNotBlank())
+        {
+            <label for="@id" class="form-label">@Text</label>
+        }
+    </div>
+</div>
+}
+else
+{
+    if (Text.IsNotBlank())
+    {
+        <label for="@id" class="form-label">@Text</label>
+    }
+    <input type="file" class="form-control" id="@id" name="@(Name ?? id)" title="@Text" @attributes="AdditionalAttributes">
+}
+
+
+@code {
+    private readonly string id = typeof(CustomInputFile).Name.GenerateId();
+
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public bool Legacy { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object>? AdditionalAttributes { get; set; }
+}

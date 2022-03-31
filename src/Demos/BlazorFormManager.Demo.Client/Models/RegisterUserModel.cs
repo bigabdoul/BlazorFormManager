@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+﻿using Carfamsoft.Model2View.Annotations;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorFormManager.Demo.Client.Models

@@ -1,0 +1,35 @@
+﻿@if (Options != null)
+{
+	<select class="form-control" value="@CurrentValue" @onchange="HandlePageSizeChange">
+		@foreach (var item in Options.Distinct())
+		{
+			<option value="@item.Value">@item.Text</option>
+		}
+	</select>
+}
+
+@code {
+	/// <summary>
+	/// Gets or sets the page size options.
+	/// </summary>
+	[Parameter] public IReadOnlyCollection<PageSizeOption>? Options { get; set; }
+
+	/// <summary>
+	/// Gets or sets the current page size.
+	/// </summary>
+	[Parameter] public int CurrentValue { get; set; }
+
+	/// <summary>
+	/// Gets or sets the event callback for page size change notifications.
+	/// </summary>
+	[Parameter] public EventCallback<int> OnPageSizeChange { get; set; }
+
+	private async Task HandlePageSizeChange(ChangeEventArgs e)
+	{
+		int size = int.Parse($"{e.Value}");
+		CurrentValue = size;
+
+		if (OnPageSizeChange.HasDelegate)
+			await OnPageSizeChange.InvokeAsync(size);
+	}
+}

@@ -1,0 +1,78 @@
+﻿
+<RenderIf Condition="Cells?.Count(cell => !cell.Hidden) > 0">
+    <thead class="@CssClass">
+        <tr>
+            @foreach (var cell in Cells!)
+            {
+                if (cell.Hidden) continue;
+
+                var attrs = TableCell.GetAttributes(cell, out var value, out _);
+
+                if (cell.OnClick.HasDelegate)
+                {
+                    <th scope="col" @attributes="attrs" @onclick="cell.OnClick">
+                        @if (!string.IsNullOrWhiteSpace(cell.Icon))
+                        {
+                            <span><i class="@cell.Icon"></i></span>
+                        }
+                        @if (value is MarkupString ms)
+                        {
+                            @ms
+                        }
+                        else
+                        {
+                            @value
+                        }
+                        @GetSortIcon(cell.SortAscending)
+                    </th>
+                }
+                else
+                {
+                    <th scope="col" @attributes="attrs">
+                        @if (!string.IsNullOrWhiteSpace(cell.Icon))
+                        {
+                            <span><i class="@cell.Icon"></i></span>
+                        }
+                        @if (value is MarkupString ms)
+                        {
+                            @ms
+                        }
+                        else
+                        {
+                            @value
+                        }
+                        @GetSortIcon(cell.SortAscending)
+                    </th>
+                }
+            }
+        </tr>
+    </thead>
+</RenderIf>
+
+@code {
+    #region parameters
+
+    /// <summary>
+    /// Gets or sets a collection of <see cref="TableCell"/> to render as &lt;th> elements.
+    /// </summary>
+    [Parameter] public IReadOnlyCollection<TableCell>? Cells { get; set; }
+
+    /// <summary>
+    /// Gets or sets the CSS class to apply to the &lt;thead> element.
+    /// </summary>
+    [Parameter] public string? CssClass { get; set; }
+
+    #endregion
+
+    #region helpers
+
+    private static readonly MarkupString EmptyMarkupString = new MarkupString();
+
+    private MarkupString GetSortIcon(bool? sorting)
+    {
+        if (sorting == null) return EmptyMarkupString;
+        return new MarkupString($"<span><i class=\"fas fa-sort-{(sorting.Value ? "up" : "down")}\"></i></span>");
+    }
+
+    #endregion
+}

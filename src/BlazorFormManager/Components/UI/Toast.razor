@@ -1,0 +1,22 @@
+﻿<div id="@Id" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+	@if (Header != null)
+	{
+		<div class="toast-header">
+			@Header
+			@if (CloseButtonText.IsNotBlank())
+			{
+				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="@CloseButtonText"></button>
+			}
+		</div>
+	}
+	<div class="toast-body">
+		@Body
+	</div>
+</div>
+
+@code {
+	[Parameter] public string Id { get; set; } = "";
+	[Parameter] public string? CloseButtonText { get; set; } = "Close";
+	[Parameter] public RenderFragment? Header { get; set; }
+	[Parameter] public RenderFragment? Body { get; set; }
+}

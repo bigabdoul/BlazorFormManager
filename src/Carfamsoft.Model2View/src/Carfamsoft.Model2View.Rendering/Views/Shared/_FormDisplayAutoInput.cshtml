@@ -1,0 +1,34 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+@model DisplayAutoInputModel
+@{
+    var metadata = Model.Metadata;
+    var attr = metadata.Attribute;
+
+    if (attr.IsInputFile)
+    {
+        @Html.Partial("_FormDisplayAutoFileInput")
+    }
+    else
+    {
+        if (attr.IsInputRadio || metadata.IsInputCheckbox)
+        {
+            var labelText = metadata.GetDisplayName();
+            <div class="form-group">
+                @if (labelText.IsNotBlank() && attr.IsInputRadio)
+                {
+                    <label class="form-label">@labelText</label>
+                }
+                @metadata.Render(Model.ViewModel, Model.RenderOptions)
+                @*<AutoValidationMessage Model="metadata.Model" Property="@propertyName" />*@
+            </div>
+        }
+        else
+        {
+            @Html.Partial(RazorViewConfig.AutoInputGroupView, Model)
+        }
+    }
+}

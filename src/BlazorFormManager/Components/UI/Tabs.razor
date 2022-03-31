@@ -1,0 +1,12 @@
+﻿<ul class="nav nav-tabs" role="tablist">
+	@Headers
+</ul>
+<div class="tab-content p-3" id="@Id">
+	@Panels
+</div>
+
+@code {
+	[Parameter] public string Id { get; set; } = $"tabs_{Guid.NewGuid().GetHashCode():x}";
+	[Parameter] public RenderFragment? Headers { get; set; }
+	[Parameter] public RenderFragment? Panels { get; set; }
+}

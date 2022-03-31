@@ -38,7 +38,7 @@ namespace BlazorFormManager.IO
         /// <summary>
         /// Gets or sets the error message.
         /// </summary>
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         /// <summary>
         /// Gets the upload or read progress percentage.

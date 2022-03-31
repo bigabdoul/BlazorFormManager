@@ -20,6 +20,8 @@ namespace BlazorFormManager.Demo.Server.Models
         public int? PageSize { get; set; }
         public bool? Sort { get; set; }
         public string Column { get; set; }
+        public string[] Columns { get; set; }
+        public bool?[] Sorts { get; set; }
         public string Search { get; set; }
         public int TotalItemCount { get; private set; }
 

@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+﻿using Carfamsoft.Model2View.Annotations;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorFormManager.Demo.Client.Models
@@ -13,7 +13,7 @@ namespace BlazorFormManager.Demo.Client.Models
 
         [Required]
         [StringLength(100)]
-        [FormDisplay(GroupName = "Personal info", Name = "Last / Family Name", Icon = "fas fa-user")]
+        [FormDisplay(GroupName = "Personal info", Name = "Last / Family Name", Prompt = "Last Name", Icon = "fas fa-user")]
         public string LastName { get; set; }
 
         [Required]

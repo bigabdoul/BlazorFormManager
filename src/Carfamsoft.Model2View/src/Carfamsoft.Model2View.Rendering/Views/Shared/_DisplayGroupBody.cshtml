@@ -1,0 +1,18 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+@model ViewModelMetadataBag
+@{
+    FormDisplayGroupMetadata group = ViewBag.GroupMetadata;
+    AutoInputMetadata[] items = ViewBag.AutoInputMetadatas;
+}
+<div class="display-group-body @group.CssClass">
+    @foreach (var data in items)
+    {
+        Model.Metadata = data;
+        <div class="@data.Attribute.ColumnCssClass">
+            @Html.Partial(Carfamsoft.Model2View.Mvc.RazorViewConfig.AutoInputView, Model)
+        </div>
+    }
+</div>

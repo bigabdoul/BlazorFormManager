@@ -14,6 +14,7 @@
         /// </summary>
         public DomDragEventArgs()
         {
+            _dataTransfer = new DomDataTransfer();
         }
 
         /// <summary>
@@ -41,6 +42,6 @@
         /// <summary>
         /// Gets or sets the response to a drag and drop operation.
         /// </summary>
-        public DragEventResponse Response { get; set; }
+        public DragEventResponse? Response { get; set; }
     }
 }

@@ -1,0 +1,80 @@
+﻿
+@{
+    ViewBag.Title = "Near-Earth Objects (NEO)";
+}
+
+<div id="nasaNeoFeed">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h2 class="border-bottom my-4 pb-3">@ViewBag.Title</h2>
+            <div class="mt-3">
+                <a href="#" @@click.prevent="showSummary = !showSummary">Show/hide summary</a>
+                <ul v-for="(_, date) in feed.near_earth_objects" class="list-unstyled" :key="date">
+                    <li>
+                        <transition name="shooting-star">
+                            <div v-if="showSummary" class="mt-4 mb-1" v-cloak>
+                                <h4>
+                                    {{toDateString(date)}}
+                                    <button @@click="removeObject(date)" class="btn btn-warning float-right">
+                                        <i class="fas fa-trash"></i> {{objectCount(date)}} object.s
+                                    </button>
+                                </h4>
+                                <small>{{shortestMissDistance(date)}}</small>
+                            </div>
+                        </transition>
+                        <table class="table table-sm table-dark table-striped table-hover">
+                            <thead class="thead-light">
+                                <tr class="text-uppercase" :style="getRowStyle(date)">
+                                    <th>Remove</th>
+                                    <th>Name</th>
+                                    <th title="Close Approach Date">Approach</th>
+                                    <th style="width:50%">Miss Distance</th>
+                                </tr>
+                            </thead>
+                            <tbody is="transition-group" name="neo-list" v-cloak>
+                                <tr v-for="(obj, key) in feed.near_earth_objects[date]" :key="obj.neo_reference_id">
+                                    <td>
+                                        <button @@click="remove(date, key)" class="btn btn-sm btn-default text-white">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                    <td><a :href="getDetailUrl('@Url.Action("Item")', obj.id)" class="text-white">{{obj.name}}</a></td>
+                                    <td>{{getCloseApproachDate(obj)}}</td>
+                                    <td>
+                                        <ul v-if="obj.close_approach_data.length > 0" class="nav">
+                                            <li v-for="(dist, unit) in obj.close_approach_data[0].miss_distance">
+                                                <span class="badge badge-primary">{{unit}}:</span>
+                                                <span class="badge badge-secondary mr-1">{{dist}}</span>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                </ul>
+                <ul class="nav links" v-if="feed.links">
+                    <li class="nav-item" v-if="feed.links.prev">
+                        <a class="nav-link" :href="feed.links.prev"><i class="fas fa-arrow-left"></i> Previous </a>
+                    </li>
+                    <li class="nav-item" v-if="feed.links.self">
+                        <a class="nav-link" :href="feed.links.self"><i class="fas fa-check"></i> Current </a>
+                    </li>
+                    <li class="nav-item" v-if="feed.links.next">
+                        <a class="nav-link" :href="feed.links.next"><i class="fas fa-arrow-right"></i> Next </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        //Vue.component('spinner', {
+
+        //})
+        NASA.createNeoFeedApp('#nasaNeoFeed', '@Request.QueryString["startDate"]', '@Request.QueryString["endDate"]');
+    </script>
+}

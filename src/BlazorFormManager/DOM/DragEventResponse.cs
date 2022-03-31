@@ -30,12 +30,12 @@
         /// <summary>
         /// Gets or sets the drag event data.
         /// </summary>
-        public string Data { get; set; }
+        public string? Data { get; set; }
 
         /// <summary>
         /// Gets or sets the drag event data format.
         /// </summary>
-        public string DataFormat { get; set; }
+        public string? DataFormat { get; set; }
 
         /// <summary>
         /// true to cancel the event; otherwise, false.
@@ -45,7 +45,7 @@
         /// <summary>
         /// Gets or sets an array of files accepted on a drop event.
         /// </summary>
-        public string[] AcceptedFiles { get; set; }
+        public string[]? AcceptedFiles { get; set; }
 
         /// <summary>
         /// Indicates whether to store dropped files without reading their content.
@@ -65,6 +65,6 @@
         /// <summary>
         /// Gets or sets the options for dynamically generating image previews.
         /// </summary>
-        public IO.ImagePreviewOptions ImagePreviewOptions { get; set; }
+        public IO.ImagePreviewOptions? ImagePreviewOptions { get; set; }
     }
 }

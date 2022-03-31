@@ -1,0 +1,18 @@
+﻿@inherits ModalDialogButtonBase
+
+@{
+	var attrs = GetAttributes
+	(
+		("class", CssClass),
+		("data-bs-target", Target),
+		("data-bs-toggle", Dismissable ? "" : "modal"),
+		("data-bs-dismiss", Dismissable ? "modal" : "")
+	);
+}
+<a href="@LinkUrl" role="button" @onclick="OnClick" @attributes="AdditionalAttributes.Merge(attrs)">
+	<ContentIconText Icon="@Icon" Text="@Text" ChildContent="ChildContent!" />
+</a>
+@code {
+	/// <inheritdoc />
+	protected override bool IsLink => true;
+}

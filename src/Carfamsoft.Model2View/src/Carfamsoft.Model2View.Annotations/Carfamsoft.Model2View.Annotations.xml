@@ -1,0 +1,775 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Carfamsoft.Model2View.Annotations</name>
+    </assembly>
+    <members>
+        <member name="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata">
+            <summary>
+            Holds metadata required for rendering an auto-generated HTML form element.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.AutoInputMetadata.#ctor(Carfamsoft.Model2View.Annotations.FormDisplayAttribute,System.Resources.ResourceManager)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> class using the specified parameters.
+            </summary>
+            <param name="attr">An object that encapsulates display-related metadata.</param>
+            <param name="resourceManager">The resource manager used to retrieve localized strings.</param>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.Options">
+            <summary>
+            Gets a collection of <see cref="T:Carfamsoft.Model2View.Shared.SelectOption"/> items for a 'select'
+            or 'input' element of type 'radio' to generate.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetDisplayName">
+            <summary>
+            Returns the display name for an input.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetDisplayString(System.String,System.Globalization.CultureInfo)">
+            <summary>
+            Returns a localized string for a property of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/> attribute.
+            </summary>
+            <param name="name">The name of the resource to retrieve.</param>
+            <param name="culture">
+            An object that represents the culture for which the resource is localized.
+            </param>
+            <returns>
+            The value of the resource localized for the specified culture, 
+            or null if name cannot be found in a resource set.
+            </returns>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.IsInputCheckbox">
+            <summary>
+            Indicates whether the input should be of type checkbox.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetValue(System.Object)">
+            <summary>
+            Returns the property value of a specified object.
+            </summary>
+            <param name="obj">The object whose property value will be returned. Can be null.</param>
+            <returns>The property value of the specified object.</returns>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.PropertyInfo">
+            <summary>
+            Gets the information about the property.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.Attribute">
+            <summary>
+            Gets the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.Required">
+            <summary>
+            Gets the <see cref="T:System.ComponentModel.DataAnnotations.RequiredAttribute"/> custom attribute associated with this metadata.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.IsRequired">
+            <summary>
+            Determines whether a value is required for the property associated with this metadata.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.AutoInputMetadata.ExtractOptions">
+            <summary>
+            When implemented, extracts a range of values from the custom attribute 
+            'RangeAttribute' using the <see cref="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.PropertyInfo"/> property.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.CustomRenderMode">
+            <summary>
+            Specifies if components should support custom rendering or not.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.CustomRenderMode.Default">
+            <summary>
+            The default value is determined by a parent setting.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.CustomRenderMode.Disabled">
+            <summary>
+            Custom rendering is disabled.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.CustomRenderMode.Enabled">
+            <summary>
+            Custom rendering is enabled.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.DisplayHintAttribute">
+            <summary>
+            Specifies the control used to display a data field.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.Tag">
+            <summary>
+            Gets or sets the tag or element name of the control to display.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.Type">
+            <summary>
+            Gets or sets the type of the control to display.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.ExtraAttributes">
+            <summary>
+            Gets or sets a vertical pipe-separated list of key/value pairs of additional attributes to display.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.Options">
+            <summary>
+            Gets or sets a vertical pipe-separated list of key/value pairs of options to render for 'select' tag. 
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.Icon">
+            <summary>
+            Gets or sets the icon for the control's label.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.GetExtraAttributes">
+            <summary>
+            Parses the <see cref="P:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.ExtraAttributes"/> property's value into a case-insensitive string dictionary.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.DisplayHintAttribute.ParseKeyValuePairs(System.String)">
+            <summary>
+            Parses the <paramref name="values"/> into a case-insensitive string dictionary.
+            </summary>
+            <param name="values">A vertical pipe-separated list of key/value pairs.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.DisplayIgnoreAttribute">
+            <summary>
+            Decorates a property that should not be displayed.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.DisplayResourceAttribute">
+            <summary>
+            Provides a general-purpose attribute that lets you specify the resource manager type for localizable strings for properties of entity partial classes.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.DisplayResourceAttribute.ResourceType">
+            <summary>
+            Gets or sets the type that contains the resources for all properties of the decorated entity class.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.DisplayResourceAttribute.GetResourceManager">
+            <summary>
+            Returns an initialized instance of the <see cref="T:System.Resources.ResourceManager"/> 
+            class for the <see cref="P:Carfamsoft.Model2View.Annotations.DisplayResourceAttribute.ResourceType"/> property.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.DragDropAttribute">
+            <summary>
+            Indicates that an object supports drag and drop operations.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.DragDropAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.DragDropAttribute"/> class.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase">
+            <summary>
+            Represents the base attribute for members capable of handling files.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.Accept">
+            <summary>
+            Gets or sets a comma-separated list of file name extensions that limits the 
+            types of files a user can pick. If the value is null or empty (or only 
+            whitespace) then any file can be picked.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.AcceptType">
+            <summary>
+            Gets or sets the type of file that can be picked up.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.Multiple">
+            <summary>
+            Indicates whether multiple file selection is allowed.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.DropTargetId">
+            <summary>
+            Gets or sets the identifier of an element that supports drag and drop.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.DropEffect">
+            <summary>
+            Gets or sets the icon that identifies a drag and drop operation. The default is 'copy'.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.Method">
+            <summary>
+            Gets or sets the method of the FileReader API (in JavaScript) to use.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FileReaderMethod">
+            <summary>
+            Provides enumerated method names corresponding to JavaScript's FileReader API.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.None">
+            <summary>
+            Nothing will be done.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.ReadAsArrayBuffer">
+            <summary>
+            In JavaScript:
+            Starts reading the contents of the specified Blob, once finished, the 
+            result attribute contains an ArrayBuffer representing the file's data.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.ReadAsBinaryString">
+            <summary>
+            In JavaScript:
+            Starts reading the contents of the specified Blob, once finished, the 
+            result attribute contains the raw binary data from the file as a string.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.ReadAsDataURL">
+            <summary>
+            In JavaScript:
+            Starts reading the contents of the specified Blob, once finished, the 
+            result attribute contains a data: URL representing the file's data.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.ReadAsText">
+            <summary>
+            In JavaScript:
+            Starts reading the contents of the specified Blob, once finished, the 
+            result attribute contains the contents of the file as a text string. 
+            An optional encoding name can be specified.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FormAttributeBase">
+            <summary>
+            Represents the base class for form-related custom attributes.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormAttributeBase.#ctor">
+            <summary>
+            Intializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormAttributeBase"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.InputCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. form-control) added to the input.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.Prompt">
+            <summary>
+            Gets or sets a value that will be used to set the watermark for prompts in the UI.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.Disabled">
+            <summary>
+            Indicates whether the input is disabled.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.Ignore">
+            <summary>
+            Indicates whether this custom attribute should be ignored during rendering.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormAttributeBase.IsIgnored">
+            <summary>
+            Determines whether this attribute should be ignored.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute">
+            <summary>
+            Represents a custom attribute that specifies layout for a form input.
+            </summary>
+        </member>
+        <member name="F:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Empty">
+            <summary>
+            Provides a value to use for default form display options.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.GroupName">
+            <summary>
+            Gets or sets a value that is used to group fields in the UI.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.GroupIcon">
+            <summary>
+            Gets or sets the icon for the group.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Name">
+            <summary>
+            Gets or sets a value that is used for display in the UI.
+            Set to an empty string (value of <see cref="F:System.String.Empty"/>, not null) to omit the label.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ShortName">
+            <summary>
+            Gets or sets a value that is used for the grid column label.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Description">
+            <summary>
+             Gets or sets a value that is used to display a description in the UI.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ResourceType">
+            <summary>
+            Gets or sets the type that contains the resources for the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ShortName"/>,
+            <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Name"/>, <see cref="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.Prompt"/>, and <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Description"/> properties.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Order">
+            <summary>
+            Gets or sets the order weight of the column.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ColumnCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. col-md-4) used for an element (column)
+            wrapped around the input.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UIHint">
+            <summary>
+            Gets or sets a suggestion for the HTML element to generate. Supported
+            elements are all standard HTML data collection elements such as input,
+            select, textarea, etc. Other elements are not supported.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Tag">
+            <summary>
+            Gets or sets the tag or element name of the control to display.
+            This is an alias for <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UIHint"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint">
+            <summary>
+            Gets or sets a suggestion for the input type to generate. Supported types are
+            all standard HTML input types (e. g. text, checkbox, number, date, file...).
+            All type names must be in lower-case characters.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Type">
+            <summary>
+            Gets or sets the type of the control to display.
+            This is an alias for <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Icon">
+            <summary>
+            Gets or sets an icon associated with the generated input.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Format">
+            <summary>
+            Gets or sets the data format. If you want to format a <see cref="T:System.DateTime"/>
+            or <see cref="T:System.DateTimeOffset"/>, you must specify a valid value for 
+            <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.CultureName"/> and set <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint"/> to 'text'.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.CultureName">
+            <summary>
+            The case-insensitive name of a culture to use for conversions and formatting.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.NumberStyles">
+            <summary>
+            Determines the styles permitted in numeric string arguments that are passed to
+            the Parse and TryParse methods of the integral and floating-point numeric types.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Options">
+            <summary>
+            Gets or sets a vertical pipe-separated list of key/value pairs of options to render for 'select' tag. 
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ExtraAttributes">
+            <summary>
+            Gets or sets a vertical pipe-separated list of key/value pairs of additional attributes to display.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.CustomRenderMode">
+            <summary>
+            Indicates whether rendering custom inputs is disabled, enabled or determined by the default value.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.IsInputCheckbox">
+            <summary>
+            Indicates whether the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint"/> property value is checkbox.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.IsInputRadio">
+            <summary>
+            Indicates whether the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint"/> property value is radio.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.IsInputCheckboxOrRadio">
+            <summary>
+            Returns true if either of <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.IsInputCheckbox"/> or <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.IsInputRadio"/> is true.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.Is(System.String)">
+            <summary>
+            Determines whether the specified <paramref name="type"/> corresponds
+            to the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.UITypeHint"/> property value.
+            </summary>
+            <param name="type">The type of the HTML element to compare to.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.FileAttribute">
+            <summary>
+            Gets or sets the <see cref="T:Carfamsoft.Model2View.Annotations.InputFileAttribute"/> associated with the 
+            property that this <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/> decorates.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.GetFileAttribute">
+            <summary>
+            Gets the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.FileAttribute"/> property value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.SetFileAttribute(Carfamsoft.Model2View.Annotations.InputFileAttribute)">
+            <summary>
+            Sets the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.FileAttribute"/> property value.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.GetProperty">
+            <summary>
+            Gets the <see cref="T:System.Reflection.PropertyInfo"/> of the model's property that the current attribute decorates.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.SetProperty(System.Reflection.PropertyInfo)">
+            <summary>
+            Sets the <see cref="T:System.Reflection.PropertyInfo"/> of the model's property that the current attribute decorates.
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.GetResourceManager">
+            <summary>
+            Returns an initialized instance of the <see cref="T:System.Resources.ResourceManager"/> 
+            class for the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayAttribute.ResourceType"/> property.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute">
+            <summary>
+            Represents a custom attributes that encapsulates default 
+            values for an instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/>.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.GroupIcon">
+            <summary>
+            Gets or sets the icon for the group.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.GroupCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. row) for a section element.
+            The default value is "row".
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.ColumnCssClass">
+            <summary>
+            Gets or sets the CSS class (e.g. col) for an HTML element wrapped around an input.
+            The default value is "col".
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.ShowGroupName">
+            <summary>
+            Indicates whether to display the name of a group.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.CustomRenderMode">
+            <summary>
+            Indicates whether rendering custom inputs is disabled, enabled or determined
+            by the default value. The default is <see cref="F:Carfamsoft.Model2View.Annotations.CustomRenderMode.Enabled"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.ResourceType">
+            <summary>
+            Gets or sets the type that contains the resources for all properties of the decorated entity class.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.GetResourceManager">
+            <summary>
+            Returns an initialized instance of the <see cref="T:System.Resources.ResourceManager"/> 
+            class for the <see cref="P:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.ResourceType"/> property.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute.CreateDefault">
+            <summary>
+            Creates a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/> from matching 
+            properties of the current <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute"/> instance.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata">
+            <summary>
+            Holds metadata related to the way a group of inputs is layed out.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.Items">
+            <summary>
+            Gets a collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> elements.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.Name">
+            <summary>
+            Gets or sets the name of the section.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.CssClass">
+            <summary>
+            Gets or sets the CSS class for a section.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.ShowName">
+            <summary>
+            Indicates whether the section name should be displayed.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata.Icon">
+            <summary>
+            Gets or sets the icon for the group.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute">
+            <summary>
+            Represents a custom attribute that is used to generate inputs of type file,
+            provides settings for image file reading and automatic preview generation 
+            using JavaScript's FileReader API.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.TargetElementIdSuffix">
+            <summary>
+            Gets or sets the default suffix for <see cref="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.TargetElementId"/>.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute"/> class
+            by setting the <see cref="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.AcceptType"/> property value to
+            'image' and the <see cref="P:Carfamsoft.Model2View.Annotations.FileCapableAttributeBase.Method"/> property value to
+            <see cref="F:Carfamsoft.Model2View.Annotations.FileReaderMethod.ReadAsDataURL"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.TargetElementId">
+            <summary>
+            Gets or sets the identifier of an HTML element (typically a &lt;img /> tag)
+            that will display the image. If this property's value is set, it can greatly
+            improve performance of file reading operation as it avoids calling back 
+            .NET managed code from JavaScript with a huge amount of base64-encoded URL.
+            By convention, if this property's value is null, the name of the property
+            that it decorates is used with the <see cref="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.TargetElementIdSuffix"/> value
+            (e.g. the property 'Photo' will have a target element id of 'PhotoPreview').
+            If the value is empty, then the target element id should not be used.
+            If specified, this property takes precedence over <see cref="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.AutoGenerate"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.TargetElementAttributeName">
+            <summary>
+            Gets or sets the name of the target element's attribute name that will 
+            receive the base64-encoded data URL. The default value is 'src'.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.AutoGenerate">
+            <summary>
+            Indicates whether a preview should be automatically generated for every
+            selected image. The default value is true.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.GenerateFileInfo">
+            <summary>
+            Indicates whether to include file metadata (name, size, etc.).
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.Width">
+            <summary>
+            Gets or sets the preferred width of the thumbnail to be generated.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ImagePreviewAttribute.Height">
+            <summary>
+            Gets or sets the preferred height of the thumbnail to be generated.
+            </summary>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.InputFileAttribute">
+            <summary>
+            Represents a custom attribute that is used to generate inputs of type file and
+            provides settings for file reading using JavaScript's FileReader API.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.InputFileAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.InputFileAttribute"/> class.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.InputFileAttribute.Clone">
+            <summary>
+            Creates and returns a shallow copy of the current 
+            <see cref="T:Carfamsoft.Model2View.Annotations.InputFileAttribute"/> instance.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.MetadataExtensions">
+            <summary>
+            Provides extension methods for extracting and manipulating metadata, such as custom attributes.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.ExtractMetadata(System.Object,System.Collections.Generic.IReadOnlyCollection{Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata}@)">
+            <summary>
+            Generates a grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> instances
+            extracted from custom attributes of types <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/>
+            and <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute"/> that decorate the specified 
+            </summary>
+            <param name="instance">
+            An initialized instance of an object whose type information will be used to extract metadata.
+            </param>
+            <param name="result">
+            Returns a grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> objects.
+            </param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.ExtractMetadata(System.Type,System.Collections.Generic.IReadOnlyCollection{Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata}@)">
+            <summary>
+            Generates a grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> instances
+            extracted from custom attributes of types <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayAttribute"/>
+            and <see cref="T:Carfamsoft.Model2View.Annotations.FormDisplayDefaultAttribute"/> that decorate the specified 
+            <paramref name="type"/>.
+            </summary>
+            <param name="type">The type of the object from which to extract metadata.</param>
+            <param name="result">Returns a grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> objects.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.TryGetMetadata(System.Type,System.String,Carfamsoft.Model2View.Annotations.AutoInputMetadata@)">
+            <summary>
+            Attempts to get a cached instance of the <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/>
+            class whose <see cref="P:Carfamsoft.Model2View.Annotations.AutoInputMetadata.PropertyInfo"/>.Name matches the
+            specified <paramref name="propertyName"/>.
+            </summary>
+            <param name="type">The type of the object to which <paramref name="propertyName"/> belongs.</param>
+            <param name="propertyName">The name of the property for which to retrieve the metadata.</param>
+            <param name="result">Returns the cached <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/>, if any.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.TryGetMetadata(System.Type,System.Collections.Generic.IReadOnlyCollection{Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata}@)">
+            <summary>
+            Attempts to get the metadata value associated with the specified type.
+            </summary>
+            <param name="type">The type of the object from which to extract metadata.</param>
+            <param name="result">Returns a grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> objects.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.RemoveIgnoredPropertiesFromObjectToBeSerialized(System.Object)">
+            <summary>
+            Make sure that properties decorated with an ignorable 
+            custom attribute are NOT included for serialization.
+            </summary>
+            <param name="obj">The object to scan.</param>
+            <returns>
+            An initialized instance of the <see cref="T:Carfamsoft.Model2View.Annotations.ObjectDictionary"/> class if 
+            there are properties to be ignored; otherwise, <paramref name="obj"/>.
+            </returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.MetadataExtensions.GetControlType(System.ComponentModel.DataAnnotations.DataTypeAttribute)">
+            <summary>
+            Returns a string that represents an HTML element type based on the specified <paramref name="dataType"/>.
+            </summary>
+            <param name="dataType">A <see cref="T:System.ComponentModel.DataAnnotations.DataTypeAttribute"/> custom attribute to interpret.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag">
+            <summary>
+            Represents an object that encapsulates metadata for a model.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag"/> class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ViewModel">
+            <summary>
+            Gets or sets the view model to render.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ViewModelType">
+            <summary>
+            Gets or sets the type of the <see cref="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ViewModel"/> property.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.Metadata">
+            <summary>
+            Gets or sets the metadata retrieved from <see cref="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ViewModel"/>.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.RenderOptions">
+            <summary>
+            Gets or sets the render options.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.LabelAlignment">
+            <summary>
+            Gets or sets the alignment for labels.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.LabelContent">
+            <summary>
+            Gets or sets a custom object that represents the label.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ChildContent">
+            <summary>
+            Gets or sets a custom object that represents the child content.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ValidationContent">
+            <summary>
+            Gets or sets a custom object that represents the validation content.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.ParentPropertyName">
+            <summary>
+            Gets or sets the parent property name, which is prefixed to an HTML element's name.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.Annotations.ViewModelMetadataBag.Tag">
+            <summary>
+            Gets or sets a custom object.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,4 +1,5 @@
 using BlazorFormManager.Demo.Client.Services;
+using Carfamsoft.JSInterop;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ namespace BlazorFormManager.Demo.Client
                 .AddAccountClaimsPrincipalFactory<CustomUserFactory>();
 
             builder.Services.AddScoped<IRequestHeadersProvider, RequestHeadersProvider>();
+            builder.Services.AddScoped<ILocalStorage, LocalStorage>();
 
             await builder.Build().RunAsync();
         }

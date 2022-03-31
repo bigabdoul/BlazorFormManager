@@ -1,0 +1,147 @@
+﻿@if (Pagination?.EndPage > 1)
+{
+	var currentPage = Pagination.CurrentPage;
+	var pageCount = Pagination.PageCount;
+	var isFirstPage = currentPage == 1;
+	var isLastPage = currentPage == pageCount;
+	
+	<nav class="data-pager" aria-label="Data navigation">
+		<ul class="pagination pagination-@(Size.ToString().ToLower()) justify-content-@(Alignment.ToString().ToLower())">
+			@if (Pagination.ShowFirstLast)
+			{
+				if (isFirstPage)
+				{
+					<li class="page-item disabled no-user-select">
+						<a class="page-link" tabindex="-1">
+							<span aria-hidden="true">&laquo;&laquo;</span><span class="sr-only">Go to first page</span>
+						</a>
+					</li>
+				}
+				else
+				{
+					<li class="page-item no-user-select">
+						<a class="page-link pointer" @onclick="@(() => LinkClicked(1))">
+							<span aria-hidden="true">&laquo;&laquo;</span><span class="sr-only">Go to first page</span>
+						</a>
+					</li>
+				}
+			}
+			@if (Pagination.HasPrevious)
+            {
+				var prev = currentPage - 1;
+                <li class="page-item no-user-select">
+					<a class="page-link pointer" @onclick="@(() => LinkClicked(prev))" title="Page @(prev)">
+						<span aria-hidden="true">&laquo;</span><span class="sr-only">Go to previous page</span>
+					</a>
+				</li>
+            }
+            else
+            {
+                <li class="page-item disabled no-user-select">
+					<a class="page-link" tabindex="-1">
+						<span aria-hidden="true">&laquo;</span><span class="sr-only">Go to previous page</span>
+					</a>
+				</li>
+            }
+			@if (Pagination.ShowPageNumbers)
+			{
+				for (var p = Pagination.StartPage; p <= Pagination.EndPage; p++)
+				{
+					var idx = p; // don't use the loop variable inside the @onclick event delegate
+					if (p == currentPage)
+					{
+						<li class="page-item active no-user-select"><a class="page-link" title="Page @p">@p</a></li>
+					}
+					else
+					{
+						<li class="page-item no-user-select">
+							<a class="page-link pointer" @onclick="@(() => LinkClicked(idx))" title="Page @idx">@idx</a>
+						</li>
+					}
+				}
+			}
+			else if (Pagination.ShowPageLabel)
+			{
+				<li class="page-item no-user-select">
+					<a class="page-link">@currentPage / @pageCount</a>
+				</li>
+			}
+
+			@if (Pagination.HasNext)
+            {
+				var pnext = currentPage + 1;
+				<li class="page-item">
+					<a class="page-link pointer" @onclick="@(() => LinkClicked(pnext))" title="Page @(pnext)">
+						<span aria-hidden="true">&raquo;</span><span class="sr-only">Go to next page</span>
+					</a>
+				</li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+					<a class="page-link" href="#" tabindex="-1">
+						<span aria-hidden="true">&raquo;</span><span class="sr-only">Go to next page</span>
+					</a>
+				</li>
+            }
+
+			@if (Pagination.ShowFirstLast)
+			{
+				if (isLastPage)
+				{
+					<li class="page-item disabled">
+						<a class="page-link" href="#" tabindex="-1">
+							<span aria-hidden="true">&raquo;&raquo;</span><span class="sr-only">>Go to last page</span>
+						</a>
+					</li>
+				}
+				else
+				{
+					<li class="page-item">
+						<a class="page-link pointer" @onclick="@(() => LinkClicked(pageCount))" title="Page @pageCount">
+							<span aria-hidden="true">&raquo;&raquo;</span><span class="sr-only">Go to last page</span>
+						</a>
+					</li>
+				}
+			}
+		</ul>
+	</nav>
+}
+<style>
+    .no-user-select {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -khtml-user-select: none;
+        user-select: none;
+    }
+    .pointer {
+        cursor: pointer;
+    }
+</style>
+@code {
+
+	/// <summary>
+	/// Gets or sets the pagination instance.
+	/// </summary>
+	[Parameter] public Carfamsoft.Model2View.Shared.Collections.ItemsPagination? Pagination { get; set; }
+
+	/// <summary>
+	/// Gets or sets the horizontal alignment of the pager.
+	/// </summary>
+	[Parameter] public JustifyContent Alignment { get; set; }
+
+	/// <summary>
+	/// Gets or sets the size of this DataPager component.
+	/// Supported values are <see cref="ComponentSize.Sm"/> and <see cref="ComponentSize.Lg"/>.
+	/// By default, any other size has no effect. The default is <see cref="ComponentSize.Md"/>.
+	/// </summary>
+	[Parameter] public ComponentSize Size { get; set; } = ComponentSize.Md;
+
+
+	private void LinkClicked(int page)
+	{
+		Pagination!.CurrentPage = page;
+	}
+}

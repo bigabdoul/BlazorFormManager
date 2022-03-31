@@ -11,13 +11,13 @@
     /// <summary>
     /// Gets or sets the parent container.
     /// </summary>
-    [CascadingParameter] public FormDebugInfo Parent { get; set; }
+    [CascadingParameter] public FormDebugInfo? Parent { get; set; }
 
     private const string CheckboxId = nameof(FormManagerXhrDebug.HtmlDocViewEnabled);
 
     private void HtmlDocViewEnabledChanged(ChangeEventArgs e)
     {
-        Parent.Options.HtmlDocViewEnabled = bool.Parse(e.Value.ToString());
+        Parent!.Options.HtmlDocViewEnabled = bool.Parse($"{e.Value}");
         StateHasChanged();
         Parent.RefreshState();
     }

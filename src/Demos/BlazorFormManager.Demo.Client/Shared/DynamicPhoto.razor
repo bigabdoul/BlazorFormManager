@@ -1,0 +1,27 @@
+﻿
+@if (ModelId != null)
+{
+    var attrs = GetAttributes(
+        ("src", $"dynamic/{Controller}/photo/{ModelId}"),
+        ("width", Width),
+        ("height", Height),
+        ("class", CssClass),
+        ("style", Style),
+        ("alt", Alt),
+        ("onerror", OnError)
+    );
+    <img @attributes="attrs" />
+}
+
+@code {
+    [Parameter] public string Controller { get; set; }
+    [Parameter] public object ModelId { get; set; }
+    [Parameter] public int? Width { get; set; }
+    [Parameter] public int? Height { get; set; }
+    [Parameter] public string Alt { get; set; }
+    [Parameter] public string OnError { get; set; }
+    [Parameter] public bool FitCover { get; set; }
+
+    private string CssClass => $"img-fluid{(FitCover ? " img-fit-cover" : "")}";
+    private string Style => FitCover && Width.HasValue && Height.HasValue ? $"object-fit:cover;width:{Width}px;height:{Height}px;" : "";
+}

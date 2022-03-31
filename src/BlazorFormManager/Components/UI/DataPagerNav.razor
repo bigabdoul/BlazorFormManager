@@ -1,0 +1,43 @@
+﻿@if (Pagination != null)
+{ 
+    var prevPage = 0;
+    <nav class="data-pager" aria-label="Data navigation">
+        <ul class="pagination pagination-@(Size.ToString().ToLower()) justify-content-@(Alignment.ToString().ToLower())">
+            @foreach (var n in Pagination.Links)
+            {
+                var idx = n;
+                if (n != prevPage + 1)
+                {
+                    <li class="page-item disabled"><span class="px-1">...</span></li>
+                }
+                <li class="@ActivePageItem(n)">
+                    <button type="button" class="page-link" aria-label="Go to page @n"
+                        @onclick="() => Pagination.CurrentPage = idx">@idx</button>
+                </li>
+                prevPage = n;
+            }
+        </ul>
+    </nav>
+}
+
+@code {
+
+    private string ActivePageItem(int n) => $"page-item{(Pagination!.IsActive(n) ? " active" : string.Empty)}";
+
+    /// <summary>
+    /// Gets or sets the pagination instance.
+    /// </summary>
+    [Parameter] public Carfamsoft.Model2View.Shared.Collections.Pagination? Pagination { get; set; }
+
+    /// <summary>
+    /// Gets or sets the horizontal alignment of the pager.
+    /// </summary>
+    [Parameter] public JustifyContent Alignment { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size of this DataPager component.
+    /// Supported values are <see cref="ComponentSize.Sm"/> and <see cref="ComponentSize.Lg"/>.
+    /// By default, any other size has no effect. The default is <see cref="ComponentSize.Md"/>.
+    /// </summary>
+    [Parameter] public ComponentSize Size { get; set; } = ComponentSize.Md;
+}

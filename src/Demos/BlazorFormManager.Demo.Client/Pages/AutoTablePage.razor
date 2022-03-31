@@ -1,0 +1,86 @@
+﻿@page "/auto-table"
+
+<section class="border-bottom mb-3">
+    <div class="row">
+        <div class="col-md-9">
+            <h3 class="mt-md-2">Auto Table Demo</h3>
+        </div>
+        <div class="col-md-3">
+            <InputGroupContainer PrependText="Page size">
+                <input type="number" @bind-value="UsersPerPage" min="1" max="20" class="form-control" aria-label="Number of users per page" />
+            </InputGroupContainer>
+        </div>
+    </div>
+</section>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <section>
+            <div class="row">
+                <div class="col-md-9">
+                    <h4 class="mt-0 mr-2 mb-0 p-2">In-memory sample data</h4>
+                </div>
+                <div class="col-md-3">
+                    <InputGroupContainer PrependText="Random users">
+                        <input type="number" @bind-value="UserCount" min="0" max="1000" class="form-control" aria-label="Random users to generate" />
+                    </InputGroupContainer>
+                </div>
+            </div>
+
+            <AutoTable Items="CurrentUsers"
+                       TotalItemCount="UserCount"
+                       ItemsPerPage="UsersPerPage"
+                       GetCellData="GetCellData"
+                       OnPageChange="GotoPage"
+                       Styles="Styles2" />
+        </section>
+
+        <hr />
+
+        <h4>Log in required for advanced demo</h4>
+        <p>
+            Please <a href="@LoginUrl">log in</a> or <a href="@RegisterUrl">register</a>
+            to view the demo with data fetched from the database server.
+        </p>
+    </NotAuthorized>
+    <Authorized>
+        <section>
+            <h4 class="mb-4">Data fetched from the server</h4>
+            <ErrorDisplay Error="Error" />
+
+            <AutoTable Items="ServerData1.Items"
+                       TotalItemCount="ServerData1.TotalItemCount"
+                       ItemsPerPage="UsersPerPage"
+                       OnHeadersSet="HandleHeadersSet"
+                       OnHeaderClicked="HandleHeaderClicked"
+                       GetCellData="GetCellData"
+                       OnPageChange="FetchFromServer1Async"
+                       Styles="Styles1"
+                       SearchOptions="@SearchOptions"
+                       FilteredItems="FilteredItems"
+                       EnableHeaderClick
+                       EnableSorting />
+        </section>
+
+        <hr />
+
+        <section>
+            <h4 class="mb-4">Custom Templating</h4>
+
+            <AutoTable Items="ServerData2.Items"
+                       TotalItemCount="ServerData2.TotalItemCount"
+                       ItemsPerPage="UsersPerPage"
+                       OnPageChange="FetchFromServer2Async"
+                       Styles="@Styles3"
+                       NoHeader>
+                <TableBodyRow Context="user">
+                    <tr>
+                        <td class="py-1">
+                            <UserInfo Model="user" Options="Options"/>
+                        </td>
+                    </tr>
+                </TableBodyRow>
+            </AutoTable>
+        </section>
+    </Authorized>
+</AuthorizeView>

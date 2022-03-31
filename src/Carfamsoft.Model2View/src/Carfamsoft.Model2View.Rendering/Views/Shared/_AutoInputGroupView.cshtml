@@ -1,0 +1,156 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+@model ViewModelMetadataBag
+@{
+    var metadata = Model.Metadata;
+    var options = Model.RenderOptions;
+
+    if (options != null &&
+        options.GetRenderOutput(metadata.PropertyInfo, metadata.GetValue(Model.ViewModel), out var eventArgs) &&
+        eventArgs.Handled)
+    {
+        @Html.Raw(eventArgs.RenderOutput)
+        return;
+    }
+
+    var uniqueId = options?.UniqueId;
+    var icon = metadata.Attribute.Icon;
+    var labelText = metadata.GetDisplayName();
+
+    switch (Model.LabelAlignment)
+    {
+        case ContentAlignment.Right:
+            <div class="form-group">
+                <div class="input-group">
+                    @metadata.Render(Model.ViewModel, options)
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            @if (icon.IsNotBlank())
+                            {
+                                <i class="@icon"></i><text>&nbsp;</text>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(labelText))
+                            {
+                                if (uniqueId.IsNotBlank())
+                                {
+                                    <label for="@uniqueId" class="form-label">@labelText</label>
+                                }
+                                else
+                                {
+                                    <label class="form-label">@labelText</label>
+                                }
+                            }
+                            else if (Model.LabelContent != null)
+                            {
+                                @Html.Raw(Model.LabelContent)
+                            }
+                        </span>
+                    </div>
+                </div>
+                @Html.Raw(Model.ValidationContent)
+            </div>
+            break;
+        case ContentAlignment.Bottom:
+            <div class="form-group">
+                <div class="input-group">
+                    @if (icon.IsNotBlank())
+                    {
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="@icon"></i>
+                            </span>
+                        </div>
+                    }
+                    @metadata.Render(Model.ViewModel, options)
+                    @Html.Raw(Model.ChildContent)
+                </div>
+                @if (labelText.IsNotBlank())
+                {
+                    if (uniqueId.IsNotBlank())
+                    {
+                        <label for="@uniqueId" class="form-label">@labelText</label>
+                    }
+                    else
+                    {
+                        <label class="form-label">@labelText</label>
+                    }
+                }
+                else if (Model.LabelContent != null)
+                {
+                    @Html.Raw(Model.LabelContent)
+                }
+                @Html.Raw(Model.ValidationContent)
+            </div>
+            break;
+        case ContentAlignment.Left:
+            <div class="form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            @if (icon.IsNotBlank())
+                            {
+                                <i class="@icon"></i><text>&nbsp;</text>
+                            }
+                            @if (labelText.IsNotBlank())
+                            {
+                                if (uniqueId.IsNotBlank())
+                                {
+                                    <label for="@uniqueId" class="form-label">@labelText</label>
+                                }
+                                else
+                                {
+                                    <label class="form-label">@labelText</label>
+                                }
+                            }
+                            else if (Model.LabelContent != null)
+                            {
+                                @Html.Raw(Model.LabelContent)
+                            }
+                        </span>
+                    </div>
+                    @metadata.Render(Model.ViewModel, options)
+                    @Html.Raw(Model.ChildContent)
+                </div>
+                @Html.Raw(Model.ValidationContent)
+            </div>
+
+            break;
+        default:
+            <div class="form-group">
+                @if (Model.LabelAlignment == ContentAlignment.Top)
+                {
+                    if (!string.IsNullOrWhiteSpace(labelText))
+                    {
+                        if (uniqueId.IsNotBlank())
+                        {
+                            <label for="@uniqueId" class="form-label">@labelText</label>
+                        }
+                        else
+                        {
+                            <label class="form-label">@labelText</label>
+                        }
+                    }
+                    else if (Model.LabelContent != null)
+                    {
+                        @Html.Raw(Model.LabelContent)
+                    }
+                }
+                <div class="input-group">
+                    @if (icon.IsNotBlank())
+                    {
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="@icon"></i>
+                            </span>
+                        </div>
+                    }
+                    @metadata.Render(Model.ViewModel, options)
+                    @Html.Raw(Model.ChildContent)
+                </div>
+                @Html.Raw(Model.ValidationContent)
+            </div>
+            break;
+    }
+}

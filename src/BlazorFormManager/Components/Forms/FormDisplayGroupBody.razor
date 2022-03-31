@@ -1,0 +1,48 @@
+﻿@if (Items?.Length > 0)
+{
+    var pathPrefix = string.Empty;
+    if (PropertyNavigationPath.IsNotBlank())
+    {
+        pathPrefix = $"{PropertyNavigationPath}.";    
+    }
+    var css = $"display-group-body {CssClass}".Trim();
+    <div class="@css">
+        @foreach (var inputMetadata in Items)
+        {
+            var navigationPath = pathPrefix + inputMetadata.PropertyInfo.Name;
+            var type = inputMetadata.PropertyInfo.PropertyType;
+            if (type.IsNonStringClass())
+            {
+                // we must have a valid instance of the nested property value
+                object childModel = inputMetadata.GetValue(Model);
+                if (childModel == null && Form != null && type.TryCreateInstance(out childModel))
+                {
+                    // update the root model's corresponding property
+                    Form.SetModelValue(navigationPath, childModel, type);
+                }
+                if (childModel != null && type.ExtractMetadata(out var groups))
+                {
+                    // do recursive rendering for the nested property
+                    foreach (var groupMetadata in groups)
+                    {
+                        <FormDisplayGroup Metadata="groupMetadata" Model="childModel" PropertyNavigationPath="@navigationPath"/>
+                    }
+                }
+            }
+            else
+            {
+                <div class="@inputMetadata.Attribute.ColumnCssClass">
+                    <AutoInput Metadata="inputMetadata" Model="Model" PropertyNavigationPath="@navigationPath"/>
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public AutoInputMetadata[]? Items { get; set; }
+    [Parameter] public object? Model { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public string? PropertyNavigationPath { get; set; }
+    [CascadingParameter] private FormManagerBase? Form{ get; set; }
+}

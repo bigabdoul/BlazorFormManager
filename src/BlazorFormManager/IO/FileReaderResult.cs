@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+﻿using Carfamsoft.Model2View.Annotations;
 using System.Linq;
 
 namespace BlazorFormManager.IO
@@ -24,22 +24,22 @@ namespace BlazorFormManager.IO
         /// <summary>
         /// Gets or sets the input file identifier.
         /// </summary>
-        public string InputId { get; set; }
+        public string? InputId { get; set; }
 
         /// <summary>
         /// Gets or sets the input file name.
         /// </summary>
-        public string InputName { get; set; }
+        public string? InputName { get; set; }
 
         /// <summary>
         /// Gets or sets a file read operation result.
         /// </summary>
-        public string Content { get; set; }
+        public string? Content { get; set; }
 
         /// <summary>
         /// Gets or sets a file read operation result as a buffer array.
         /// </summary>
-        public int[] ContentArray { get; set; }
+        public int[]? ContentArray { get; set; }
 
         /// <summary>
         /// Gets or sets the method used to read a file.
@@ -49,13 +49,13 @@ namespace BlazorFormManager.IO
         /// <summary>
         /// Gets or sets the error that occurred during a file reading operation.
         /// </summary>
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         /// <summary>
         /// Casts the <see cref="ContentArray"/> to a-dimensional array of <see cref="byte"/> elements.
         /// </summary>
         /// <returns></returns>
-        public byte[] ContentArrayAsByteArray() => ContentArray.Select(b => (byte)b).ToArray();
+        public byte[]? ContentArrayAsByteArray() => ContentArray?.Select(b => (byte)b).ToArray();
 
         /// <summary>
         /// Indicates whether the UI interaction was done in JavaScript.

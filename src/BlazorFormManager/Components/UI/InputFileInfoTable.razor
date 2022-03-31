@@ -1,0 +1,160 @@
+﻿@using BlazorFormManager.IO
+
+@if (Files?.Count > 0)
+{
+	var totalSize = 0D;
+	var row = _itemStart + 1;
+	<div class="input-file-info-table">
+		<TemplatedTable Items="Files" TotalItemCount="FileCount" ItemsPerPage="PageSize"
+					OnPageChange="HandlePageChange" DataPagerSize="ComponentSize.Sm"
+					Styles="@_styles" SearchOptions="SearchOptions" FilteredItems="FilteredItems">
+			<TableHeader>
+				<thead class="@_styles?.HeaderCssClass">
+					<tr>
+						@if (RowNumberColumnShown) { <th>#</th> }
+						@if (CustomColumnStart != null) { <th>@CustomColumnStartText</th> }
+						@if (ImageColumnShown) { <th scope="col" class="file-image" title="Image"></th> }
+						@if (NameColumnShown) { <th scope="col" class="file-name" title="File name">Name</th> }
+						@if (SizeColumnShown) { <th scope="col" class="file-size" title="File size">Size</th> }
+						@if (DimensionsColumnShown) { <th scope="col" class="file-size" title="Width and Height">Dimensions</th> }
+						@if (TypeColumnShown) { <th scope="col" class="file-type" title="File type">Type</th> }
+						@if (DateColumnShown) { <th scope="col" class="file-date" title="Last modified date">Last modified</th> }
+						@if (CustomColumnEnd != null) { <th>@CustomColumnEndText</th> }
+					</tr>
+				</thead>
+		</TableHeader>
+		<TableBody Context="f">
+			@{
+				f.Index = row - 1;
+				totalSize += f.Size;
+			}
+			<tr class="file-policy-@(f.Rejected ? "rejected" : "accepted")">
+				@if (RowNumberColumnShown) { <th scope="row">@(row++)</th> }
+				@if (CustomColumnStart != null) { <td>@CustomColumnStart(f)</td> }
+				@if (ImageColumnShown) { <td class="file-image">@if (f.IsImage && f.ObjectUrl.IsNotBlank()) { <img src="@f.ObjectUrl" alt="@f.Name" class="img-fluid" /> }</td> }
+				@if (NameColumnShown) { <td class="file-name">@f.Name</td> }
+				@if (SizeColumnShown) { <td class="file-size">@f.SizeAsString</td> }
+				@if (DimensionsColumnShown) { <td class="file-size">@f.Dimensions</td> }
+				@if (TypeColumnShown) { <td class="file-type"><i class="@GetIcon(f)"></i> <span class="file">@f.Type</span></td> }
+				@if (DateColumnShown) { <td class="file-date">@f.LastModifiedDateAsString</td> }
+				@if (CustomColumnEnd != null) { <td>@CustomColumnEnd(f)</td> }
+			</tr>
+		</TableBody>
+		<TableFooter>
+			<RenderIf Condition="Files.Count > 1">
+				<tfoot>
+					<tr>
+						<td class="pt-3" colspan="@CountVisibleColumns()">
+							<div class="d-flex justify-content-between">
+								<h6>Selected: <span class="badge bg-secondary">@Files.Count</span></h6>
+								<h6>Size: <span class="badge bg-secondary">@InputFileInfo.FileSizeToString(totalSize)</span></h6>
+							</div>
+							
+							<div class="d-flex justify-content-between">
+								<h6><span class="text-success">Accepted: </span> <span class="badge bg-success">@Files.Count(f => !f.Rejected)</span></h6>
+								<h6><span class="text-success">Size: </span> <span class="badge bg-success">@InputFileInfo.FileSizeToString(Files.Where(f => !f.Rejected).Sum(f => (double)f.Size))</span></h6>
+							</div>
+
+							<div class="d-flex justify-content-between">
+								<h6><span class="text-danger">Rejected:</span> <span class="badge bg-danger">@Files.Count(f => f.Rejected)</span></h6>
+								<h6><span class="text-danger">Size: </span> <span class="badge bg-danger">@InputFileInfo.FileSizeToString(Files.Where(f => f.Rejected).Sum(f => (double)f.Size))</span></h6>
+							</div>
+						</td>
+					</tr>
+				</tfoot>
+			</RenderIf>
+		</TableFooter>
+	</TemplatedTable>
+</div>
+}
+
+@code {
+	[Parameter] public IReadOnlyCollection<InputFileInfo>? Files { get; set; }
+	[Parameter] public int FileCount { get; set; }
+	[Parameter] public int PageSize { get; set; } = 20;
+	[Parameter] public EventCallback<int> OnPageChange { get; set; }
+	[Parameter] public RenderFragment<InputFileInfo>? CustomColumnStart { get; set; }
+	[Parameter] public string? CustomColumnStartText { get; set; }
+	[Parameter] public RenderFragment<InputFileInfo>? CustomColumnEnd { get; set; }
+	[Parameter] public string? CustomColumnEndText { get; set; }
+	[Parameter] public FileInfoTableColumns VisibleColumns { get; set; } = FileInfoTableColumns.All;
+
+	/// <summary>
+	/// Gets or sets the CSS styles to apply to the table.
+	/// </summary>
+	[Parameter] public TableStyles? Styles { get; set; }
+
+	/// <summary>
+	/// Gets or sets the configuration options for an embedded input search text box.
+	/// </summary>
+	[Parameter] public InputSearchOptions? SearchOptions { get; set; }
+
+	/// <summary>
+    /// Gets or sets a collection of items that have been filtered.
+    /// </summary>
+    [Parameter] public IReadOnlyCollection<InputFileInfo>? FilteredItems { get; set; }
+
+	private int _itemStart;
+	private TableStyles? _styles;
+
+	private bool RowNumberColumnShown => (VisibleColumns & FileInfoTableColumns.RowNumber) == FileInfoTableColumns.RowNumber;
+	private bool NameColumnShown => (VisibleColumns & FileInfoTableColumns.Name) == FileInfoTableColumns.Name;
+	private bool SizeColumnShown => (VisibleColumns & FileInfoTableColumns.Size) == FileInfoTableColumns.Size;
+	private bool DimensionsColumnShown => (VisibleColumns & FileInfoTableColumns.Dimensions) == FileInfoTableColumns.Dimensions;
+	private bool TypeColumnShown => (VisibleColumns & FileInfoTableColumns.Type) == FileInfoTableColumns.Type;
+	private bool DateColumnShown => (VisibleColumns & FileInfoTableColumns.LastModifiedDate) == FileInfoTableColumns.LastModifiedDate;
+	private bool ImageColumnShown => (VisibleColumns & FileInfoTableColumns.Image) == FileInfoTableColumns.Image;
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		if (Styles != null)
+			_styles = Styles;
+		else
+			_styles = new TableStyles
+			{
+				CssClass = "table table-light table-striped table-hover table-sm table-bordered",
+				HeaderCssClass = "table-dark",
+				ResponsiveCssClass = CountVisibleColumns() > 4 ? "table-responsive mb-1 border" : ""
+			};
+	}
+
+	private string GetIcon(InputFileInfo file)
+	{
+		if (file.IsImage) return "fas fa-image";
+		if (file.IsVideo) return "fas fa-video";
+		if (file.IsArchive) return "fas fa-file-archive";
+
+		if (file.HasExtension(".pdf")) return "fas fa-file-pdf";
+		if (file.HasExtension(".xls", ".xlsx")) return "fas fa-file-excel";
+		if (file.HasExtension(".doc", ".docx")) return "fas fa-file-word";
+		if (file.HasExtension(".mdb", ".accdb")) return "fas fa-file-access";
+		if (file.HasExtension(".ppt", ".pptx", ".pps", ".ppsx", ".ppsm", 
+			".pptm", ".pot", ".potx", "potm", ".ppa", ".ppam", ".odp")) 
+			return "fas fa-file-powerpoint";
+
+		return "fas fa-file";
+	}
+
+	private void HandlePageChange(int page)
+	{
+		_itemStart = PageSize * (page - 1);
+		if (OnPageChange.HasDelegate)
+			OnPageChange.InvokeAsync(page);
+	}
+
+	private int CountVisibleColumns()
+	{
+		int count = 0;
+		if (RowNumberColumnShown) count++;
+		if (NameColumnShown) count++;
+		if (SizeColumnShown) count++;
+		if (DimensionsColumnShown) count++;
+		if (TypeColumnShown) count++;
+		if (DateColumnShown) count++;
+		if (NameColumnShown) count++;
+		if (CustomColumnStart != null) count++;
+		if (CustomColumnEnd != null) count++;
+		return count;
+	}
+}

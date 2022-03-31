@@ -1,0 +1,11 @@
+﻿@page "/rich-text-editor"
+
+<AutoEditForm Model="Model" EnableRichText>
+    <AfterDisplayGroups>
+        <SubmitButton Text="Save"/>
+    </AfterDisplayGroups>
+</AutoEditForm>
+
+@code {
+    private RichTextEditorModel Model = new RichTextEditorModel();
+}

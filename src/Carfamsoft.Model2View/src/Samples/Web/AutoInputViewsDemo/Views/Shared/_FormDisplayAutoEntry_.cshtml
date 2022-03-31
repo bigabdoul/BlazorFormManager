@@ -1,0 +1,12 @@
+﻿@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+
+@model DisplayAutoInputModel
+
+@{
+    string element = Model.Metadata.Attribute.GetElement(out var elementType);
+}
+<div class="form-floating @element @elementType">
+    @Model.Metadata.Render(Model.ViewModel, Model.RenderOptions, Model.PropertyNavigationPath)
+    <label>@Model.Metadata.GetDisplayName()</label>
+</div>

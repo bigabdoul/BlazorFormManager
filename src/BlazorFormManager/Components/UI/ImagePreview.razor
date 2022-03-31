@@ -1,0 +1,29 @@
+﻿
+@* This image's src attribute is set as a data URL in JavaScript *@
+<img id="@Id" class="img-fluid blazor-form-manager-image-preview" style="@Style" />
+
+@code {
+    /// <summary>
+    /// The name of the associated property for which to generate a preview.
+    /// </summary>
+    [Parameter] public string? PropertyName { get; set; }
+
+    /// <summary>
+    /// Ensures the &lt;img /&gt; stays (hidden or not) in the 
+    /// DOM tree instead of being removed between two render cycles.
+    /// </summary>
+    [Parameter] public bool Visible { get; set; }
+
+    /// <summary>
+    /// The maximum height in pixels of the image. If null, 100% will apply.
+    /// </summary>
+    [Parameter] public int? MaxHeight { get; set; }
+
+    [CascadingParameter] private DragDropArea? DropTarget { get; set; }
+
+    private string Id => $"{DropTarget?.PropertyName ?? PropertyName}{ImagePreviewAttribute.TargetElementIdSuffix}";
+
+    private string Style =>
+        $"max-height: {(MaxHeight.HasValue ? $"{MaxHeight.Value}px" : "100%")};" +
+        $"display: {(DropTarget != null || Visible ? "block" : "none")};";
+}

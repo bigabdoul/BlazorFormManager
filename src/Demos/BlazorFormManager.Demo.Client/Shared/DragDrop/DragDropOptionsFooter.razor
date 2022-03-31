@@ -43,7 +43,7 @@
     {
         await DropArea.DeleteFileListAsync();
         OptionsManager.Model.ClearFiles();
-        Manager.NotifyStateChanged();
+        await Manager.NotifyStateChanged();
     }
 
     private async Task HandleEventListeners()
@@ -55,13 +55,13 @@
             {
                 OptionsManager.Model.Disabled = true;
                 OptionsManager.Model.ClearFiles();
-                Manager.NotifyStateChanged();
+                await Manager.NotifyStateChanged();
             }
         }
         else if (await DropArea.AddEventListenersAsync())
         {
             OptionsManager.Model.Disabled = false;
-            Manager.NotifyStateChanged();
+            await Manager.NotifyStateChanged();
         }
     }
 }

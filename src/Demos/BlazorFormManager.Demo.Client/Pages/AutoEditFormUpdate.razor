@@ -3,7 +3,7 @@
 @page "/account/autoeditform/{ModelId}"
 @using BlazorFormManager.Demo.Client.Extensions
 
-<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="Manager.ProcessCustomServerResponse" OptionsGetter="GetOptions" @ref="Manager">
+<AutoEditForm Model="Model" FormAction="api/account/update" RequestHeaders="RequestHeaders" OnSubmitDone="Manager.ProcessCustomServerResponse" OptionsGetter="GetOptions" EnableRichText @ref="Manager">
     <FormHeader>
         <DemoHeader Title="Auto Edit Form Demo" LogLevel="LogLevel" OnLogLevelChanged="level => Manager.SetLogLevelAsync(level)" />
     </FormHeader>

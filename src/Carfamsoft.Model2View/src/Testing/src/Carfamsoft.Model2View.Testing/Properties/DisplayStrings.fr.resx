@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Address" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Authentication" xml:space="preserve">
+    <value>Authentification</value>
+  </data>
+  <data name="Black" xml:space="preserve">
+    <value>Noir</value>
+  </data>
+  <data name="Blue" xml:space="preserve">
+    <value>Bleu</value>
+  </data>
+  <data name="CityId" xml:space="preserve">
+    <value>Ville</value>
+  </data>
+  <data name="CityName" xml:space="preserve">
+    <value>Ville</value>
+  </data>
+  <data name="CompanyAddress" xml:space="preserve">
+    <value>Adresse de l'entreprise</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Nom de l'entreprise</value>
+  </data>
+  <data name="CompanyRegistrationCode" xml:space="preserve">
+    <value>RCCM / Siren</value>
+  </data>
+  <data name="ConfirmEmail" xml:space="preserve">
+    <value>Confirmer l'adresse e-mail</value>
+  </data>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Les adresses e-mail ne correspondent pas.</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmer le mot de passe</value>
+  </data>
+  <data name="ConfirmPasswordError" xml:space="preserve">
+    <value>Le nouveau mot de passe ne correspond pas au mot de passe actuel.</value>
+  </data>
+  <data name="ConfirmUserName" xml:space="preserve">
+    <value>Confirmer le nom d'utilisateur</value>
+  </data>
+  <data name="ConfirmUserNameError" xml:space="preserve">
+    <value>Les noms d'utilisateur ne correspondent pas.</value>
+  </data>
+  <data name="ContactDetails" xml:space="preserve">
+    <value>Détails de contact</value>
+  </data>
+  <data name="ContactName" xml:space="preserve">
+    <value>Personne contact</value>
+  </data>
+  <data name="CountryId" xml:space="preserve">
+    <value>Pays</value>
+  </data>
+  <data name="DarkBlue" xml:space="preserve">
+    <value>Bleu foncé</value>
+  </data>
+  <data name="DarkCyan" xml:space="preserve">
+    <value>Cyan foncé</value>
+  </data>
+  <data name="DarkGray" xml:space="preserve">
+    <value>Gris foncé</value>
+  </data>
+  <data name="DarkGreen" xml:space="preserve">
+    <value>Vert foncé</value>
+  </data>
+  <data name="DarkMagenta" xml:space="preserve">
+    <value>Magenta foncé</value>
+  </data>
+  <data name="DarkRed" xml:space="preserve">
+    <value>Rouge foncé</value>
+  </data>
+  <data name="DarkYellow" xml:space="preserve">
+    <value>Jaune foncé</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DontHaveAnAccount" xml:space="preserve">
+    <value>Si vous n'avez pas de compte :</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="FavouriteColor" xml:space="preserve">
+    <value>Quelle est votre couleur préférée ?</value>
+  </data>
+  <data name="FavouriteWorkingDay" xml:space="preserve">
+    <value>[Jour de travail préféré]</value>
+  </data>
+  <data name="Fax" xml:space="preserve">
+    <value>Fax</value>
+  </data>
+  <data name="Female" xml:space="preserve">
+    <value>Femme</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Prénom(s)</value>
+  </data>
+  <data name="Friday" xml:space="preserve">
+    <value>Vendredi</value>
+  </data>
+  <data name="Gender" xml:space="preserve">
+    <value>Sexe</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>Gris</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>Vert</value>
+  </data>
+  <data name="HomePhone" xml:space="preserve">
+    <value>Tél. Domicile</value>
+  </data>
+  <data name="IndustryId" xml:space="preserve">
+    <value>Industrie</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="LoginUsingSocialAccount" xml:space="preserve">
+    <value>Connectez-vous avec votre compte {0}</value>
+  </data>
+  <data name="LoginWithEmailAndSms" xml:space="preserve">
+    <value>Connectez-vous avec votre email et une confirmation par SMS</value>
+  </data>
+  <data name="LoginWithSocialAccount" xml:space="preserve">
+    <value>Connectez-vous en utilisant votre compte social</value>
+  </data>
+  <data name="Male" xml:space="preserve">
+    <value>Homme</value>
+  </data>
+  <data name="MobilePhone" xml:space="preserve">
+    <value>Tél. Mobile</value>
+  </data>
+  <data name="Monday" xml:space="preserve">
+    <value>Lundi</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="NoExternalAuthenticationServicesConfigured" xml:space="preserve">
+    <value>Il n'y aucun service d'authentification externe configuré.</value>
+  </data>
+  <data name="OldPassword" xml:space="preserve">
+    <value>Mot de passe actuel</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="PasswordLengthError" xml:space="preserve">
+    <value>Le {0} doit avoir au plus {2} caractères.</value>
+  </data>
+  <data name="PersonalInfo" xml:space="preserve">
+    <value>Informations personnelles</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Numéro Tél.</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Numéro téléphone</value>
+  </data>
+  <data name="PleaseSelect" xml:space="preserve">
+    <value>Veuillez sélectionner</value>
+  </data>
+  <data name="PostalCode" xml:space="preserve">
+    <value>Code Postal</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>Rouge</value>
+  </data>
+  <data name="RegistrationNumber" xml:space="preserve">
+    <value>RCCM</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Se souvenir de moi la prochaine fois</value>
+  </data>
+  <data name="Saturday" xml:space="preserve">
+    <value>Samedi</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Sélectionnez</value>
+  </data>
+  <data name="Sunday" xml:space="preserve">
+    <value>Dimanche</value>
+  </data>
+  <data name="Thursday" xml:space="preserve">
+    <value>Jeudi</value>
+  </data>
+  <data name="Tuesday" xml:space="preserve">
+    <value>Mardi</value>
+  </data>
+  <data name="TwoFactorEnabled" xml:space="preserve">
+    <value>Activer l'authentification à deux facteurs</value>
+  </data>
+  <data name="UseAnotherService" xml:space="preserve">
+    <value>ou utilisez un autre service pour vous connecter</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="UserNameOrPhoneNumber" xml:space="preserve">
+    <value>E-mail ou Numéro de Téléphone</value>
+  </data>
+  <data name="WebSite" xml:space="preserve">
+    <value>Site Web</value>
+  </data>
+  <data name="Wednesday" xml:space="preserve">
+    <value>Mercredi</value>
+  </data>
+  <data name="White" xml:space="preserve">
+    <value>Blanc</value>
+  </data>
+  <data name="Yellow" xml:space="preserve">
+    <value>Jaune</value>
+  </data>
+</root>

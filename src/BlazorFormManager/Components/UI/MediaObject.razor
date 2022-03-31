@@ -1,0 +1,24 @@
+﻿<div class="d-flex align-items-center">
+    @if (Image != null)
+    {
+        var i = Image;
+        if (i.Src.IsNotBlank())
+        {
+            var attrs = GetAttributes(
+                ("src", i.Src),
+                ("alt", i.Alt),
+                ("width", (i.Width ?? 0) > 0 ? i.Width : null),
+                ("height", (i.Height ?? 0) > 0 ? i.Height : null)
+            );
+            <img class="me-3 rounded-circle" @attributes="attrs"/>
+        }
+    }
+    <div>
+        @ChildContent
+    </div>
+</div>
+
+@code {
+	[Parameter] public ComponentImage? Image { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+}

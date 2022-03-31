@@ -1,0 +1,213 @@
+﻿@using Carfamsoft.Model2View.Shared.Collections
+
+@if (_error != null)
+{
+    <em class="small text-danger">@_error</em>
+}
+else if (_pagination.IsMultiPage)
+{
+    if (true == SearchOptions?.CanSearch)
+    {
+        if (Alignment == JustifyContent.Start)
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <DataPaginationNav Pagination="_pagination" Alignment="Alignment" Size="Size" />
+                </div>
+                @if (PageSizeOptions != null)
+                {
+                    <div class="col-md-2">
+                        <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
+                            OnPageSizeChange="HandlePageSizeChange"/>
+                    </div>
+                }
+                <div class="col-md-4">
+                    <InputSearch SearchOptions="SearchOptions"/>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-4">
+                    <InputSearch SearchOptions="SearchOptions"/>
+                </div>
+                @if (PageSizeOptions != null)
+                {
+                    <div class="col-md-2">
+                        <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
+                            OnPageSizeChange="HandlePageSizeChange"/>
+                    </div>
+                }
+                <div class="col-md-6">
+                    <DataPaginationNav Pagination="_pagination" Alignment="Alignment" Size="Size" />
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            @if (PageSizeOptions != null)
+            {
+                <div class="col-md-2">
+                    <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
+                        OnPageSizeChange="HandlePageSizeChange"/>
+                </div>
+            }
+            <div class="col-md-7">
+                <DataPaginationNav Pagination="_pagination" Alignment="Alignment" Size="Size" />
+            </div>
+        </div>
+    }
+}
+else if (true == SearchOptions?.CanSearch)
+{
+    <InputSearch SearchOptions="SearchOptions"/>
+}
+
+@code {
+    #region private
+
+    private string? _error;
+    private readonly ItemsPagination _pagination = new() { VisibleLinkCount = 5 };
+
+    #endregion
+
+    #region parameters
+
+    /// <summary>
+    /// Gets or sets the total number of items. Should not be less than 0.
+    /// </summary>
+    [Parameter]
+    public int TotalItemCount
+    {
+        get => _pagination.TotalItemCount;
+        set
+        {
+            if (_pagination.TotalItemCount != value)
+            {
+                _error = null;
+                _pagination.TotalItemCount = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum number of items per page. Should not be less than 1.
+    /// </summary>
+    [Parameter]
+    public int PageSize
+    {
+        get => _pagination.PageSize;
+        set => _pagination.PageSize = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a one-based integer representing the current page number.
+    /// </summary>
+    [Parameter]
+    public int CurrentPage
+    {
+        get => _pagination.CurrentPage;
+        set => _pagination.CurrentPage = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the event callback to invoke when the current page or related property changes.
+    /// </summary>
+    [Parameter] public EventCallback<int> OnPageChange { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback for page size change notifications.
+    /// </summary>
+    [Parameter] public EventCallback<int> OnPageSizeChange { get; set; }
+
+    /// <summary>
+    /// Gets or sets the horizontal alignment of the pager.
+    /// </summary>
+    [Parameter] public JustifyContent Alignment { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size of this DataPager component.
+    /// Supported values are <see cref="ComponentSize.Sm"/> and <see cref="ComponentSize.Lg"/>.
+    /// By default, any other size has no effect. The default is <see cref="ComponentSize.Md"/>.
+    /// </summary>
+    [Parameter] public ComponentSize Size { get; set; } = ComponentSize.Md;
+
+    /// <summary>
+    /// Gets or sets the configuration options for an embedded input search text box.
+    /// </summary>
+    [Parameter] public InputSearchOptions? SearchOptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the page sizes.
+    /// </summary>
+    [Parameter] public IReadOnlyCollection<PageSizeOption>? PageSizeOptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of navigation buttons shown.
+    /// </summary>
+    [Parameter] public int VisibleLinkCount { get => _pagination.VisibleLinkCount; set => _pagination.VisibleLinkCount = value; }
+
+    #endregion
+
+    /// <summary>
+    /// Sets the <see cref="CurrentPage"/> property to the specified value.
+    /// </summary>
+    /// <param name="page">The one-based page number to set.</param>
+    /// <param name="changeState">true to mutate state by eventually calling 
+    /// <see cref="ComponentBase.StateHasChanged()" />; otherwise, false.
+    /// </param>
+    public void SetPage(int page, bool changeState = false)
+    {
+        if (changeState)
+            CurrentPage = page;
+        else
+            _pagination.CurrentPage = page;
+    }
+
+    #region helpers
+
+    private void HandlePageChange(int page)
+    {
+        _error = null;
+        //Redraw();
+        if (OnPageChange.HasDelegate)
+            OnPageChange.InvokeAsync(page);
+        StateHasChanged();
+    }
+
+    private void HandlePageSizeChange(int page)
+    {
+        _error = null;
+        //Redraw();
+        if (OnPageSizeChange.HasDelegate)
+            OnPageSizeChange.InvokeAsync(page);
+        StateHasChanged();
+    }
+
+    #endregion
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        _pagination.OnPageChange = HandlePageChange;
+        _pagination.OnPageSizeChange = HandlePageSizeChange;
+        base.OnInitialized();
+    }
+
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        Redraw();
+        base.OnParametersSet();
+    }
+
+    private void Redraw()
+    {
+        //if (CurrentPage < 1) CurrentPage = 1;
+        _pagination.Update(TotalItemCount, PageSize, CurrentPage);
+    }
+}

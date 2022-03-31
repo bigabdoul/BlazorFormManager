@@ -1,0 +1,10 @@
+﻿@model Carfamsoft.Model2View.Mvc.Rendering.Models.DisplayGroupIconModel
+
+@if (Model.Icon.IsNotBlank())
+{
+    <text><i class="@Model.Icon"></i>&nbsp;</text>
+}
+@if (Model.Text.IsNotBlank())
+{
+    @Html.Raw(Model.Text)
+}

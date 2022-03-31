@@ -1,0 +1,41 @@
+﻿@{
+	var attrs = GetAttributes(
+		("id", Id),
+		("tabindex", -1),
+		("class", $"offcanvas offcanvas-{PositionString}"),
+		("data-bs-scroll", Scroll ? "true" : "false"),
+		("data-bs-backdrop", Backdrop ? "true" : "false"),
+		("aria-labelledby", Title.IsNotBlank() ? TitleId : null)
+	); 
+}
+<div @attributes="attrs">
+	@if (Title.IsNotBlank())
+	{
+		<div class="offcanvas-header">
+			<h5 class="offcanvas-title" id="@TitleId">
+				<ContentIconText Icon="@TitleIcon" Text="@Title" />
+			</h5>
+			@if (CloseButton)
+			{
+				<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+			}
+		</div>
+	}
+	<div class="offcanvas-body">
+		@ChildContent
+	</div>
+</div>
+
+@code {
+	[Parameter] public string? Id { get; set; }
+	[Parameter] public string? Title { get; set; }
+	[Parameter] public string? TitleIcon { get; set; }
+	[Parameter] public bool CloseButton { get; set; } = true;
+	[Parameter] public bool Backdrop { get; set; } = true;
+	[Parameter] public bool Scroll { get; set; }
+	[Parameter] public ComponentPosition Position { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+
+	private string PositionString => $"{Position}".ToLower();
+	private readonly string TitleId = $"offcanvas-title-{Guid.NewGuid().GetHashCode():x}";
+}

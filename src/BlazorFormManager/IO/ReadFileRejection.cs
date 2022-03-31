@@ -29,5 +29,10 @@
         /// Operation was aborted.
         /// </summary>
         Aborted = 4,
+
+        /// <summary>
+        /// A file read operation was rejected due to application policy.
+        /// </summary>
+        Policy = 5,
     }
 }

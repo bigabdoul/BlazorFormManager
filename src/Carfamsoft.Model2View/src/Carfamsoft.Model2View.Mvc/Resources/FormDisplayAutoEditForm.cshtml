@@ -1,0 +1,39 @@
+﻿@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@model DisplayAutoEditFormModel
+
+@{
+    var modl = Model ?? new DisplayAutoEditFormModel();
+
+    <form id="@modl.FormId" action="@modl.FormAction" method="@modl.FormMethod" enctype="@modl.EncodingType">
+        @if (modl.FormHeader != null)
+        {
+            <div class="form-header">@Html.Raw(modl.FormHeader)</div>
+        }
+        <div class="form-body">
+            <div class="form-display-group">
+                @if (modl.BeforeDisplayGroups != null)
+                {
+                    <div class="before-display-groups">@Html.Raw(modl.BeforeDisplayGroups)</div>
+                }
+                <div class="display-groups">
+                    @Html.Partial(RazorViewConfig.FormDisplayAutoEdit, Model)
+                </div>
+                @if (modl.AfterDisplayGroups != null)
+                {
+                    <div class="after-display-groups">@Html.Raw(modl.AfterDisplayGroups)</div>
+                }
+            </div>
+            @if (modl.ChildContent != null)
+            {
+                <div class="child-content">
+                    @modl.ChildContent
+                </div>
+            }
+        </div>
+        @if (modl.FormFooter != null)
+        {
+            <div class="form-footer">@Html.Raw(modl.FormFooter)</div>
+        }
+    </form>
+}

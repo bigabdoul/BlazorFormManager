@@ -1,0 +1,81 @@
+﻿
+@if (HasMessage)
+{
+    var withImage = HasImage;
+    var cls = "px-2 py-1 ";
+    var type = _message!.Type.ToString().ToLower();
+    cls += (withImage ? $"text-{type}" : $"alert alert-{type}");
+
+    <div class="blazor-form-manager-message">
+        <div class="@cls">
+            @if (withImage)
+            {
+                <MediaObject Image="new(ImageSource!, ImageWidth, ImageHeight)">
+                    @((MarkupString)_message.Message!)
+                </MediaObject>
+            }
+            else
+            {
+                @((MarkupString)_message.Message!)
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private ComponentMessage? _message;
+
+    [CascadingParameter] private FormManagerBase? Form { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Form == null)
+            throw new InvalidOperationException(
+            $"The {nameof(FormSubmitResultView)} component must be placed " +
+            $"inside a form that inherits {nameof(FormManagerBase)}.");
+         
+        base.OnParametersSet();
+    }
+
+    private bool HasMessage
+    {
+        get
+        {
+            _message = null;
+            var result = Form?.SubmitResult;
+
+            if (result is null)
+                return false;
+
+            FormManagerBase form = Form!;
+            var success = result.Succeeded;
+
+            string message = result.Message 
+                ?? (success ? form.SuccessMessage : form.ErrorMessage) 
+                ?? string.Empty;
+
+            if (success)
+            {
+                _message = form.Messages?.SuccessOrInfo();
+                if(_message is null)
+                    _message = ComponentMessage.Success(message);
+            }
+            else
+            {
+                _message = form.Messages?.DangerOrWarning();
+                if (_message is null)
+                    _message = ComponentMessage.Danger(message);
+            }
+
+            return _message.Type != MessageType.None && _message.Message.IsNotBlank();
+        }
+    }
+
+    private bool HasImage => true == Form?.Messages?.HasImage();
+
+    private string? ImageSource => _message!.Image?.Src;
+
+    private int? ImageWidth => _message!.Image?.Width;
+        
+    private int? ImageHeight => _message!.Image?.Height;
+}

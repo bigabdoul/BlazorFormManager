@@ -6,6 +6,11 @@
     public enum ComponentSize
     {
         /// <summary>
+        /// Default size.
+        /// </summary>
+        None,
+
+        /// <summary>
         /// Small size.
         /// </summary>
         Sm,
@@ -23,6 +28,11 @@
         /// <summary>
         /// Extra large size.
         /// </summary>
-        Xl
+        Xl,
+
+        /// <summary>
+        /// Extra, extra large size.
+        /// </summary>
+        Xxl,
     }
 }

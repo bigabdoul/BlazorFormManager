@@ -1,0 +1,11 @@
+﻿@if (Message.IsNotBlank())
+{
+	<div class="alert alert-@Type p-1 my-1">
+		<p class="mb-0">@Message</p>
+	</div>
+}
+
+@code {
+	[Parameter] public string? Type { get; set; }
+	[Parameter] public string? Message { get; set; }
+}

@@ -24,6 +24,7 @@ namespace BlazorFormManager.DOM
         /// </summary>
         public double MovementY { get; set; }
 
+#if NETSTANDARD2_0
         /// <summary>
         /// Indicates the X-offset coordinate.
         /// </summary>
@@ -43,7 +44,7 @@ namespace BlazorFormManager.DOM
         /// The Y coordinate of the mouse pointer in page (DOM content) coordinates.
         /// </summary>
         public double PageY { get; set; }
-
+#endif
         /// <summary>
         /// Provides additional info about a key press.
         /// </summary>

@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Carfamsoft.Model2View</name>
+    </assembly>
+    <members>
+        <member name="T:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions">
+            <summary>
+            Provides extension methods for instances of the <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> class.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.GetInnerHtml(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Renders the <paramref name="builder"/> and removes the outer tag from the output.
+            </summary>
+            <param name="builder">The tag builder from which to remove the outer tag.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderAsHtmlString(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.Object,System.String,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified model as an HTML string.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will contain the render output.</param>
+            <param name="viewModel">The view model to render.</param>
+            <param name="ngModel">
+            The model prefix for the AngularJS ng-model attribute.
+            If the value is null the ng-mnodel attribute is not added.
+            If the value is empty the attribute is added without the prefix.
+            </param>
+            <param name="renderOptions">An object that controls a part of the HTML generation process.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.Render(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.Object,System.String,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified model to the given <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will contain the render output.</param>
+            <param name="viewModel">The view model to render.</param>
+            <param name="ngModel">
+            The model prefix for the AngularJS ng-model attribute.
+            If the value is null the ng-model attribute is not added.
+            If the value is empty the attribute is added without the prefix.
+            </param>
+            <param name="renderOptions">An object that controls a part of the HTML generation process.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderForm(Carfamsoft.Model2View.Shared.INestedTagBuilder,Carfamsoft.Model2View.Shared.FormAttributes)">
+            <summary>
+            Renders a 'form' tag using the specified <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> used to create an HTML 'form' tag.</param>
+            <param name="attrs">An object that contains the form attributes to render.</param>
+            <returns>
+            An initialized instance of a class that implements the interface
+            <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>, which represents the rendered form.
+            </returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderAutoEditForm(Carfamsoft.Model2View.Shared.INestedTagBuilder,Carfamsoft.Model2View.Shared.FormAttributes,System.Object,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified model as an HTML string.
+            </summary>
+            <param name="builder"></param>
+            <param name="formAttrs">An object that encapsulates form attribute values.</param>
+            <param name="viewModel">The view model to render.</param>
+            <param name="renderOptions">A function that supplies additional attributes to the render output.</param>
+            <returns>An initialized instance of a class that implements <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>, representing the form.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderFormDisplayGroup(Carfamsoft.Model2View.Shared.INestedTagBuilder,Carfamsoft.Model2View.Annotations.FormDisplayGroupMetadata,System.Object,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the specified <paramref name="group"/> into an 
+            instance of <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will contain the render output.</param>
+            <param name="group">The grouped collection of <see cref="T:Carfamsoft.Model2View.Annotations.AutoInputMetadata"/> used to render <paramref name="viewModel"/>.</param>
+            <param name="viewModel">The view model to render.</param>
+            <param name="renderOptions">An object that controls a part of an HTML generation process.</param>
+            <returns>A reference to the given <paramref name="builder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderButton(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.String,System.String,System.String,System.Action{Carfamsoft.Model2View.Shared.INestedTagBuilder})">
+            <summary>
+            Renders a button to the specified <paramref name="builder"/> children's collection.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will contain the render output.</param>
+            <param name="text">The button text.</param>
+            <param name="type">The type of button to render.</param>
+            <param name="cssClass">The CSS class to add to the button.</param>
+            <param name="config">An action used to perform more configuration on the button.</param>
+            <returns>A reference to <paramref name="builder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.Mvc.NestedTagBuilderExtensions.RenderAutoInputBase(Carfamsoft.Model2View.Shared.INestedTagBuilder,Carfamsoft.Model2View.Annotations.AutoInputMetadata,System.Object,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Renders the <see cref="T:Carfamsoft.Model2View.WebPages.AutoInputBase"/> component to the specified <paramref name="builder"/>.
+            </summary>
+            <param name="builder">The <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will contain the render output.</param>
+            <param name="metadata">An object used to render an HTML element.</param>
+            <param name="viewModel">An object used to obtain the value of the associated property defined in <paramref name="metadata"/>.</param>
+            <returns>A reference to <paramref name="builder"/>.</returns>
+            <param name="renderOptions">An object that controls a part of the HTML generation process.</param>
+        </member>
+        <member name="T:Carfamsoft.Model2View.WebPages.AutoInputBase">
+            <summary>
+            A base class for form input components generated on the fly.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.#ctor(Carfamsoft.Model2View.Annotations.AutoInputMetadata,System.Object,Carfamsoft.Model2View.Shared.ControlRenderOptions)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Carfamsoft.Model2View.WebPages.AutoInputBase"/> class.
+            </summary>
+            <param name="metadata">The metadata for generating a form input.</param>
+            <param name="viewModel">An object used to obtain the value of the associated property defined in <paramref name="metadata"/>.</param>
+            <param name="renderOptions">An object that controls a part of the HTML generation process.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="metadata"/> is null.</exception>
+        </member>
+        <member name="P:Carfamsoft.Model2View.WebPages.AutoInputBase.Metadata">
+            <summary>
+            Gets or sets metadata for generating a form input.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CssClass">
+            <summary>
+            Gets or sets the CSS class.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.WebPages.AutoInputBase.Value">
+            <summary>
+            Gets or sets the current value.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CurrentValueAsString">
+            <summary>
+            Gets or sets the current value as a string.
+            </summary>
+        </member>
+        <member name="P:Carfamsoft.Model2View.WebPages.AutoInputBase.AdditionalAttributes">
+            <summary>
+            Gets or sets a collection of additional attributes that will be applied to the created element.
+            </summary>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.BuildRenderTree(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Renders the component to the specified <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <returns>A reference to <paramref name="builder"/>.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderElement(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.String,System.String)">
+            <summary>
+            Renders an HTML element to the <paramref name="builder"/> render output.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="elementName">The name of the HTML element to render.</param>
+            <param name="elementType">The type of the HTML element to render.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.FormatValueAsString(System.Object)">
+            <summary>
+            Formats the value as a string. Derived classes can override this to determine 
+            the formating used for <see cref="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CurrentValueAsString"/>.
+            </summary>
+            <param name="value">The value to format.</param>
+            <returns>A string representation of the value.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.GetElement(System.String@)">
+            <summary>
+            Determines the frame to generate representing an HTML element.
+            </summary>
+            <param name="elementType">Returns the type of element to generate.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderSelectOptions(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Renders option elements for a select element to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderRadioOptions(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Renders a collection of input elements of type 'radio' to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderInputCheckbox(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.String,System.String)">
+            <summary>
+            Renders a checkbox to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CssClass"/>.</param>
+            <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderInputRadio(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.String,System.Object,System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Renders an input radio to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="propertyName">The name of the input radio.</param>
+            <param name="value">The value of the radio input.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CssClass"/>.</param>
+            <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
+            <param name="index">A descriminating number to append to the input identifier.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderInputFile(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.String)">
+            <summary>
+            Renders an input file to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="P:Carfamsoft.Model2View.WebPages.AutoInputBase.CssClass"/>.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.AddInputFileAttributes(Carfamsoft.Model2View.Shared.INestedTagBuilder,Carfamsoft.Model2View.Annotations.InputFileAttribute)">
+            <summary>
+            Adds attributes to an input file from the custom attribute <see cref="T:Carfamsoft.Model2View.Annotations.InputFileAttribute"/>.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="fileAttr">The <see cref="T:Carfamsoft.Model2View.Annotations.InputFileAttribute"/> to check.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderCustomInputFile(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Renders to the supplied <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> an input of type file.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.RenderCustomFormCheck(Carfamsoft.Model2View.Shared.INestedTagBuilder,System.Boolean,System.String,System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Renders to the specified <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> a checkbox 
+            or a radio input inside a &lt;div class="form-check"> wrapper element.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+            <param name="radio">true to render a radio input; otherwise, false to render a checkbox input.</param>
+            <param name="label">The label text.</param>
+            <param name="name">The name of the input radio.</param>
+            <param name="value">The value of the radio input.</param>
+            <param name="index">A descriminating number to append to the input identifier.</param>
+        </member>
+        <member name="M:Carfamsoft.Model2View.WebPages.AutoInputBase.CheckDisabled(Carfamsoft.Model2View.Shared.INestedTagBuilder)">
+            <summary>
+            Determines at run-time the disabled state of the current <see cref="T:Carfamsoft.Model2View.WebPages.AutoInputBase"/>
+            if the associated property was statically-marked as disabled with the property
+            <see cref="P:Carfamsoft.Model2View.Annotations.FormAttributeBase.Disabled"/> set to true.
+            </summary>
+            <param name="builder">A <see cref="T:Carfamsoft.Model2View.Shared.INestedTagBuilder"/> that will receive the render output.</param>
+        </member>
+    </members>
+</doc>

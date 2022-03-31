@@ -3,7 +3,7 @@
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
-@inject IJSRuntime JS;
+@inject ILocalStorage localStorage;
 
 <AuthorizeView>
     <Authorized>
@@ -20,7 +20,7 @@
     private async Task BeginSignOut(MouseEventArgs args)
     {
         await SignOutManager.SetSignOutState();
-        await LocalStorage.Create(JS).RemoveAuthorizationTokenAsync();
+        await localStorage.RemoveAuthorizationTokenAsync();
         Navigation.NavigateTo("authentication/logout");
     }
 }

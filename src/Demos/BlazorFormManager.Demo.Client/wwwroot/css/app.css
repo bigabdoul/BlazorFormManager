@@ -1,6 +1,7 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 @import url('loader.css');
 @import url('loading-spinner.css');
+@import url('checkbox.css');
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -179,6 +180,11 @@ app {
 
 .img-fit-cover {
     object-fit: cover;
+}
+
+td .img-fit-cover {
+    width: 104px;
+    height: 104px;
 }
 
 @media (max-width: 767.98px) {

@@ -1,0 +1,53 @@
+﻿@using BlazorFormManager.IO
+
+@if (Progress != null)
+{
+    <div class="blazor-form-manager-progress">
+        <small class="status-text">@UploadStatusMessage @Progress.ProgressPercentage%</small>
+        <div class="progress mb-3">
+            <div class="progress-bar" role="progressbar" style="@ProgressStyle"
+                    aria-valuenow="@Progress.ProgressPercentage" aria-valuemin="0" aria-valuemax="100">
+            </div>
+        </div>
+        @if (!HideCancelButton && CanCancel && OnCancelRequested.HasDelegate)
+        {
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
+                <i class="fas fa-ban"></i> @CancelButtonText
+            </button>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets an object that contains information about the current form submission progress.
+    /// </summary>
+    [Parameter] public ProgressChangedEventArgs? Progress { get; set; }
+
+    /// <summary>
+    /// Gets or sets the upload status message.
+    /// </summary>
+    [Parameter] public string? UploadStatusMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether an ongoing progress can be cancelled.
+    /// </summary>
+    [Parameter] public bool CanCancel { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the text of the cancel button.
+    /// </summary>
+    [Parameter] public string? CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Indicates whether to hide the cancel button.
+    /// </summary>
+    [Parameter] public bool HideCancelButton { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback used to handle a cancellation request.
+    /// </summary>
+    [Parameter] public EventCallback OnCancelRequested { get; set; }
+
+    private string ProgressStyle => $"width: {Progress?.ProgressPercentage ?? 0}%";
+}

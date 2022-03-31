@@ -1,0 +1,42 @@
+﻿@typeparam TModel
+@inherits FormManagerBase<TModel>
+
+@if (EditContext != null)
+{
+    <div class="blazor-form-manager">
+        <EditForm EditContext="EditContext" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit"
+                  id="@FormId" action="@FormAction" method="@FormMethod" enctype="@EncodingType"
+                  @attributes="AdditionalAttributes">
+            <CascadingValue Value="this">
+                @if (!ContentHidden)
+                {
+                    @ChildContent
+                }
+                else
+                {
+                    @NotHiddenContent
+                }
+                <ReCaptcha />
+                @if (SubmitButton != null)
+				{
+					<SubmitButton Options="SubmitButton" />
+				}
+                @if (AntiForgeryToken.IsNotBlank())
+                {
+                    @((MarkupString)AntiForgeryToken!)
+                }
+                <FormSubmitResultView />
+            </CascadingValue>
+        </EditForm>
+        @if (EnableProgressBar && IsUploadingFiles)
+        {
+            <UploadProgressBar Progress="Progress" UploadStatusMessage="@UploadStatus" 
+                CanCancel="CanAbortUpload" OnCancelRequested="() => AbortRequested = true" />
+        }
+        @if (IsDebug)
+        {
+            <FormDebugInfo Model="XhrResult" Options="DebugOptions" />
+            <UnsupportedBrowserProperties Model="AjaxUploadNotSupported?.ExtraProperties" />
+        }
+    </div>
+}

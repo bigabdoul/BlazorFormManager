@@ -1,4 +1,5 @@
-﻿
+﻿@import url('/_content/BlazorFormManager/css/floating-labels.css');
+
 .blazor-form-manager-debug-info {
     font-family: Consolas;
     font-size: .8rem;
@@ -287,6 +288,45 @@ progress, progress::-webkit-progress-bar {
         border-radius: 2px;
         display: block;
         text-indent: -9999px;
+    }
+
+.auto-table .table-sm td,
+.auto-table .table-sm th {
+    padding: .2rem .4rem;
+    font-size: 85%;
+}
+
+.auto-table .table-dark a, .auto-table .table-dark .btn-link {
+    color: #b4d7ff;
+}
+
+    .auto-table .table-dark a:hover, .auto-table .table-dark .btn-link:hover {
+        color: #3b94f5;
+    }
+
+.auto-table .table-responsive {
+    min-height: 175px;
+}
+
+th.clickable {
+    cursor: pointer;
+}
+
+.input-sm, .input-sm .input-group-text, .input-sm input {
+    height: 30px;
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+label.required {
+    font-weight: 700 !important;
+}
+
+    label.required:after {
+        content: " * ";
+        color: red;
     }
 
 @media (max-width:767px) {

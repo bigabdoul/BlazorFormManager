@@ -28,15 +28,20 @@
         public ReadFileRejection Reason { get; set; }
 
         /// <summary>
+        /// Gets or sets the reason a file has been rejected.
+        /// </summary>
+        public ReadFileRejection Response { get; set; }
+
+        /// <summary>
         /// Gets or sets the file that was denied reading.
         /// </summary>
-        public InputFileInfo File { get; set; }
+        public InputFileInfo? File { get; set; }
 
         /// <summary>
         /// Gets or sets the files that were denied reading due to the 'multiple' 
         /// attribute restrictions.
         /// </summary>
-        public InputFileInfo[] Files { get; set; }
+        public InputFileInfo[]? Files { get; set; }
 
         /// <summary>
         /// Gets or sets the number of files read so far.

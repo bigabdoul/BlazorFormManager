@@ -1,0 +1,35 @@
+﻿@inherits AutoFormEntryBase
+
+@if (Metadata != null)
+{
+	var attr = Metadata.Attribute;
+	_ = attr.GetElement(out var type);
+
+	var attributes = GetAttributes
+	(
+		("type", type),
+		("id", InputId),
+		("name", InputName),
+		("title", attr.Description),
+		("class", attr.InputCssClass ?? "form-check-input")
+	);
+
+	var classlist = attr.CheckNoLabel 
+		? string.Empty
+		: $"form-check{(attr.CheckSwitch ? " form-switch" : string.Empty)}{(attr.CheckInline ? " form-check-inline" : string.Empty)}";
+
+	var extraAttrs = attr.GetExtraAttributes();
+
+	if (extraAttrs.ContainsKey("class"))
+		classlist += $" {extraAttrs["class"]}".Trim();
+
+	<div @attributes="@(GetAttributes(("class", classlist)))">
+		<input @attributes="attributes" @bind-value="Value">
+		@if (!attr.CheckNoLabel)
+		{
+			var cls = "form-check-label" + (Metadata.IsRequired ? " required" : string.Empty);
+			<label @attributes="@(GetAttributes(("class", cls), ("for", InputId)))">@Metadata.GetDisplayName()</label>
+		}
+	</div>
+	<AutoValidationMessage Model="Model" Property="@Metadata.PropertyInfo.Name" />
+}

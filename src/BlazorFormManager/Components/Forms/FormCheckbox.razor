@@ -1,0 +1,45 @@
+﻿@{
+	var attributes = GetAttributes
+	(
+		("type", Radio ? "radio" : "checkbox"),
+		("id", Id),
+		("name", Name),
+		("title", Description),
+		("class", CssClass ?? "form-check-input")
+	);
+
+	var classlist = DisplayName.IsBlank()
+		? string.Empty
+		: $"form-check{(Switch ? " form-switch" : string.Empty)}{(Inline ? " form-check-inline" : string.Empty)}";
+}
+
+<div @attributes="@(GetAttributes(("class", classlist)))">
+	<input @attributes="attributes" @onchange="HandleCheckedChanged" checked="@IsChecked">
+	@if (DisplayName.IsNotBlank())
+	{
+		var cls = "form-check-label" + (IsRequired ? " required" : string.Empty);
+		<label @attributes="@(GetAttributes(("class", cls), ("for", Id)))">@DisplayName</label>
+	}
+</div>
+
+@code {
+	[Parameter] public string? Id { get; set; } = typeof(FormCheckbox).Name.GenerateId(camelCase: true);
+	[Parameter] public string? Name { get; set; }
+	[Parameter] public string? CssClass { get; set; }
+	[Parameter] public string? Description { get; set; }
+	[Parameter] public string? Label { get; set; }
+	[Parameter] public string? CheckedLabel { get; set; }
+	[Parameter] public bool Radio { get; set; }
+	[Parameter] public bool Switch { get; set; }
+	[Parameter] public bool Inline { get; set; }
+	[Parameter] public bool IsRequired { get; set; }
+	[Parameter] public bool IsChecked { get; set; }
+
+	private string? DisplayName => IsChecked ? CheckedLabel ?? Label : Label;
+
+	private void HandleCheckedChanged(ChangeEventArgs e)
+	{
+		IsChecked = e.Value != null && (bool)e.Value;
+		StateHasChanged();
+	}
+}

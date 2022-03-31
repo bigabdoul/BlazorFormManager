@@ -1,7 +1,11 @@
 ﻿@if (Error != null)
 {
+    var err = Error;
+    if (err.Message == "''")
+        err = new Exception(err.ToString());
+
     <div class="alert alert-danger">
-        @Error.Message
+        @err.Message
     </div>
 }
 

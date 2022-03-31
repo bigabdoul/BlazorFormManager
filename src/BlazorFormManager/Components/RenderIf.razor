@@ -1,0 +1,16 @@
+﻿@if (Condition.HasValue)
+{
+    if (Condition.Value)
+    {
+        @ChildContent
+    }
+}
+else if (ChildContent != null)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool? Condition { get; set; }
+}

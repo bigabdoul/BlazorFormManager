@@ -1,0 +1,62 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Shared.Extensions
+@using Carfamsoft.Model2View.Mvc
+@model ViewModelMetadataBag
+@{
+    var viewModel = Model.ViewModel;
+    var modelType = viewModel?.GetType() ?? Model.ViewModelType;
+
+    if (modelType != null && modelType.ExtractMetadata(out var groups))
+    {
+        var parentName = Model.ParentPropertyName.IsNotBlank()
+            ? $"{Model.ParentPropertyName}."
+            : string.Empty;
+
+        var isNested = parentName.IsNotBlank();
+
+        foreach (var group in groups)
+        {
+            var items = group.Items.Where(g => !g.Attribute.IsIgnored()).ToArray();
+
+            // first render all hidden inputs
+            foreach (var item in items.Where(i => i.Attribute.Is("hidden")))
+            {
+                <input type="hidden" name="@parentName@item.PropertyInfo.Name" value="@item.GetValue(viewModel)" />
+            }
+
+            items = items.Where(i => !i.Attribute.Is("hidden")).ToArray();
+
+            if (items.Length > 0)
+            {
+                ViewBag.GroupMetadata = group;
+                ViewBag.AutoInputMetadatas = items;
+                var hasGroupIcon = group.Icon.IsNotBlank();
+                // now display the other elements
+                if (isNested)
+                {
+                    <div class="display-group nested">
+                        @if (hasGroupIcon || group.ShowName)
+                        {
+                            <h4 class="display-group-title">@Html.Partial(RazorViewConfig.DisplayGroupIcon, group)</h4>
+                        }
+                        @Html.Partial(RazorViewConfig.DisplayGroupBody, Model)
+                    </div>
+                }
+                else
+                {
+                    <fieldset class="display-group">
+                        @if (hasGroupIcon || group.ShowName)
+                        {
+                            <legend class="display-group-title">@Html.Partial(RazorViewConfig.DisplayGroupIcon, group)</legend>
+                        }
+                        @Html.Partial(RazorViewConfig.DisplayGroupBody, Model)
+                    </fieldset>
+                }
+            }
+        }
+    }
+    else
+    {
+        throw new InvalidOperationException("Could not extract metadata from the specified model.");
+    }
+}

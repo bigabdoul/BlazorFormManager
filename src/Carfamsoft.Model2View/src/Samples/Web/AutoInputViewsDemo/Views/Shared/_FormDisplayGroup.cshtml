@@ -1,0 +1,85 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared.Extensions
+
+@model DisplayGroupModel
+
+@{
+    if (Model == null || Model.Metadata == null || Model.Metadata.Items == null || Model.Metadata.Items.Count == 0)
+    {
+        return;
+    }
+
+    var items = Model.Metadata.Items.Where(g => !g.Attribute.IsIgnored()).ToArray();
+
+    if (items.Length == 0)
+    {
+        return;
+    }
+
+    var pathPrefix = string.Empty;
+    var isNested = Model.PropertyNavigationPath.IsNotBlank();
+
+    if (isNested)
+    {
+        pathPrefix = $"{Model.PropertyNavigationPath}.";
+    }
+
+    var options = Model.RenderOptions;
+
+    // first render all hidden inputs
+    foreach (var data in items.Where(i => i.Attribute.Is("hidden")))
+    {
+        var navigationPath = pathPrefix + data.PropertyInfo.Name;
+        var (id, name) = data.GenerateIdAndName(options, navigationPath);
+
+        <input type="hidden" value="@data.GetValue(Model.ViewModel)"
+               @if (id.IsNotBlank()) { <text> id="@id" </text> }
+               @if (name.IsNotBlank()) { <text> name="@name" </text> } />
+    }
+
+    // render all other inputs/elements
+    items = items.Where(i => false == i.Attribute.Is("hidden")).ToArray();
+
+    if (items.Length > 0)
+    {
+        var group = Model.Metadata;
+        var showGroupName = group.ShowName || group.Icon.IsNotBlank();
+        var fieldsetClass = $"display-group{(isNested ? " nested" : "")}";
+
+        var displayGroupBodyModel = new DisplayGroupBodyModel
+        {
+            Items = items,
+            ViewModel = Model.ViewModel,
+            RenderOptions = options,
+            CssClass = group.CssClass,
+            PropertyNavigationPath = Model.PropertyNavigationPath,
+        };
+
+        if (isNested)
+        {
+            <div class="@fieldsetClass">
+                @if (showGroupName)
+                {
+                    <h4 class="display-group-title">
+                        @Html.Partial(RazorViewConfig.FormDisplayGroupIcon, group)
+                    </h4>
+                }
+                @Html.Partial(RazorViewConfig.FormDisplayGroupBody, displayGroupBodyModel)
+            </div>
+        }
+        else
+        {
+            <fieldset class="@fieldsetClass">
+                @if (showGroupName)
+                {
+                    <legend class="display-group-title">
+                        @Html.Partial(RazorViewConfig.FormDisplayGroupIcon, group)
+                    </legend>
+                }
+                @Html.Partial(RazorViewConfig.FormDisplayGroupBody, displayGroupBodyModel)
+            </fieldset>
+        }
+    }
+}

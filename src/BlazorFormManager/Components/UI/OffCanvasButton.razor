@@ -1,0 +1,19 @@
+﻿@inherits ModalDialogButtonBase
+
+@{
+	var attrs = GetAttributes
+	(
+		("class", CssClass),
+		("data-bs-toggle", "offcanvas"),
+		("data-bs-target", Target),
+		("aria-controls", AriaControls)
+	);
+}
+
+<button type="button" @onclick="OnClick" @attributes="AdditionalAttributes.Merge(attrs)">
+	<ContentIconText Icon="@Icon" Text="@Text" ChildContent="ChildContent!" />
+</button>
+
+@code {
+	private string AriaControls => true == Target?.StartsWith("#") || true == Target?.StartsWith(".") ? Target.Substring(1) : "";
+}

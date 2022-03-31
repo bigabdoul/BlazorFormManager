@@ -1,18 +1,28 @@
-﻿@inject HttpClient Http
+﻿@using Carfamsoft.Model2View.Shared.Extensions
+@inject HttpClient Http
 
 @if (!string.IsNullOrEmpty(base64DataURL))
 {
-    <img id="@Id" src="@base64DataURL" alt="@altText" class="img-fluid" style="@Style" />
+    var attrs = GetAttributes(
+        ("id", Id),
+        ("src", base64DataURL),
+        ("class", "img-fluid"),
+        ("width", MaxWidth),
+        ("height", MaxHeight),
+        ("alt", Alt)
+    );
+    <img @attributes="attrs" />
 }
 
 @code {
     private string base64DataURL;
-    private string altText;
-    private int maxHeight = 275;
-    private string Style => $"max-height:{maxHeight}px;";
+    private string Style => $"max-height:{MaxHeight}px;";
 
     [Parameter] public string Src { get; set; }
-    [Parameter] public string Id { get; set; } = typeof(Base64RemoteImage).GenerateId();
+    [Parameter] public string Alt { get; set; }
+    [Parameter] public int? MaxWidth { get; set; }
+    [Parameter] public int? MaxHeight { get; set; } = 275;
+    [Parameter] public string Id { get; set; } = typeof(Base64RemoteImage).Name.GenerateId();
 
     protected override async Task OnInitializedAsync()
     {
@@ -26,7 +36,7 @@
             var result = await Http.GetAsync(Src);
             result.EnsureSuccessStatusCode();
             var bytes = await result.Content.ReadAsByteArrayAsync();
-            SetImage(bytes, altText);
+            SetImage(bytes, Alt);
         }
         catch (Exception ex)
         {
@@ -36,7 +46,7 @@
 
     public void SetImage(byte[] bytes, string alternativeText = null, int maxHeight = 0)
     {
-        SetDataUrl($"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}", altText);
+        SetDataUrl($"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}", alternativeText, maxHeight);
     }
 
     /// <summary>
@@ -51,10 +61,10 @@
     public void SetDataUrl(string base64DataURL, string alternativeText = null, int maxHeight = 0)
     {
         this.base64DataURL = base64DataURL;
-        altText = alternativeText;
+        Alt = alternativeText;
         if (maxHeight > 0)
         {
-            this.maxHeight = maxHeight;
+            MaxHeight = maxHeight;
         }
         StateHasChanged();
     }

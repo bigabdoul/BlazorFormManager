@@ -117,11 +117,13 @@
     function createImage(src, handler) {
         return new Promise(resolve => {
             const sourceImage = new Image();
-            sourceImage.onload = () => resolve({
-                canvas: handler.call(this, sourceImage),
-                naturalWidth: sourceImage.naturalWidth,
-                naturalHeight: sourceImage.naturalHeight
-            });
+            sourceImage.onload = function () {
+                resolve({
+                    canvas: handler.call(this, sourceImage),
+                    naturalWidth: sourceImage.naturalWidth,
+                    naturalHeight: sourceImage.naturalHeight
+                })
+            };
             sourceImage.src = src;
         });
     }

@@ -1,0 +1,24 @@
+﻿@model AutoUpdateUserModel
+@{
+    ViewData["Title"] = "Update User";
+    var display = new DisplayAutoEditModel
+    {
+        ViewModel = Model ?? new AutoUpdateUserModel(),
+        RenderOptions = ControlRenderOptions.CreateDefault(true).SetOptionsGetter((OptionsGetterDelegate)ViewBag.OptionsGetter)
+    };
+}
+<form method="post" class="row my-3" novalidate>
+    <div class="col-md-8 offset-md-2">
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success p-2">@ViewBag.Message</div>
+        }
+        @Html.Partial(RazorViewConfig.FormDisplayAutoEdit, display)
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa fa-save"></i>&nbsp;Update
+            </button>
+        </div>
+    </div>
+    @Html.AntiForgeryToken()
+</form>

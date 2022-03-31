@@ -1,0 +1,44 @@
+﻿
+<div class="@ModalClass" @attributes="GetModalAttributes()">
+	<div class="@ModalDialogClass">
+		<div class="modal-content">
+			@if (DialogTitle != null)
+			{
+				<div class="@ModalHeaderClass">
+					<h5 class="modal-title" id="@_ariaLabelledBy">@DialogTitle</h5>
+					@if (TopCloseButtonVisible)
+					{
+						<ModalDialogButton OnClick="OnCloseClicked" CssClass="btn-close" 
+							aria-label="@(@CloseButtonText ?? "Close")" Dismissable/>
+					}
+				</div>
+			}
+			@if (@DialogContent != null)
+			{
+				<div class="modal-body">
+					@if (FluidContainer)
+					{
+						<div class="container-fluid">
+							@DialogContent
+						</div>
+					}
+					else
+					{
+						@DialogContent
+					}
+				</div>
+			}
+			@if (DialogActions != null || FooterCloseButtonVisible)
+			{
+				<div class="modal-footer">
+					@if (FooterCloseButtonVisible)
+					{
+						<ModalDialogButton OnClick="OnCloseClicked" CssClass="btn border"
+							Icon="@CloseButtonIcon" Text="@CloseButtonText" Dismissable/>
+					}
+					@DialogActions
+				</div>
+			}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,16 @@
+﻿@{
+	var attrs = GetAttributes(
+		("id", Id),
+		("class", "tab-pane fade" + (IsActive ? " show active" : "")),
+		("aria-labelledby", $"{Id}-tab")
+	);
+}
+<div @attributes="attrs" role="tabpanel">
+	@ChildContent
+</div>
+
+@code {
+	[Parameter] public string? Id { get; set; }
+	[Parameter] public bool IsActive { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,53 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+@model ViewModelMetadataBag
+@{
+    ConfigureRenderOptions();
+    var metadata = Model.Metadata;
+    var attr = metadata.Attribute;
+
+    if (attr.IsInputRadio || metadata.IsInputCheckbox)
+    {
+        var labelText = metadata.GetDisplayName();
+        <div class="form-group">
+            @if (labelText.IsNotBlank() && attr.IsInputRadio)
+            {
+                <label class="form-label">@labelText</label>
+            }
+            @metadata.Render(Model.ViewModel, Model.RenderOptions)
+            @*<AutoValidationMessage Model="metadata.Model" Property="@propertyName" />*@
+        </div>
+    }
+    else
+    {
+        @Html.Partial(Carfamsoft.Model2View.Mvc.RazorViewConfig.AutoInputGroupView, Model)
+    }
+}
+
+@functions
+{
+    void ConfigureRenderOptions()
+    {
+        var options = Model.RenderOptions ?? (Model.RenderOptions = ControlRenderOptions.CreateDefault());
+
+        if (options.GenerateIdAttribute)
+        {
+            var parentName = options.ParentPropertyName = Model.ParentPropertyName;
+            if (parentName.IsNotBlank())
+            {
+                parentName = $"{parentName}.{Model.Metadata.PropertyInfo.Name}";
+            }
+            else
+            {
+                parentName = Model.Metadata.PropertyInfo.Name;
+            }
+            options.UniqueId = parentName.GenerateId(options.CamelCaseId, !options.PredictableId);
+        }
+        else
+        {
+            options.UniqueId = null;
+        }
+    }
+}

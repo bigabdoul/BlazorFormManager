@@ -1,0 +1,61 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared.Extensions
+
+@model DisplayGroupBodyModel
+
+@{
+    if (Model == null || Model.Items == null || Model.Items.Length == 0)
+    {
+        return;
+    }
+
+    var pathPrefix = string.Empty;
+    var renderOptions = Model.RenderOptions;
+
+    if (Model.PropertyNavigationPath.IsNotBlank())
+    {
+        pathPrefix = $"{Model.PropertyNavigationPath}.";
+    }
+}
+
+<div class="display-group-body @Model.CssClass">
+    @foreach (var inputMetadata in Model.Items)
+    {
+        var navigationPath = pathPrefix + inputMetadata.PropertyInfo.Name;
+        var type = inputMetadata.PropertyInfo.PropertyType;
+        if (type.IsNonStringClass())
+        {
+            object childViewModel = inputMetadata.GetValue(Model.ViewModel);
+            if ((childViewModel != null || type.TryCreateInstance(out childViewModel)) && type.ExtractMetadata(out var groups))
+            {
+                // recursive rendering
+                foreach (var groupMetadata in groups)
+                {
+                    var displayGroupModel = new DisplayGroupModel
+                    {
+                        Metadata = groupMetadata,
+                        ViewModel = childViewModel,
+                        RenderOptions = renderOptions,
+                        PropertyNavigationPath = navigationPath,
+                    };
+                    @Html.Partial(RazorViewConfig.FormDisplayGroup, displayGroupModel)
+                }
+            }
+        }
+        else
+        {
+            var autoInputModel = new DisplayAutoInputModel
+            {
+                Metadata = inputMetadata,
+                ViewModel = Model.ViewModel,
+                RenderOptions = renderOptions,
+                PropertyNavigationPath = navigationPath,
+            };
+            <div class="@inputMetadata.Attribute.ColumnCssClass">
+                @Html.Partial(RazorViewConfig.FormDisplayAutoInput, autoInputModel)
+            </div>
+        }
+    }
+</div>

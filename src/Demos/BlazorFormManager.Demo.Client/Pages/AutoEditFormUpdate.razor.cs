@@ -1,7 +1,8 @@
-﻿using BlazorFormManager.Components;
+﻿using BlazorFormManager.Components.Forms;
 using BlazorFormManager.Debugging;
 using BlazorFormManager.Demo.Client.Models;
 using BlazorFormManager.Demo.Client.Services;
+using Carfamsoft.Model2View.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using System;
@@ -16,9 +17,9 @@ namespace BlazorFormManager.Demo.Client.Pages
     public partial class AutoEditFormUpdate
     {
         private static IEnumerable<SelectOptionList> _options;
-        private AutoEditForm<AutoUpdateUserModel> Manager { get; set; }
+        private AutoEditForm<RichTextEditorModel> Manager { get; set; }
         private IDictionary<string, object> RequestHeaders { get; set; }
-        private AutoUpdateUserModel Model { get; set; }
+        private RichTextEditorModel Model { get; set; }
         private ConsoleLogLevel LogLevel => Manager?.LogLevel ?? ConsoleLogLevel.None;
         [Inject] private HttpClient Http { get; set; }
         [Inject] private IRequestHeadersProvider HeadersProvider { get; set; }
@@ -29,7 +30,7 @@ namespace BlazorFormManager.Demo.Client.Pages
         {
             try
             {
-                Model = await Http.GetFromJsonAsync<AutoUpdateUserModel>($"api/account/info/{ModelId}");
+                Model = await Http.GetFromJsonAsync<RichTextEditorModel>($"api/account/info/{ModelId}");
                 RequestHeaders = await HeadersProvider.CreateAsync();
                 if (_options == null) _options = await Http.GetFromJsonAsync<IEnumerable<SelectOptionList>>("api/account/options");
             }

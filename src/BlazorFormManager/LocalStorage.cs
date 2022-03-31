@@ -12,12 +12,12 @@ namespace BlazorFormManager
     /// Represents an instance of a limited JavaScript runtime to which 
     /// localStorage-related calls may be dispatched through the BlazorFormManager.js script.
     /// </summary>
-    public sealed class LocalStorage
+    public sealed class LocalStorage0
     {
         #region fields
 
         private readonly IJSRuntime JS; 
-        private const string LOCAL_STORAGE_ID_FORMAT = "BlazorFormManager.localStorage{0}Item";
+        private const string LOCAL_STORAGE_ID_FORMAT = "window.localStorage.{0}Item";
         private const string LOCAL_STORAGE_TOKEN_KEY = "BlazorFormManager.AuthorizationToken";
 
         #endregion
@@ -25,21 +25,21 @@ namespace BlazorFormManager
         #region constructor
 
         /// <summary>
-        /// Create a new instance of the <see cref="LocalStorage"/> class using the 
+        /// Create a new instance of the <see cref="LocalStorage0"/> class using the 
         /// specified <see cref="IJSRuntime"/>.
         /// </summary>
         /// <param name="jSRuntime">The JavaScript runtime instance to which calls are dispatched.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"><paramref name="jSRuntime"/> is null.</exception>
-        public static LocalStorage Create(IJSRuntime jSRuntime) => new LocalStorage(jSRuntime);
+        public static LocalStorage0 Create(IJSRuntime jSRuntime) => new(jSRuntime);
 
         /// <summary>
-        /// Initializes new instance of the <see cref="LocalStorage"/> class using 
+        /// Initializes new instance of the <see cref="LocalStorage0"/> class using 
         /// the specified <see cref="IJSRuntime"/>.
         /// </summary>
         /// <param name="jSRuntime">The JavaScript runtime instance to which calls are dispatched.</param>
         /// <exception cref="ArgumentNullException"><paramref name="jSRuntime"/> is null.</exception>
-        private LocalStorage(IJSRuntime jSRuntime)
+        private LocalStorage0(IJSRuntime jSRuntime)
         {
             JS = jSRuntime ?? throw new ArgumentNullException(nameof(jSRuntime));
         }
@@ -57,7 +57,7 @@ namespace BlazorFormManager
         /// <param name="value">The value to serialize and set in the localStorage.</param>
         /// <param name="options">Options to control serialization behaviour.</param>
         /// <returns></returns>
-        public Task SetItemAsync<T>(string key, T value, JsonSerializerOptions options = null)
+        public Task SetItemAsync<T>(string key, T value, JsonSerializerOptions? options = null)
         {
             var json = JsonSerializer.Serialize(value, options);
             return SetItemAsync(key, json);
@@ -71,7 +71,7 @@ namespace BlazorFormManager
         /// <returns></returns>
         public async Task SetItemAsync(string key, string value)
         {
-            await JS.InvokeVoidAsync(string.Format(LOCAL_STORAGE_ID_FORMAT, "Set"), key, value);
+            await JS.InvokeVoidAsync(string.Format(LOCAL_STORAGE_ID_FORMAT, "set"), key, value);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace BlazorFormManager
         /// <returns></returns>
         public async Task<string> GetItemAsync(string key)
         {
-            return await JS.InvokeAsync<string>(string.Format(LOCAL_STORAGE_ID_FORMAT, "Get"), key);
+            return await JS.InvokeAsync<string>(string.Format(LOCAL_STORAGE_ID_FORMAT, "get"), key);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace BlazorFormManager
         /// <param name="key">The key of the value to retrieve.</param>
         /// <param name="options">Options to control the behaviour during deserialization.</param>
         /// <returns></returns>
-        public async Task<T> GetItemAsync<T>(string key, JsonSerializerOptions options = null)
+        public async Task<T?> GetItemAsync<T>(string key, JsonSerializerOptions? options = null)
         {
             var json = await GetItemAsync(key);
             if (json == null) return default;
@@ -105,7 +105,7 @@ namespace BlazorFormManager
         /// <returns></returns>
         public async Task RemoveItemAsync(string key)
         {
-            await JS.InvokeVoidAsync(string.Format(LOCAL_STORAGE_ID_FORMAT, "Remove"), key);
+            await JS.InvokeVoidAsync(string.Format(LOCAL_STORAGE_ID_FORMAT, "remove"), key);
         }
 
         /// <summary>
@@ -116,10 +116,25 @@ namespace BlazorFormManager
         public Task SetAuthorizationTokenAsync(string token) => SetItemAsync(LOCAL_STORAGE_TOKEN_KEY, token);
 
         /// <summary>
+        /// Adds the specified custom authorization token to the storage asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type of the authorization token to store.</typeparam>
+        /// <param name="value">The value of the authorization token to store.</param>
+        /// <returns></returns>
+        public Task SetAuthorizationTokenAsync<T>(T value) => SetItemAsync<T>(LOCAL_STORAGE_TOKEN_KEY, value);
+
+        /// <summary>
         /// Returns a previously stored authorization token asynchronously.
         /// </summary>
         /// <returns></returns>
         public Task<string> GetAuthorizationTokenAsync() => GetItemAsync(LOCAL_STORAGE_TOKEN_KEY);
+
+        /// <summary>
+        /// Returns a previously stored custom authorization token asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type of the authorization token to retrieve.</typeparam>
+        /// <returns></returns>
+        public Task<T?> GetAuthorizationTokenAsync<T>() => GetItemAsync<T>(LOCAL_STORAGE_TOKEN_KEY);
 
         /// <summary>
         /// Removes a previously stored authorization token asynchronously.

@@ -48,7 +48,7 @@ For a working sample please checkout the demo application in the project's repos
 ### The sample view model:
 
 ```C#
-using BlazorFormManager.ComponentModel.ViewAnnotations;
+using Carfamsoft.Model2View.Annotations;
 using System;
 using System.ComponentModel.DataAnnotations;
 

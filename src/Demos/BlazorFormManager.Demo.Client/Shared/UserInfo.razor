@@ -1,0 +1,52 @@
+﻿@using Carfamsoft.Model2View.Shared
+@if (Model != null)
+{
+    <div class="media">
+        <DynamicPhoto Controller="account" ModelId="Model.Id" Alt="@Model.FirstName" FitCover />
+        <div class="media-body ml-3">
+            <h5 class="mt-0">
+                <a href="@($"account/autoeditform/{Model.Id}")">@Model.FirstName @Model.LastName</a>
+            </h5>
+            <div class="row">
+                <div class="col-md-7">
+                    <dl class="row">
+                        <dt class="col-md-4 text-md-right">Email:</dt>
+                        <dd class="col-md-8">@Model.Email</dd>
+
+                        <dt class="col-md-4 text-md-right">Phone Number:</dt>
+                        <dd class="col-md-8">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "[Unspecified]" : Model.PhoneNumber)</dd>
+
+                        <dt class="col-md-4 text-md-right">2-Factor Auth?</dt>
+                        <dd class="col-md-8">@(Model.TwoFactorEnabled ? "Yes" : "No")</dd>
+                    </dl>
+                </div>
+                <div class="col-md-5">
+                    <dl class="row">
+                        <dt class="col-md-6 text-md-right">Favourite Color:</dt>
+                        <dd class="col-md-6">@GetOption(nameof(AutoUpdateUserModel.FavouriteColor), Model.FavouriteColor)</dd>
+
+                        <dt class="col-md-6 text-md-right">Age Range:</dt>
+                        <dd class="col-md-6">@GetOption(nameof(AutoUpdateUserModel.AgeRange), Model.AgeRange)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public AutoUpdateUserModel Model { get; set; }
+    [Parameter] public IEnumerable<SelectOptionList> Options { get; set; }
+
+    private string GetOption(string propertyName, object id)
+    {
+        var strId = $"{id}";
+        if (strId == string.Empty || strId == "0")
+            return "[Unspecified]";
+
+        return Options?
+            .SingleOrDefault(list => list.PropertyName == propertyName)?
+            .Items.FirstOrDefault(opt => opt.Id == $"{id}")?
+            .Value;
+    }
+}

@@ -16,6 +16,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BlazorFormManager\BlazorFormManager.csproj" />
+    <ProjectReference Include="..\..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />
+    <ProjectReference Include="..\..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
+    <ProjectReference Include="..\..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
+    <ProjectReference Include="..\..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Shared\Carfamsoft.Model2View.Shared.csproj" />
   </ItemGroup>
 
 </Project>

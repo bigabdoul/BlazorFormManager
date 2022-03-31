@@ -1,0 +1,69 @@
+﻿@using BlazorFormManager.IO
+
+@if (Progress != null)
+{
+    <div class="blazor-form-manager-progress html5-progress">
+        <small class="status-text">@Progress.ProgressPercentage% : @StatusMessage</small>
+        <div>
+            <progress value="@Progress.ProgressPercentage" max="100">
+                <span class="progress-bar">
+                    <span style="@ProgressStyle">@Progress.ProgressPercentage%</span>
+                </span>
+            </progress>
+        </div>
+        @if (!HideCancelButton && CanCancel && OnCancelRequested.HasDelegate)
+        {
+            <button type="button" class="btn btn-sm btn-secondary btn-cancel" @onclick="OnCancelRequested">
+                <i class="fa fa-ban"></i> @CancelButtonText
+            </button>
+        }
+        @if (!HideElapsedMilliseconds && ElapsedMilliseconds.HasValue)
+        {
+            <small class="elapsed-milliseconds">@($"{TimeSpan.FromMilliseconds(ElapsedMilliseconds.Value).ToString(@"hh\:mm\:ss")}")</small>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets an object that contains information about the current progress.
+    /// </summary>
+    [Parameter] public ProgressChangedEventArgs? Progress { get; set; }
+
+    /// <summary>
+    /// Gets or sets the progress status message.
+    /// </summary>
+    [Parameter] public string? StatusMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value that indicates whether an ongoing progress can be cancelled.
+    /// </summary>
+    [Parameter] public bool CanCancel { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the text of the cancel button.
+    /// </summary>
+    [Parameter] public string? CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Indicates whether to hide the cancel button.
+    /// </summary>
+    [Parameter] public bool HideCancelButton { get; set; }
+
+    /// <summary>
+    ///Gets or sets the total amount of milliseconds elapsed.
+    /// </summary>
+    [Parameter] public long? ElapsedMilliseconds { get; set; }
+
+    /// <summary>
+    /// Indicates whether to hide the elapsed milliseconds value.
+    /// </summary>
+    [Parameter] public bool HideElapsedMilliseconds { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event callback used to handle a cancellation request.
+    /// </summary>
+    [Parameter] public EventCallback OnCancelRequested { get; set; }
+
+    private string ProgressStyle => $"width: {Progress?.ProgressPercentage}%;";
+}

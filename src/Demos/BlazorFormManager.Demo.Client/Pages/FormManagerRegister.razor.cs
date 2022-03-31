@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.Components;
+﻿using BlazorFormManager.Components.Forms;
 using BlazorFormManager.Debugging;
 using BlazorFormManager.Demo.Client.Models;
 using Microsoft.AspNetCore.Components;

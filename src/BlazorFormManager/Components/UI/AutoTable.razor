@@ -1,0 +1,38 @@
+﻿@typeparam TItem
+@inherits AutoTableBase<TItem>
+<div class="auto-table">
+    <TemplatedTable Items="Items" TotalItemCount="TotalItemCount" ItemsPerPage="ItemsPerPage" OnPageChange="OnPageChange"
+        Styles="Styles" SearchOptions="SearchOptions" FilteredItems="FilteredItems">
+        <Loading>@Loading</Loading>
+        <Empty>@Empty</Empty>
+        <TableHeader>
+            @if (TableHeader != null)
+            {
+                @TableHeader
+            }
+            else if (!NoHeader)
+            {
+                <TemplatedTableHeader Cells="Headers" CssClass="@Styles?.HeaderCssClass" />
+            }
+        </TableHeader>
+        <TableBody Context="item">
+            @if (TableBodyRow != null)
+            {
+                @TableBodyRow(item)
+            }
+            else
+            {
+                <tr>
+                    @foreach (var cell in Headers)
+                    {
+                        if (cell.Hidden) continue;
+                        <RenderTableCell Data="HandleGetCellData(cell.Name!, item)" />
+                    }
+                </tr>
+            }
+        </TableBody>
+        <TableFooter>
+            <RenderIf Condition="Headers.Count(cell => !cell.Hidden) > 0" />
+        </TableFooter>
+    </TemplatedTable>
+</div>

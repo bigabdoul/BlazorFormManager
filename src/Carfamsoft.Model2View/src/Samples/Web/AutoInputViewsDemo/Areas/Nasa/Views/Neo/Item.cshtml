@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewBag.Title = "Near-Earth Objects (NEO)";
+}
+
+<div id="nasaNeoFeed">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h2 class="page-header my-4">@ViewBag.Title</h2>
+            <div v-cloak>
+                <ul v-for="(value, key) in feed.near_earth_objects">
+                    <li>
+                        <h4>{{ key }}</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Close Approach Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="obj in feed.near_earth_objects[key]">
+                                    <td><a :href="getDetailUrl('@Url.Action("Item")', obj.id)">{{ obj.name }}</a></td>
+                                    <td>{{ getCloseApproachDate(obj) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                </ul>
+                <ul class="nav links" v-if="feed.links">
+                    <li class="nav-item" v-if="feed.links.prev"><a class="nav-link" :href="feed.links.prev"><i class="fas fa-arrow-left"></i> Previous </a></li>
+                    <li class="nav-item" v-if="feed.links.self"><a class="nav-link" :href="feed.links.self"><i class="fas fa-check"></i> Current </a></li>
+                    <li class="nav-item" v-if="feed.links.next"><a class="nav-link" :href="feed.links.next"><i class="fas fa-arrow-right"></i> Next </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        const vapp = NASA.createNeoFeedApp('#nasaNeoFeed', '@Request.QueryString["startDate"]', '@Request.QueryString["endDate"]');
+    </script>
+}

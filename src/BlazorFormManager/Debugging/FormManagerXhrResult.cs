@@ -15,7 +15,7 @@ namespace BlazorFormManager.Debugging
     {
         #region fields
 
-        private IReadOnlyDictionary<string, string> _headers;
+        private IReadOnlyDictionary<string, string>? _headers;
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace BlazorFormManager.Debugging
         /// <summary>
         /// Gets or sets the request headers.
         /// </summary>
-        public IDictionary<string, object> RequestHeaders { get; set; }
+        public IDictionary<string, object>? RequestHeaders { get; set; }
 
         #endregion
 
@@ -52,7 +52,7 @@ namespace BlazorFormManager.Debugging
         /// Document, JavaScript Object, or DOMString, depending on the value 
         /// of the request's responseType property.
         /// </summary>
-        public object Response { get; set; }
+        public object? Response { get; set; }
 
         /// <summary>
         /// Gets or sets all the response headers, separated by CRLF, 
@@ -73,12 +73,12 @@ namespace BlazorFormManager.Debugging
         /// x-xss-protection: 1; mode=block\r\n
         /// </para>
         /// </summary>
-        public string ResponseHeaders { get; set; }
+        public string? ResponseHeaders { get; set; }
 
         /// <summary>
         /// Gets or set the text received from a server following a request being sent.
         /// </summary>
-        public string ResponseText { get; set; }
+        public string? ResponseText { get; set; }
 
         /// <summary>
         /// Gets or sets an enumerated string value specifying the type of data 
@@ -87,7 +87,7 @@ namespace BlazorFormManager.Debugging
         /// default value of text is used. Supported values are: arraybuffer, blob,
         /// document, json, text, ms-stream
         /// </summary>
-        public string ResponseType { get; set; }
+        public string? ResponseType { get; set; }
 
         /// <summary>
         /// The read-only XMLHttpRequest.responseURL property returns the serialized 
@@ -95,14 +95,14 @@ namespace BlazorFormManager.Debugging
         /// is returned, any URL fragment present in the URL will be stripped away. 
         /// The value of responseURL will be the final URL obtained after any redirects.
         /// </summary>
-        public string ResponseUrl { get; set; }
+        public string? ResponseUrl { get; set; }
 
         /// <summary>
         /// The XMLHttpRequest.responseXML read-only property returns a Document containing 
         /// the HTML or XML retrieved by the request; or null if the request was unsuccessful, 
         /// has not yet been sent, or if the data can't be parsed as XML or HTML.
         /// </summary>
-        public string ResponseXML { get; set; }
+        public string? ResponseXML { get; set; }
 
         /// <summary>
         /// The read-only XMLHttpRequest.status property returns the 
@@ -118,7 +118,7 @@ namespace BlazorFormManager.Debugging
         /// If the request's readyState is in UNSENT or OPENED state, the value of statusText 
         /// will be an empty string.
         /// </summary>
-        public string StatusText { get; set; }
+        public string? StatusText { get; set; }
 
         /// <summary>
         /// The XMLHttpRequest.withCredentials property is a Boolean that indicates 
@@ -135,7 +135,7 @@ namespace BlazorFormManager.Debugging
         /// <summary>
         /// Gets or sets supplementary properties received from an XMLHttpRequest object.
         /// </summary>
-        public Dictionary<string, object> ExtraProperties { get; set; }
+        public Dictionary<string, object>? ExtraProperties { get; set; }
 
         /// <summary>
         /// Determines whether the <see cref="Status"/> code indicates 
@@ -146,8 +146,7 @@ namespace BlazorFormManager.Debugging
         /// <summary>
         /// Gets a read-only dictionary of all the response headers.
         /// </summary>
-        public IReadOnlyDictionary<string, string> Headers 
-            => _headers ?? (_headers = GetAllResponseHeaders());
+        public IReadOnlyDictionary<string, string> Headers => _headers ??= GetAllResponseHeaders();
 
         /// <summary>
         /// Determines whether the 'content-type' response header 
@@ -219,21 +218,19 @@ namespace BlazorFormManager.Debugging
             var dic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (!string.IsNullOrWhiteSpace(ResponseHeaders))
             {
-                using (var sr = new System.IO.StringReader(ResponseHeaders))
-                {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        var index = line.IndexOf(':');
-                        if (index > -1)
-                        {
-                            var name = line.Substring(0, index).TrimEnd();
-                            var value = line.Substring(index + 1).TrimStart();
-                            dic.Add(name, value);
-                        }
-                    }
-                }
-            }
+				using var sr = new System.IO.StringReader(ResponseHeaders);
+				string? line;
+				while ((line = sr.ReadLine()) != null)
+				{
+					var index = line.IndexOf(':');
+					if (index > -1)
+					{
+						var name = line.Substring(0, index).TrimEnd();
+						var value = line.Substring(index + 1).TrimStart();
+						dic.Add(name, value);
+					}
+				}
+			}
             return new ReadOnlyDictionary<string, string>(dic);
         }
 

@@ -31,13 +31,13 @@
         /// <summary>
         /// Gets or sets the CSS class name for an auto-generated image.
         /// </summary>
-        public string TagClass { get; set; }
+        public string? TagClass { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of an HTML element (typically a &lt;img /> tag)
         /// that will display the image.
         /// </summary>
-        public string TagId { get; set; }
+        public string? TagId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the target element's attribute name that will 
@@ -49,7 +49,7 @@
         /// Gets or sets the DOM query selector for the element that is wrapped around
         /// the auto-generated image (e.g. '#auto-image-wrapper', '.image-wrapper', etc.)
         /// </summary>
-        public string WrapperSelector { get; set; }
+        public string? WrapperSelector { get; set; }
 
         /// <summary>
         /// Gets or sets the preferred width of the thumbnail to be generated.

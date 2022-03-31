@@ -1,0 +1,52 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@model DisplayAutoInputModel
+@{
+    var metadata = Model.Metadata;
+    var attr = metadata.Attribute;
+    var renderOptions = Model.RenderOptions;
+    var navigationPath = Model.PropertyNavigationPath;
+
+    (Model.InputId, Model.InputName) = metadata.GenerateIdAndName(renderOptions, navigationPath);
+
+    if (attr.IsInputFile)
+    {
+        @Html.Partial(RazorViewConfig.FormDisplayAutoFileInput, Model)
+    }
+    else
+    {
+        var viewModel = Model.ViewModel;
+        if (attr.IsInputRadio || metadata.IsInputCheckbox)
+        {
+            var labelText = metadata.GetDisplayName();
+            <div class="form-group mb-3">
+                @if (!string.IsNullOrWhiteSpace(labelText) && attr.IsInputRadio)
+                {
+                    <label class="control-label">@labelText</label>
+                }
+                @metadata.Render(viewModel, renderOptions, navigationPath)
+            </div>
+        }
+        else if (attr.Is("hidden"))
+        {
+            <input type="hidden" id="@Model.InputId" name="@Model.InputName" value="@metadata.GetValue(viewModel)">
+        }
+        else
+        {
+            var autoEntryModel = new DisplayAutoInputModel
+            {
+                Metadata = metadata,
+                ViewModel = viewModel,
+                RenderOptions = renderOptions,
+                PropertyNavigationPath = navigationPath
+            };
+            var entryModel = new DisplayInputGroupEntryModel
+            {
+                Icon = attr.Icon,
+                ChildContent = Html.Partial(RazorViewConfig.FormDisplayAutoEntry, autoEntryModel)
+            };
+            @Html.Partial(RazorViewConfig.FormDisplayInputGroupEntry, entryModel)
+        }
+    }
+}

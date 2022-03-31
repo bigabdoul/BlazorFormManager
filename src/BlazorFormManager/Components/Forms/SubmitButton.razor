@@ -1,0 +1,88 @@
+﻿@if (!IsHidden)
+{
+    var ico = ButtonIcon;
+
+    <button type="@ButtonType" class="@ButtonCssClass" @onclick="HandleClick" 
+        disabled="@CheckIsDisabled" @attributes="AdditionalAttributes">
+        @if (CheckIsBusy)
+        {
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        }
+        &nbsp; @if (ico.IsNotBlank()) { <i class="@ico"></i><text>&nbsp;</text> } 
+        <span @attributes="@(GetAttributes(("class", TextCssClass)))">@ButtonText</span>
+    </button>
+    @if (true == Manager?.IsDebug)
+    {
+        <button type="button" class="btn btn-danger"
+                aria-label="Simulate AJAX upload with progress report not supported by browser"
+                @onclick="Manager.RaiseAjaxUploadWithProgressNotSupportedAsync">
+            Show Browser Info
+        </button>
+    }
+}
+
+@code {
+    [Parameter] public FormManagerBase? Manager { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Type { get; set; }
+    [Parameter] public string? Icon { get; set; } = "fas fa-save";
+    [Parameter] public bool ForceSubmit { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool IsHidden { get; set; }
+    [Parameter] public bool CenterText { get; set; }
+    [Parameter] public SubmitButtonOptions? Options { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> Clicked { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object>? AdditionalAttributes{ get; set; }
+
+    [CascadingParameter] private FormManagerBase? Form { get; set; }
+
+    private string? ButtonText => Options?.Text ?? Text;
+
+    private string ButtonType
+    {
+        get
+        {
+            var type = Options?.Type ?? Type;
+            return type.IsNotBlank() ? type! : (ForceSubmit || Form != null ? "button" : "submit");
+        }
+    }
+
+    private string? ButtonIcon => Options?.Icon ?? Icon;
+
+    private bool IsTextCentered => Options?.CenterText ?? CenterText;
+
+    private bool CheckIsDisabled => IsDisabled || CheckIsBusy;
+
+    private bool CheckIsBusy
+    {
+        get
+        {
+            if (IsBusy) return true;
+            
+            if (Manager is not null)
+                return Manager.IsUploadingFiles && Manager.IsLongRunning;
+            
+            if (Form is not null)
+                return Form.IsUploadingFiles && Form.IsLongRunning;
+            
+            return false;
+        }
+    }
+
+    private string TextCssClass => IsTextCentered ? "justify-content-center w-100" : "";
+
+    private string ButtonCssClass => "btn btn-primary my-3" + (IsTextCentered ? " w-100 align-items-center d-flex" : "");
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (Clicked.HasDelegate)
+            await Clicked.InvokeAsync(e);
+
+        else if (ForceSubmit && Manager != null)
+            await Manager.SubmitFormAsync();
+
+        else if (Form != null && (ForceSubmit || !ButtonType.EqualsIgnoreCase("submit")))
+            await Form.SubmitFormAsync();
+    }
+}

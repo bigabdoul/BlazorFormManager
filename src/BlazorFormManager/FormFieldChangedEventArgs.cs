@@ -1,4 +1,4 @@
-﻿using BlazorFormManager.ComponentModel.ViewAnnotations;
+﻿using Carfamsoft.Model2View.Annotations;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
 
@@ -29,7 +29,7 @@ namespace BlazorFormManager
         /// <param name="isFile">Indicates whether the field that triggered the change is an input file.</param>
         /// <param name="elementId">The identifier of the element that triggered the change.</param>
         /// <param name="fileAttribute">A copy of the custom attribute attached to the current field, if any.</param>
-        public FormFieldChangedEventArgs(object value, FieldIdentifier fieldIdentifier, bool isFile = false, string elementId = null, InputFileAttribute fileAttribute = null)
+        public FormFieldChangedEventArgs(object? value, FieldIdentifier fieldIdentifier, bool isFile = false, string? elementId = null, InputFileAttribute? fileAttribute = null)
         {
             Value = value;
             Field = fieldIdentifier;
@@ -51,17 +51,17 @@ namespace BlazorFormManager
         /// <summary>
         /// Gets the identifier of the field that triggered the change.
         /// </summary>
-        public string FieldId { get; }
+        public string? FieldId { get; }
 
         /// <summary>
         /// Gets the value of the field that changed.
         /// </summary>
-        public object Value { get; private set; }
+        public object? Value { get; private set; }
 
         /// <summary>
         /// Gets a copy of the custom attribute attached to the current field, if any.
         /// </summary>
-        public InputFileAttribute FileAttribute { get; }
+        public InputFileAttribute? FileAttribute { get; }
 
         /// <summary>
         /// Indicates whether the field that triggered the change is an input file.

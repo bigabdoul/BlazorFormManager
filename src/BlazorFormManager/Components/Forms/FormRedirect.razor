@@ -1,0 +1,122 @@
+﻿@implements IDisposable
+@inject NavigationManager Navigation
+@code {
+	[CascadingParameter] private FormManagerBase? Form { get; set; }
+
+	/// <summary>
+	/// The URI to redirect to.
+	/// </summary>
+	[Parameter] public string? Uri { get; set; }
+
+	/// <summary>
+	/// The fallback URI if Url is not specified.
+	/// </summary>
+	[Parameter] public string? FallbackUri { get; set; }
+
+	/// <summary>
+	/// If true, redirects only if the form has been successfully submitted 
+	/// and processed by the server. The default value is true.
+	/// </summary>
+	[Parameter] public bool SuccessOnly { get; set; } = true;
+
+	/// <summary>
+	/// Makes sure that the Uri is not an external URI when redirecting.
+	/// </summary>
+	[Parameter] public bool EnforceLocalUri { get; set; }
+
+	/// <summary>
+	/// If true, bypasses client-side routing and forces the browser to load the new
+	/// page from the server, whether or not the URI would normally be handled by the
+	/// client-side router.
+	/// </summary>
+	[Parameter] public bool ForceReload { get; set; }
+
+	/// <summary>
+	/// If strictly positive, the amount of milliseconds to wait before redirecting.
+	/// </summary>
+	[Parameter] public int Delay { get; set; }
+
+	/// <summary>
+	/// Navigates to the provided URI if all conditions are met.
+	/// </summary>
+	/// <returns></returns>
+	public async Task<bool> NavigateAsync()
+	{
+		string? continuationUri;
+
+		if (Uri.IsNotBlank())
+			continuationUri = Uri!;
+		else
+			continuationUri = FallbackUri ?? Navigation.Uri;
+
+		if (continuationUri.IsNotBlank())
+		{
+			if (EnforceLocalUri && !IsLocalUri(continuationUri, Navigation.Uri))
+			{
+				return false;
+			}
+
+			if (Delay > 0) 
+				await Task.Delay(Delay);
+
+			Navigation.NavigateTo(continuationUri!, forceLoad: ForceReload);
+			return true;
+		}
+
+		return false;
+	}
+
+	/// <inheritdoc />
+	protected override void OnParametersSet()
+	{
+		if (Form is null) 
+			throw new InvalidOperationException(
+			$"The {nameof(FormRedirect)} component must be a child of an instance " +
+			$"of the {nameof(FormManagerBase)} component.");
+
+		Form.Submitted += HandleSubmitDone;
+
+		base.OnParametersSet();
+	}
+
+	private void HandleSubmitDone(FormManagerSubmitResult result)
+	{
+		if (result.Succeeded)
+		{
+			if (SuccessOnly)
+				InvokeAsync(NavigateAsync);
+		}
+		else if (!SuccessOnly)
+			InvokeAsync(NavigateAsync);
+	}
+
+	void IDisposable.Dispose()
+	{
+		if (Form is not null)
+		{
+			Form.Submitted -= HandleSubmitDone;
+		}
+		GC.SuppressFinalize(this);
+	}
+
+	public static bool IsLocalUri(string uri, string localUri)
+	{
+		try
+		{
+			var oUri = new Uri(uri, UriKind.RelativeOrAbsolute);
+			if (!oUri.IsAbsoluteUri) return true;
+
+			var absUri = new Uri(localUri, UriKind.RelativeOrAbsolute);
+			if (!absUri.IsAbsoluteUri) return true;
+			
+			return 
+			oUri.Scheme.Equals(absUri.Scheme, StringComparison.OrdinalIgnoreCase) &&
+			oUri.Authority.Equals(absUri.Authority, StringComparison.OrdinalIgnoreCase);
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine(ex.Message);
+			return false;
+		}
+	}
+}

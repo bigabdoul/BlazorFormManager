@@ -1,0 +1,26 @@
+﻿@{
+    var attrs = TableCell.GetAttributes(Data, out var value, out var onclick);
+
+    if (onclick.HasDelegate)
+    {
+        <td @attributes="attrs" @onclick="onclick">
+            @if (value is MarkupString ms)
+                @ms
+            else
+                @Data
+        </td>
+    }
+    else
+    {
+        <td @attributes="attrs">
+            @if (value is MarkupString ms)
+                @ms
+            else
+                @Data
+        </td>
+    }
+}
+
+@code {
+    [Parameter] public object? Data { get; set; }
+}

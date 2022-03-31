@@ -1,0 +1,63 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+
+@model DisplayGroupBodyModel
+
+@{
+    if (Model == null || Model.Items == null || Model.Items.Length == 0)
+    {
+        return;
+    }
+
+    var pathPrefix = string.Empty;
+    var renderOptions = Model.RenderOptions;
+
+    if (Model.PropertyNavigationPath.IsNotBlank())
+    {
+        pathPrefix = $"{Model.PropertyNavigationPath}.";    
+    }
+}
+
+<div class="display-group-body @Model.CssClass">
+    @foreach (var data in Model.Items)
+    {
+        var navigationPath = pathPrefix + data.PropertyInfo.Name;
+        var type = data.PropertyInfo.PropertyType;
+        if (type.IsNonStringClass())
+        {
+            if (type.TryCreateInstance(out var childModel) && type.ExtractMetadata(out var groups))
+            {
+                // recursive rendering
+                foreach (var g in groups)
+                {
+                    @*<FormDisplayGroup Metadata="g" Model="childModel" PropertyNavigationPath="@navigationPath"/>*@
+                    var displayGroupModel = new DisplayGroupModel
+                    { 
+                        Metadata = g, 
+                        ViewModel = childModel, 
+                        RenderOptions = renderOptions,
+                        PropertyNavigationPath = navigationPath,
+                    };
+                    @Html.Partial(RazorViewConfig.FormDisplayGroupView, displayGroupModel)
+                }
+            }
+        }
+        else
+        {
+            var inputModel = new DisplayAutoInputModel
+            {
+                Metadata = data,
+                ViewModel = Model.ViewModel,
+                RenderOptions = renderOptions,
+                PropertyNavigationPath = navigationPath,
+            };
+            <div class="@data.Attribute.ColumnCssClass">
+                @*<AutoInput Metadata="data" Model="Model" PropertyNavigationPath="@navigationPath"/>*@
+                @Html.Partial(RazorViewConfig.AutoInputView, inputModel)
+            </div>
+        }
+    }
+</div>

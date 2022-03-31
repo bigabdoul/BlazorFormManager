@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "defaultProvider": "jsdelivr",
+  "libraries": [
+    {
+      "library": "axios@0.21.1",
+      "destination": "Scripts/axios/",
+      "files": [
+        "dist/axios.js",
+        "dist/axios.map",
+        "dist/axios.min.js",
+        "dist/axios.min.map"
+      ]
+    }
+  ]
+}

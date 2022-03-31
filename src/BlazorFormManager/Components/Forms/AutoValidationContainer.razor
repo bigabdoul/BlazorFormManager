@@ -1,0 +1,11 @@
+﻿<small class="@ComputedClass">
+    <AutoValidationMessage Model="Model" Property="@Property" />
+</small>
+
+@code {
+	[Parameter] public object? Model { get; set; }
+	[Parameter] public string? Property { get; set; }
+	[Parameter] public bool Indented { get; set; }
+
+	private string ComputedClass => "d-block" + (Indented ? " ms-4 ps-3 ml-4 pl-3" : string.Empty);
+}

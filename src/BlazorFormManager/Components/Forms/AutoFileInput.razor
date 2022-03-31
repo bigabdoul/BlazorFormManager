@@ -1,0 +1,28 @@
+﻿@inherits AutoFormEntryBase
+
+@if (Metadata != null)
+{
+    var metadata = Metadata;
+    var attr = metadata.Attribute;
+    var attrs = GetAttributes
+    (
+        ("id", InputId),
+        ("name", InputName),
+        ("class", attr.InputCssClass),
+        ("placeholder", attr.Placeholder),
+        ("title", attr.Description),
+        ("accept", attr.FileAttribute?.Accept),
+        ("multiple", attr.FileAttribute?.Multiple)
+    );
+    <div class="input-group mb-3">
+        <label class="input-group-text" for="@InputId">
+            @if (attr.Icon.IsNotBlank())
+            {
+                <text><i class="@attr.Icon"></i>&nbsp;</text>
+            }
+            @metadata.GetDisplayName()
+        </label>
+        <input type="file" @onchange="e => Value = e.Value" @attributes="attrs">
+    </div>
+    <HelpText Description="@attr.Description"/>
+}

@@ -1,0 +1,183 @@
+﻿@inject Microsoft.JSInterop.IJSRuntime JS
+@implements IDisposable
+
+@{
+    var attrs = GetAttributes(
+        ("id", Id),
+        ("type", _searchOptions?.InputType ?? "text"),
+        ("class", _searchOptions?.CssClass ?? "form-control"),
+        ("placeholder", _searchOptions?.Placeholder ?? _searchOptions?.Label ?? "Search"),
+        ("aria-controls", "Search"),
+        ("pattern", _searchOptions?.KeyFilters?.Pattern)
+    );
+
+    <InputGroupEntry Icon="fas fa-search">
+        <div class="form-floating input-@(_searchOptions?.InputSizeString ?? "md")">
+            <input @attributes="AdditionalAttributes.Merge(attrs)" @bind-value="Value">
+            <label for="@Id">@(_searchOptions?.Label ?? _searchOptions?.Placeholder ?? "Search")</label>
+        </div>
+    </InputGroupEntry>
+}
+
+@code {
+    #region parameters
+
+    /// <summary>
+    /// Gets or sets the configuration options for this input search text box.
+    /// </summary>
+    [Parameter]
+    public InputSearchOptions? SearchOptions { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyDown { get; set; }
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyPress { get; set; }
+    [Parameter] public EventCallback<JSKeyboardEventArgs> OnKeyUp { get; set; }
+    [Parameter] public string? Value { get; set; }
+
+    #endregion
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_searchOptions != SearchOptions)
+        {
+            // do this to prevent memory leaks
+            await RemoveEventHandlersAsync();
+
+            _searchOptions = SearchOptions;
+            
+            if (_renderedOnce)
+            {
+                await SetupEventListenersAsync();
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _renderedOnce = true;
+            await SetupEventListenersAsync();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                _ = RemoveEventHandlersAsync();
+            }
+            _disposed = true;
+        }
+    }
+
+    #region private
+
+    private bool _settingUp;
+    private bool _renderedOnce;
+    private bool _autoInputEvent;
+    private bool _disposed;
+    private InputSearchOptions? _searchOptions;
+
+    private bool HasPattern => !string.IsNullOrWhiteSpace(_searchOptions?.KeyFilters?.Pattern);
+    private string Id = typeof(InputSearch).Name.GenerateId();
+    private string EventType => $"{_searchOptions?.ChangeDetection}".ToLower();
+
+    private async Task SetupEventListenersAsync()
+    {
+        if (_settingUp) return;
+
+        _settingUp = true;
+        var options = _searchOptions;
+
+        if (options == null)
+        {
+            if (OnKeyDown.HasDelegate)
+                await JS.FilterKeysAsync(Id, DomEventType.KeyDown, HandleKeyDown);
+            
+            if (OnKeyPress.HasDelegate)
+                await JS.FilterKeysAsync(Id, DomEventType.KeyPress, HandleKeyPress);
+            
+            if (OnKeyUp.HasDelegate)
+                await JS.FilterKeysAsync(Id, DomEventType.KeyUp, HandleKeyUp);
+        }
+        else
+        {
+            var detection = options.ChangeDetection;
+            var keyEvent =
+                detection == DomEventType.KeyDown ||
+                detection == DomEventType.KeyPress ||
+                detection == DomEventType.KeyUp;
+
+            if (!keyEvent)
+                await JS.AddEventListenerAsync(Id, EventType, HandleCallback);
+            
+            if (keyEvent || options.KeyFilters != null)
+            {
+                if (!keyEvent)
+                    detection = DomEventType.KeyUp; // our default key filter event
+
+                await JS.FilterKeysAsync(Id, detection, HandleKeyboardEventCallback, options.KeyFilters);
+            }
+
+        }
+
+        if (options == null || options.ChangeDetection != DomEventType.Input)
+            // always add the "input" event so that we can capture the value of the input
+            _autoInputEvent = await JS.AddEventListenerAsync(Id, "input", HandleCallback);
+        
+        _settingUp = false;
+    }
+
+    private async Task HandleKeyboardEventCallback(JSKeyboardEventArgs e)
+    {
+        _searchOptions!.Text = e.Value;
+        var args = new InputSearchChangedEventArgs(e.Value, _searchOptions.ChangeDetection, e);
+        await _searchOptions.OnTextChanged.InvokeAsync(args);
+    }
+
+    private async Task HandleCallback(JSEventArgs e)
+    {
+        if (e.EventType == "input")
+        {
+            if (_searchOptions != null)
+                _searchOptions.Text = e.Value;
+            
+            Value = e.Value;
+        }
+        if (!_autoInputEvent && _searchOptions != null)
+        {
+            var args = new InputSearchChangedEventArgs(e.Value, _searchOptions.ChangeDetection, null, e);
+            await _searchOptions.OnTextChanged.InvokeAsync(args);
+        }
+    }
+
+    private Task HandleKeyDown(JSKeyboardEventArgs e) => OnKeyDown.InvokeAsync(e);
+
+
+    private Task HandleKeyPress(JSKeyboardEventArgs e) => Task.CompletedTask;
+
+
+    private Task HandleKeyUp(JSKeyboardEventArgs e) => Task.CompletedTask;
+
+    private async Task RemoveEventHandlersAsync()
+    {
+        await JS.RemoveEventListenerAsync(Id, "input");
+
+        if (_searchOptions != null)
+            await JS.RemoveEventListenerAsync(Id, EventType);
+    }
+
+    #endregion
+}

@@ -1,0 +1,15 @@
+﻿@inherits ModalDialogButtonBase
+
+@{
+	var attrs = GetAttributes
+	(
+		("class", CssClass),
+		("data-bs-target", Target),
+		("data-bs-toggle", Dismissable ? "" : "modal"),
+		("data-bs-dismiss", Dismissable ? "modal" : "")
+	);
+	
+}
+<button type="button" @onclick="OnClick" @attributes="AdditionalAttributes.Merge(attrs)">
+	<ContentIconText Icon="@Icon" Text="@Text" ChildContent="ChildContent!" />
+</button>

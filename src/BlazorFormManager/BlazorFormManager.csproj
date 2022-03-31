@@ -1,44 +1,91 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<RazorLangVersion>3.0</RazorLangVersion>
+		<LangVersion>9.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress.</Description>
+		<Copyright>© 2020 Karfamsoft. All rights reserved.</Copyright>
+		<Authors>Abdourahamane Kaba</Authors>
+		<Company>Karfamsoft</Company>
+		<PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+		<RepositoryType>Git</RepositoryType>
+		<PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
+		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+		<PackageReleaseNotes>
+			Added drag and drop support with simple image manipulation utilities.
+			Drag and drop options are configurable both at design and run-time:
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RazorLangVersion>3.0</RazorLangVersion>
-    <Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress.</Description>
-    <Copyright>© 2020 Karfamsoft. All rights reserved.</Copyright>
-    <Authors>Abdourahamane Kaba</Authors>
-    <Company>Karfamsoft</Company>
-    <PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
-    <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-    <PackageReleaseNotes>Added drag and drop support with simple image manipulation utilities.
-Drag and drop options are configurable both at design and run-time:
+			- Enable or disable drop event notifications.
+			- Specify the maximum number of files and total file size allowed to be dropped.
+			- Display details about dropped files such as file name, size, type, last modified date, and image dimensions.
+			- Option to store only the files without image preview generation and upload them on form submission.
+			- Enable/disable resizing of image previews, set preferred width and height, preserve original aspect ratios.
+			- Individual file and total files reading progress indicators with elapsed time display.
+			- Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic thumbnail generation, include this script into your index.html file before the BlazorFormManager.js script.
 
-- Enable or disable drop event notifications.
-- Specify the maximum number of files and total file size allowed to be dropped.
-- Display details about dropped files such as file name, size, type, last modified date, and image dimensions.
-- Option to store only the files without image preview generation and upload them on form submission.
-- Enable/disable resizing of image previews, set preferred width and height, preserve original aspect ratios.
-- Individual file and total files reading progress indicators with elapsed time display.
-- Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic thumbnail generation, include this script into your index.html file before the BlazorFormManager.js script.
+			For usage, clone the demo project on Github at https://github.com/bigabdoul/BlazorFormManager.
+		</PackageReleaseNotes>
+		<Version>3.0.0</Version>
+	</PropertyGroup>
 
-For usage, clone the demo project on Github at https://github.com/bigabdoul/BlazorFormManager.</PackageReleaseNotes>
-    <Version>2.2.0</Version>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>$(ProjectDir)\src\BlazorFormManager\bin\Debug\$(TargetFramework)\BlazorFormManager.xml</DocumentationFile>
+		<DefineConstants>TRACE</DefineConstants>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Users\akaba\source\repos\BlazorFormManager\src\BlazorFormManager\BlazorFormManager.xml</DocumentationFile>
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.9.7">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Compile Remove="Collections\**" />
+		<Compile Remove="ComponentModel\**" />
+		<Content Remove="Collections\**" />
+		<Content Remove="ComponentModel\**" />
+		<EmbeddedResource Remove="Collections\**" />
+		<EmbeddedResource Remove="ComponentModel\**" />
+		<None Remove="Collections\**" />
+		<None Remove="ComponentModel\**" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Remove="LocalStorage.cs" />
+		<Compile Remove="SelectOption.cs" />
+		<Compile Remove="SelectOptionList.cs" />
+		<Compile Remove="TypeExtensions.cs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.6" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.6" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <TypeScriptCompile Remove="typescripts\ImageUtility.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="typescripts\ImageUtility.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
+		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
+		<ProjectReference Include="..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />
+	</ItemGroup>
 
 </Project>

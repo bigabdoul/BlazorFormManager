@@ -1,0 +1,14 @@
+﻿.checks label {
+    display: inline-block;
+}
+
+.checks span:before {
+    display: inline-block;
+    box-sizing: border-box;
+    font-family: "Font Awesome 5 Free";
+    content: "\f0c8";
+    color: #3ca3ca;
+    font-size: 1.3em;
+    vertical-align: middle;
+    margin-top: -3px;
+}

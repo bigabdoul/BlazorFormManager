@@ -1,0 +1,122 @@
+﻿
+@if (Metadata != null)
+{
+    bool rendered = false;
+    var metadata = Metadata;
+    var attr = metadata.Attribute;
+    var (id, name) = Metadata.GenerateIdAndName(Form?.RenderOptions, PropertyNavigationPath, null/*Id*/, Form?.GenerateInputNameAttribute);
+    var hasIcon = attr.Icon.IsNotBlank();
+    
+    if (attr.InputName.IsNotBlank())
+    {
+        name = attr.InputName;
+    }
+
+#if NET6_0_OR_GREATER
+    if (attr.EditorType != null)
+    {
+        if (!typeof(IComponent).IsAssignableFrom(attr.EditorType))
+        throw new ArgumentException(
+        $"{nameof(FormDisplayAttribute.EditorType)} must implement {nameof(IComponent)}.");
+
+        var parameters = new Dictionary<string, object?>()
+        {
+            { "Id", id },
+            { "Name", name },
+            { "Metadata", metadata },
+            { "Model", Model },
+            { "Value", Value },
+            { "PropertyNavigationPath", PropertyNavigationPath },
+        };
+        <DynamicComponent Type="attr.EditorType" Parameters="parameters"/>
+        rendered = true;
+    }
+#endif
+
+    if (!rendered)
+    {
+        if (attr.IsInputFile)
+        {
+            <AutoFileInput Id="@id" Model="Model" Metadata="Metadata" />
+        }
+        else
+        {
+            var propertyName = metadata.PropertyInfo.Name;
+            var element = attr.GetElement(out var elementType);
+            if (attr.IsInputRadio || metadata.IsInputCheckbox)
+            {
+                var placeholder = attr.Placeholder.IsNotBlank() ? attr.Placeholder : Metadata.GetDisplayName();
+                var wrapperClass = $"form-group mb-3 {element} {elementType}";
+                <div class="@wrapperClass">
+                    <AutoInputBase Id="@id" Name="@name" Metadata="metadata" Model="Model" @bind-Value="Value"
+                        PropertyNavigationPath="@PropertyNavigationPath" class="@attr.InputCssClass" 
+                        placeholder="@placeholder" title="@attr.Description" />
+                    <HelpText Description="@attr.Description"/>
+                    <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
+                </div>
+            }
+            else
+            {
+                var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
+                if (editor)
+                {
+                    <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="Metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                }
+                else
+                {
+                    <InputGroupEntry Icon="@attr.Icon" HelpText="@attr.Description">
+                        <ChildContent>
+                            <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="Metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                        </ChildContent>
+                        <ValidationContent>
+                            <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
+                        </ValidationContent>
+                    </InputGroupEntry>
+                }
+            }
+        }
+    }
+}
+@code {
+    [CascadingParameter] private FormManagerBase? Form { get; set; }
+
+    /*
+    /// <summary>
+    /// Gets or sets the unique identifier of the generated HTML input / element.
+    /// </summary>
+    [Parameter] public string? Id { get; set; }
+*/
+    /// <summary>
+    /// Gets or  sets the metadata information for the auto-generated component.
+    /// </summary>
+    [Parameter] public AutoInputMetadata? Metadata { get; set; }
+
+    /// <summary>
+    /// Gets or sets the model for which the component is being rendered.
+    /// </summary>
+    [Parameter] public object? Model { get; set; }
+
+    /// <summary>
+    /// Gets or sets the component's child content.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the navigation path to the property 
+    /// that renders the current <see cref="AutoFormEntry"/>.
+    /// </summary>
+    [Parameter] public string PropertyNavigationPath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the model's value.
+    /// </summary>
+    protected object? Value
+    {
+        get => Metadata?.GetValue(Model);
+        set
+        {
+            // AutoInputBase<object?> has already set the model's value like the following:
+            // Metadata?.SetValue(Model, value);
+        }
+    }
+}

@@ -1,0 +1,30 @@
+﻿@if (ChildContent != null)
+{ 
+	@ChildContent
+}
+else
+{
+	if (Icon.IsNotBlank())
+	{
+		if (IconSpan)
+		{
+			<text><span class="@Icon"></span>&nbsp;</text>
+		}
+		else
+		{
+			<text><i class="@Icon"></i>&nbsp;</text>
+		}
+	}
+	if (Text.IsNotBlank())
+	{
+		<span @attributes="@(GetAttributes(("class", TextBlock ? "d-block" : null)))">@Text</span>
+	}
+}
+
+@code {
+	[Parameter] public string? Text { get; set; }
+	[Parameter] public bool TextBlock { get; set; }
+	[Parameter] public string? Icon { get; set; }
+	[Parameter] public bool IconSpan { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+}

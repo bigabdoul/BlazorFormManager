@@ -20,7 +20,7 @@
         /// <summary>
         /// Gets or sets the error that might have occurred during the operation.
         /// </summary>
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         /// <summary>
         /// Gets or sets the error code.

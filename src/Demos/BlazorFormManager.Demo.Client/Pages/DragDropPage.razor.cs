@@ -1,6 +1,6 @@
-﻿using BlazorFormManager.Components;
+﻿using BlazorFormManager.Components.Forms;
+using BlazorFormManager.Components.UI;
 using BlazorFormManager.Debugging;
-using BlazorFormManager.Demo.Client.Models;
 using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
 using System;

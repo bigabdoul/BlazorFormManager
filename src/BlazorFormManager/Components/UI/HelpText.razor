@@ -1,0 +1,19 @@
+﻿@if (Description.IsNotBlank())
+{
+    <small class="@ComputedClass">@Description</small>
+}
+else if (ChildContent != null)
+{
+    <div class"@ComputedClass">
+        @ChildContent
+    </div>
+}
+
+@code {
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public bool Indented { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => "form-text text-muted bfm-help-text d-block mb-3" + 
+    (Indented ? " ms-md-4 ps-md-3 ml-md-4 pl-md-3" : string.Empty);
+}

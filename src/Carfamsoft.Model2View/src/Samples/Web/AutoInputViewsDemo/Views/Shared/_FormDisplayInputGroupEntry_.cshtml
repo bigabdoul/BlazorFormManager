@@ -1,0 +1,29 @@
+﻿@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared.Extensions
+
+@model DisplayInputGroupEntryModel
+
+@if (Model == null)
+{
+    return;
+}
+<div class="input-group mb-3">
+    @if (Model.Icon.IsNotBlank() || Model.PrependText.IsNotBlank())
+    {
+        <span class="input-group-text">
+            @if (Model.Icon.IsNotBlank())
+            {
+                <text><i class="@Model.Icon"></i>&nbsp;</text>
+            }
+            @if (Model.PrependText.IsNotBlank())
+            {
+                <text>@Html.Raw(Model.PrependText)</text>
+            }
+        </span>
+    }
+    @Html.Raw(Model.ChildContent)
+</div>
+@if (Model.ValidationContent != null)
+{
+    @Html.Raw(Model.ValidationContent)
+}

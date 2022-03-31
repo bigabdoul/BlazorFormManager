@@ -1,0 +1,75 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Extensions
+@model dynamic
+
+@{
+    var viewModel = GetViewModel(out var renderOptions);
+    var modelType = viewModel.GetType();
+
+    if (modelType.ExtractMetadata(out var groups))
+    {
+        foreach (FormDisplayGroupMetadata group in groups)
+        {
+            var objModel = new DisplayGroupModel
+            {
+                Metadata = group,
+                ViewModel = viewModel,
+                RenderOptions = renderOptions
+            };
+            @Html.Partial(RazorViewConfig.FormDisplayGroup, objModel)
+        }
+    }
+    else
+    {
+        throw new InvalidOperationException($"Could not extract metadata from the specified model type {modelType.FullName}.");
+    }
+}
+
+@functions
+{
+    private object GetViewModel(out ControlRenderOptions renderOptions)
+    {
+        if (Model == null)
+        {
+            throw new ArgumentNullException($"{nameof(Model)} cannot be null.");
+        }
+
+        renderOptions = null;
+        object viewModel = null;
+        Type viewModelType = null;
+
+        if (Model is DisplayAutoEditModel editModel)
+        {
+            viewModel = editModel.ViewModel;
+            viewModelType = viewModel?.GetType() ?? editModel.ViewModelType;
+            renderOptions = editModel.RenderOptions;
+        }
+        else if (Model is Type t)
+        {
+            viewModelType = t;
+        }
+
+        if (viewModel == null)
+        {
+            if (viewModelType != null)
+            {
+                if (viewModelType.TryCreateInstance(out object instance))
+                {
+                    viewModel = instance;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Could not create an instance of the the type {viewModelType.FullName}.");
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"The model and/or the model type must be specified.");
+            }
+        }
+        return viewModel;
+    }
+}

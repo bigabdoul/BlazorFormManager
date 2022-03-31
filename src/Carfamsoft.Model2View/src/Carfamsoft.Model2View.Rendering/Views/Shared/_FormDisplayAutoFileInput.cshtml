@@ -1,0 +1,44 @@
+﻿@using Carfamsoft.Model2View.Annotations
+@using Carfamsoft.Model2View.Mvc
+@using Carfamsoft.Model2View.Mvc.Models
+@using Carfamsoft.Model2View.Shared
+@using Carfamsoft.Model2View.Shared.Collections
+@using Carfamsoft.Model2View.Shared.Extensions
+@model DisplayAutoInputModel
+@{
+    if (Model == null || Model.Metadata == null || Model.Metadata.Attribute == null)
+    {
+        return;
+    }
+
+    var metadata = Metadata;
+    var attr = metadata.Attribute;
+    var attrs = CollectionExtensions.GetAttributes
+    (
+        ("type", "file"),
+        ("id", Model.InputId),
+        ("name", Model.InputName),
+        ("placeholder", attr.Prompt),
+        ("title", attr.Description),
+        ("accept", attr.FileAttribute?.Accept),
+        ("multiple", attr.FileAttribute?.Multiple)
+    );
+    TagBuilder inputBuilder = new TagBuilder("input");
+    foreach (var a in attrs)
+    {
+        string value = (a.Value is bool) ? a.Key : a.Value.ToString();
+        inputBuilder.Attributes.Add(a.Key, value);
+    }
+    <div class="input-group mb-3">
+        <label class="input-group-text" for="@InputId">
+            @if (attr.Icon.IsNotBlank())
+            {
+                <text><i class="@attr.Icon"></i>&nbsp;</text>
+            }
+            @metadata.GetDisplayName()
+        </label>
+        @inputBuilder.ToString(TagRenderMode.SelfClosing)
+        <input type="file" id="@InputId" name="@metadata.PropertyInfo.Name" class="@attr.InputCssClass" 
+            @onchange="e => Value = e.Value" @attributes="attrs">
+    </div>
+}

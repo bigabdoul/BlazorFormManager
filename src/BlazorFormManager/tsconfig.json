@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "module": "System",
+    "target": "ES5",
+    "lib": ["ES2015", "DOM"],
+    "outFile": "wwwroot/dist/bundle.js"
+  },
+  "include": [
+    "typescripts/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
+}

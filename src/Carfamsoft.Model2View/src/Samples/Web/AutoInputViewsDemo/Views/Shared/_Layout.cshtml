@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="~/Content/lib/bootstrap/dist/css/bootstrap-5.0.2.min.css" />
+    <link rel="stylesheet" href="~/Content/fontawesome/css/all.css" />
+    <link rel="stylesheet" href="~/Content/mdb.min.css" />
+    <style>
+        .input-group .form-floating {
+            flex-grow: 2;
+        }
+    </style>
+    @RenderSection("head", false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AutoInput Demo</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("About", "Home")" class="nav-link">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Contact", "Home")" class="nav-link">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("UpdateUser", "Home")" class="nav-link">Update Info</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Apod", new { area = "Nasa" })" class="nav-link" title="Astronomical Picture Of the Day">APOD</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2021 - AutoInput Demo - <a href="@Url.Action("Index", "Home")">Home</a>
+        </div>
+    </footer>
+
+    <script src="~/Content/lib/jquery/dist/jquery.js"></script>
+    <script src="~/Content/lib/bootstrap/dist/js/bootstrap.bundle-5.0.2.min.js"></script>
+    <script src="~/Scripts/mdb.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

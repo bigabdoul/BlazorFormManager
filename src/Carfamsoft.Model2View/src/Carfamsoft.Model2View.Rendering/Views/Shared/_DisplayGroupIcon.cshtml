@@ -1,0 +1,10 @@
+﻿@model FormDisplayGroupMetadata
+
+@if (Model.Icon.IsNotBlank())
+{
+    <text><i class="@Model.Icon"></i>&nbsp;</text>
+}
+@if (Model.ShowName)
+{
+    @Html.Raw(Model.Name)
+}

@@ -1,0 +1,36 @@
+﻿<div class="input-group-container mb-3">
+	<div class="input-group">
+		@if (HasIcon || HasText)
+		{
+			<span class="input-group-text">
+				@if (HasIcon)
+				{
+					<i class="@Icon"></i>
+
+					<text>&nbsp;</text>
+				}
+				@if (HasText)
+				{
+					<span>@PrependText</span>
+				}
+			</span>
+		}
+		@ChildContent
+	</div>
+	<HelpText Description="@HelpText" Indented="@(HasIcon || HasText)" />
+	@if (ValidationContent != null)
+	{
+		@ValidationContent
+	}
+</div>
+
+@code {
+	[Parameter] public string? Icon { get; set; }
+	[Parameter] public string? PrependText { get; set; }
+	[Parameter] public string? HelpText { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
+	[Parameter] public RenderFragment? ValidationContent { get; set; }
+
+	private bool HasIcon => Icon.IsNotBlank();
+	private bool HasText => PrependText.IsNotBlank();
+}

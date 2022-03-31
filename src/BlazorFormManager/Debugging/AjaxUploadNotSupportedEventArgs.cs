@@ -29,6 +29,6 @@ namespace BlazorFormManager.Debugging
         /// <summary>
         /// Gets or sets supplementary properties received from an XMLHttpRequest.
         /// </summary>
-        public Dictionary<string, object> ExtraProperties { get; set; }
+        public Dictionary<string, object>? ExtraProperties { get; set; }
     }
 }

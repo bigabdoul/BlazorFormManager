@@ -3,7 +3,7 @@
 namespace BlazorFormManager
 {
     /// <summary>
-    /// Contains data related to the <see cref="Components.FormManagerBase.OnModelRequested"/> event.
+    /// Contains data related to the <see cref="Components.Forms.FormManagerBase.OnModelRequested"/> event.
     /// </summary>
     public class ModelRequestedEventArgs : EventArgs
     {
@@ -17,6 +17,6 @@ namespace BlazorFormManager
         /// <summary>
         /// Gets or sets the model to be submitted.
         /// </summary>
-        public object Model { get; set; }
+        public object? Model { get; set; }
     }
 }

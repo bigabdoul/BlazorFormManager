@@ -1,5 +1,6 @@
 ﻿using BlazorFormManager.Demo.Client.Models;
 using BlazorFormManager.Demo.Server.Models;
+using Carfamsoft.Model2View.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -430,9 +431,9 @@ namespace BlazorFormManager.Demo.Server.Controllers
         {
             bool success = true;
             string message = null;
-            if (Request.Form.Files.Any())
+            if (Request.Form.Files.Count > 0)
             {
-                var file = Request.Form.Files.First();
+                var file = Request.Form.Files[0];
 
                 if (string.Equals("image/jpeg", file.ContentType, StringComparison.OrdinalIgnoreCase) ||
                     string.Equals("image/jpg", file.ContentType, StringComparison.OrdinalIgnoreCase))

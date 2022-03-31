@@ -1,0 +1,9 @@
+﻿<div class="position-fixed @Position p-3" style="z-index: @Zindex">
+	@Childcontent
+</div>
+
+@code {
+	[Parameter] public int Zindex { get; set; } = 11;
+	[Parameter] public string? Position { get; set; } = FixedPosition.BottomRight;
+	[Parameter] public RenderFragment? Childcontent { get; set; }
+}
