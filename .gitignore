@@ -338,3 +338,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# vendor libs in Samples
+
+src/*/src/Samples/**/Content/fontawesome/**
+src/*/src/Samples/**/Content/lib/**
