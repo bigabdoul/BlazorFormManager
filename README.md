@@ -11,6 +11,121 @@ It is flexible enough to allow advanced control, such as setting HTTP request he
 over instances of the XMLHttpRequest object used to send requests, all from the C#/.NET
 perspective.
 
+# New
+
+## Google reCAPTCHA support
+
+Easily integrate Google reCAPTCHA technology into any form based on the `FormManagerBase`
+class, such as `AutoEditForm`.
+
+```HTML
+// File: Register.razor
+@using BlazorFormManager.Components.Forms
+@using Carfamsoft.Model2View.Annotations
+@using System.ComponentModel.DataAnnotations
+
+<AutoEditForm ReCaptcha="recaptchaOptions" Model="registerModel" Messages="Messages"
+    EnableProgressBar="false" HideOnSuccess RequireModel EnableChangeTracking>
+    <AfterDisplayGroups>
+        <SubmitButton Text="Create account" Icon="fas fa-user-plus" ForceSubmit CenterText/>
+    </AfterDisplayGroups>
+    <ChildContent>
+        <DataAnnotationsValidator />
+        <FormRedirect Uri="@ReturnUrl" FallbackUri="/account/register-success" 
+            Delay="2000" ForceReload EnforceLocalUri/>
+    </ChildContent>
+</AutoEditForm>
+
+@code {
+    ReCaptchaOptions recaptchaOptions = new ReCaptchaOptions
+    {
+        Version = "v3",
+        Invisible = true,
+        SiteKey = "6Ldq7iYU...RMVG...JEQTFOa",
+        LanguageCode = "en-US",
+        AllowLocalHost = true,
+    };
+
+    private readonly RegisterModel registerModel = new RegisterModel();
+
+    /// <summary>
+    /// Gets or sets various messages to display based
+    /// on the form submission outcome (success, failure).
+    /// </summary>
+    [Parameter] public MessageDictionary Messages { get; set; }
+
+    /// <summary>
+    /// Redirection URL on successful form submission.
+    /// </summary>
+    [Parameter] public string ReturnUrl { get; set; }
+
+    [FormDisplayDefault(ColumnCssClass = "col-md-6")]
+    public class RegisterModel
+    {
+        [StringLength(50)]
+        [FormDisplay(GroupName = "Identification", Icon = "fas fa-user", Description = "Enter your first name")]
+        public string FirstName { get; set; }
+
+        [StringLength(50)]
+        [FormDisplay(GroupName = "Identification", Icon = "fas fa-user", Description = "Enter your family name")]
+        public string LastName { get; set; }
+
+        [EmailAddress]
+        [Required(ErrorMessage = "A valid email is required")]
+        [FormDisplay(GroupName = "Contact", Icon = "fas fa-envelope", Description = "Enter your e-mail address")]
+        public string Email { get; set; }
+        
+        [Phone]
+        [FormDisplay(GroupName = "Contact", Description = "Enter your mobile phone number (optional)", Icon = "fas fa-phone-alt")]
+        public string PhoneNumber { get; set; }
+
+        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "A password is required")]
+        [FormDisplay(GroupName = "Password", Icon = "fas fa-key", Description = "Enter a new password")]
+        public string Password { get; set; }
+
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
+        [Required(ErrorMessage = "Confirmation password is required")]
+        [FormDisplay(GroupName = "Password", Icon = "fas fa-key", Description = "Confirm the new password")]
+        public string ConfirmPassword { get; set; }
+        
+        [FormDisplay(Type = "hidden", InputName = "__RequestVerificationToken")]
+        public string RequestVerificationToken { get; set; }
+
+        // define other required or optional properties for registration
+    }
+}
+```
+
+This inserts an invisible Google reCAPTCHA version 3 in English into the DOM.
+The `SiteKey` property must be a valid key for the domain on which the application
+is deployed.
+
+When the form is submitted, the reCAPTCHA response and version will be sent to the
+server with the keys `g-recaptcha-response` and `g-recaptcha-version` respectively.
+
+Read the Google's Developer documentation on how to create a site key and how to 
+validate a reCAPTCHA response on the server.
+
+A complete example on how to integrate reCAPTCHA with a server-side Blazor
+ASP.NET MVC Core application will be soon provided.
+
+## Integrated Rich Text Editor
+
+If you need to expose a rich text editor through your model's properties, just
+set the `EnableRichText` parameter / property on `AutoEditForm` like so:
+
+```HTML
+<AutoEditForm EnableRichText>
+</AutoEditForm>
+```
+
+Any property of a model with the `FormDisplay(Tag = "textarea")` custom attribute
+will be rendered as a rich text editor.
+
+Behind the scenes, the Quill (https://quilljs.com) editor is used.
+
 # Drag and drop with dynamic image preview generation and resizing
 
 Using `AutoEditForm` it's very easy to add drag and drop support with simple image
@@ -27,9 +142,6 @@ Drag and drop options are configurable both at design and run-time:
 - Enable/disable resizing of image previews, set preferred width and height, preserve
   original aspect ratios.
 - Individual file and total files reading progress indicators with elapsed time display.
-- Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic
-  thumbnail generation, include this script into your index.html file before the
-  BlazorFormManager.js script.
 
 For usage, clone this repo and launch the demo project.
 
@@ -71,21 +183,21 @@ public class AutoUpdateUserModel
     [Required]
     [StringLength(255)]
     [EmailAddress]
-    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-envelope", UITypeHint = "email")]
+    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-envelope", Type = "email")]
     public string Email { get; set; }
 
     [StringLength(30)]
-    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-phone", UITypeHint = "phone")]
+    [FormDisplay(GroupName = "Contact details", Icon = "fas fa-phone", Type = "phone")]
     public string PhoneNumber { get; set; }
 
-    [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 2)]
+    [FormDisplay(GroupName = "Please select", Tag = "select", Name = "", Order = 2)]
     public int AgeRange { get; set; }
 
     [Range(typeof(DayOfWeek), "Monday", "Friday")]
-    [FormDisplay(GroupName = "Please select", UIHint = "select", Name = "", Order = 1, Prompt = "[Favourite Working Day]", Icon = "fas fa-calendar")]
+    [FormDisplay(GroupName = "Please select", Tag = "select", Name = "", Order = 1, Prompt = "[Favourite Working Day]", Icon = "fas fa-calendar")]
     public string FavouriteWorkingDay { get; set; }
 
-    [FormDisplay(UITypeHint = "radio", Order = 3, Name = "What's your favourite color?")]
+    [FormDisplay(Type = "radio", Order = 3, Name = "What's your favourite color?")]
     public string FavouriteColor { get; set; }
 
     [FormDisplay(Order = 4, Name = "Enable two-factor authentication", Description = "Log in with your email and an SMS confirmation")]
@@ -118,11 +230,11 @@ a validator such as the `<DataAnnotationsValidator />` component. For instance, 
 `RangeAttribute` not only makes sure that the user selects values between the mininum
 (Monday) and maximum (Friday) values but `AutoInputBase` also generates the appropriate
 enumeration values from Monday to Friday. This is only possible if we specify the
-`UIHint` to be `select` or `radio`.
+`Tag` to be `select` or `radio`.
 
 ```C#
 [Range(typeof(DayOfWeek), "Monday", "Friday")]
-[FormDisplay(UIHint = "select")]
+[FormDisplay(Tag = "select")]
 public string FavouriteWorkingDay { get; set; }
 ```
 
@@ -132,21 +244,21 @@ and `DateTime`.
 We can dynamically (at run-time) generate values for this property and others as well.
 This is what we'll do for the `AgeRange` and `FavouriteColor` properties.
 
-You'll probably have also noticed the properties `UIHint` and `UITypeHint` of the
+You'll probably have also noticed the properties `Tag` and `Type` of the
 `FormDisplayAttribute`.
 
 ```C#
-[FormDisplay(UIHint = "select")]
+[FormDisplay(Tag = "select")]
 public int AgeRange { get; set; }
 
-[FormDisplay(UITypeHint = "phone")]
+[FormDisplay(Type = "phone")]
 public string PhoneNumber { get; set; }
 ```
 
 Behaviour of some custom attribute properties of the `FormDisplayAttribute` class:
 
-- `UIHint` determines the HTML element to generate, e.g. `input`, `select`, `textarea`...
-- `UITypeHint` determines the type of an `input` element, e.g. `email`, `number`, `date`...
+- `Tag` determines the HTML element to generate, e.g. `input`, `select`, `textarea`...
+- `Type` determines the type of an `input` element, e.g. `email`, `number`, `date`...
 - `Name` determines the `label` content. If it's an empty (not `null`) string, no label
   is displayed.
 - `GroupName` displays similiar or related properties on the same row (e.g.
