@@ -117,14 +117,18 @@ If you need to expose a rich text editor through your model's properties, just
 set the `EnableRichText` parameter / property on `AutoEditForm` like so:
 
 ```HTML
-<AutoEditForm EnableRichText>
+<AutoEditForm Model="editModel" EnableRichText>
 </AutoEditForm>
 ```
 
-Any property of a model with the `FormDisplay(Tag = "textarea")` custom attribute
-will be rendered as a rich text editor.
+Any property of the model with the `FormDisplay(Tag = "textarea")` custom attribute
+will be rendered as a rich text editor. Alternatively, explicitly decorating a 
+property with the `FormDisplay(RichText = true)` custom attribute will render it as
+a rich text editor as well and there's no need to specify the `EnableRichText` parameter.
 
-Behind the scenes, the Quill (https://quilljs.com) editor is used.
+Behind the scenes, the Quill Rich Text Editor (https://quilljs.com) is used.
+Dependencies (script and stylesheet) are only inserted into the DOM when the above 
+conditions are met.
 
 # Drag and drop with dynamic image preview generation and resizing
 
