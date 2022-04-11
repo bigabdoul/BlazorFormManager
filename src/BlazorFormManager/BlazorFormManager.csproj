@@ -79,14 +79,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <TypeScriptCompile Remove="typescripts\ImageUtility.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="typescripts\ImageUtility.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
 		<ProjectReference Include="..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />
