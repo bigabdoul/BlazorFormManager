@@ -20,6 +20,7 @@ class, such as `AutoEditForm`.
 
 ```HTML
 // File: Register.razor
+@using BlazorFormManager.Components
 @using BlazorFormManager.Components.Forms
 @using Carfamsoft.Model2View.Annotations
 @using System.ComponentModel.DataAnnotations
