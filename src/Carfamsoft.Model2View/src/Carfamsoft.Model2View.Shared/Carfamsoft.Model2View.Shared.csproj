@@ -6,6 +6,16 @@
 		<RootNamespace>Carfamsoft.Model2View.Shared</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<Nullable>warnings</Nullable>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+		<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageTags>c#, blazorformmanager</PackageTags>
+		<Description>Shared library for BlazorFormManager</Description>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

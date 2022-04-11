@@ -4,6 +4,16 @@
 	  <TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net6.0</TargetFrameworks>
     <AssemblyName>Carfamsoft.Model2View.Annotations</AssemblyName>
     <RootNamespace>Carfamsoft.Model2View.Annotations</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>Model annotations for BlazorFormManager</Description>
+    <Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
+    <PackageTags>c#, blazorformmanager</PackageTags>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

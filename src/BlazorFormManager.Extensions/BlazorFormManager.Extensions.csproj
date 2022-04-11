@@ -2,6 +2,16 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>Extensions for BlazorFormManager</Description>
+		<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>c#, blazorformmanager, extensions</PackageTags>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
