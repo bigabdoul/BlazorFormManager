@@ -46,6 +46,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carfamsoft.JSInterop", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carfamsoft.Model2View.Annotations.Core", "src\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj", "{C7D6B540-6503-440D-AFB0-46A83EDE3DA6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFormManager.Extensions", "src\BlazorFormManager.Extensions\BlazorFormManager.Extensions.csproj", "{1D59D75D-C46A-462A-B6C8-05C3E542C7A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,10 @@ Global
 		{C7D6B540-6503-440D-AFB0-46A83EDE3DA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7D6B540-6503-440D-AFB0-46A83EDE3DA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7D6B540-6503-440D-AFB0-46A83EDE3DA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D59D75D-C46A-462A-B6C8-05C3E542C7A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D59D75D-C46A-462A-B6C8-05C3E542C7A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D59D75D-C46A-462A-B6C8-05C3E542C7A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D59D75D-C46A-462A-B6C8-05C3E542C7A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
