@@ -4,7 +4,7 @@
 		<RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
-		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress.</Description>
+		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress. It supports automatic form (UI) generation from metadata-decorated .NET object models. It also supports easy integration of Google's reCAPTCHA technology and the Quill Rich Text Editor (https://quilljs.com).</Description>
 		<Copyright>© 2020 Karfamsoft. All rights reserved.</Copyright>
 		<Authors>Abdourahamane Kaba</Authors>
 		<Company>Karfamsoft</Company>
@@ -14,21 +14,25 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server</PackageTags>
+		<PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
 		<PackageReleaseNotes>
-			Added drag and drop support with simple image manipulation utilities.
-			Drag and drop options are configurable both at design and run-time:
+			This release is a major rewrite of the entire code base and introduces new namespaces
+			thus introducing breaking changes. However, these breaking changes are relatively easy
+			to fix by renaming some namespaces, and importing new ones.
 
-			- Enable or disable drop event notifications.
-			- Specify the maximum number of files and total file size allowed to be dropped.
-			- Display details about dropped files such as file name, size, type, last modified date, and image dimensions.
-			- Option to store only the files without image preview generation and upload them on form submission.
-			- Enable/disable resizing of image previews, set preferred width and height, preserve original aspect ratios.
-			- Individual file and total files reading progress indicators with elapsed time display.
-			- Included built-in imageUtil.js plugin for basic image manipulation. To enable dynamic thumbnail generation, include this script into your index.html file before the BlazorFormManager.js script.
+			This most notable changes are:
 
-			For usage, clone the demo project on Github at https://github.com/bigabdoul/BlazorFormManager.
+			- Global .NET code refactoring: namespace changes (Carfamsoft.ModelToView to Carfamsoft.Model2View, etc.)
+			- Multi-framework targeting: netstandard2.0; net6.0
+			- Project-wide C# nullable context enabled.
+			- TypeScript: JavaScript projects are now written in TypeScript
+			- SystemJS: As a result of using TypeScript, SystemJS is used as the default module loader.
+			- Proper multi-form management: include as many forms as required on one page.
+			- Google reCAPTCHA support.
+			- Rich Text Editor support.
+
+			For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.
 		</PackageReleaseNotes>
 		<Version>3.0.0</Version>
 	</PropertyGroup>
