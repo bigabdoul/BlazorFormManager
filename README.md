@@ -8,8 +8,8 @@ validations, form data and file upload progress report, abortion of an on-going
 upload, and console logging support for troubleshooting.
 
 It is flexible enough to allow advanced control, such as setting HTTP request headers,
-over instances of the XMLHttpRequest object used to send requests, all from the C#/.NET
-perspective.
+over instances of the XMLHttpRequest object used to send requests, and supports 
+automatic form (UI) generation from metadata-decorated .NET object models.
 
 # New
 
