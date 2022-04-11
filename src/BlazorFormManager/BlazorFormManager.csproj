@@ -14,7 +14,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
 		<RepositoryType>Git</RepositoryType>
-		<PackageTags>c#, .net, razor, class, library, blazor, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
+		<PackageTags>c#, .net, razor, class, library, blazor, blazorformmanager, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
 		<PackageReleaseNotes>
 			This release is a major rewrite of the entire code base and introduces new namespaces
