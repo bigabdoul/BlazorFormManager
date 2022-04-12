@@ -23,155 +23,158 @@ export class ReCAPTCHA {
         return this._activityEvent.expose();
     }
 
+    /**
+     * Configure the reCAPTCHA for the specified form identifier.
+     * @param formId The form identifier.
+     * @param reCaptcha The configuration options.
+     */
     configure(formId: string, reCaptcha: ReCaptchaOptions) {
         const { scripts } = this._greCAPTCHA;
 
-        if (!(scripts.inserted || scripts.inserting)) {
-            const {
-                siteKey,
-                version,
-                verificationTokenName,
-                theme: them,
-                languageCode,
-                invisible,
-                size: sz,
-                cssSelector
-            } = reCaptcha;
+        const {
+            siteKey,
+            version,
+            verificationTokenName,
+            theme: them,
+            languageCode,
+            invisible,
+            size: sz,
+            cssSelector
+        } = reCaptcha;
 
-            const ver = (version || '').toLowerCase();
+        const ver = (version || '').toLowerCase();
 
-            let url = scripts[ver] + '';
-            let success = false;
+        let url = scripts[ver] + '';
+        let success = false;
 
-            if (!_isString(url)) {
-                const message = `Unsupported reCAPTCHA version: ${ver}`;
-                logError(formId, message);
-                this.reportActivity(formId, { message, type: 'danger' });
-            } else {
-                if (ver === 'v2') {
-                    // register version 2 callback for this form
-                    const { callbacks } = this._greCAPTCHA;
-                    const cbConfig: ReCaptchaCallback = {};
+        if (!_isString(url)) {
+            const message = `Unsupported reCAPTCHA version: ${ver}`;
+            logError(formId, message);
+            this.reportActivity(formId, { message, type: 'danger' });
+        } else {
+            if (ver === 'v2') {
+                // register version 2 callback for this form
+                const { callbacks } = this._greCAPTCHA;
+                const cbConfig: ReCaptchaCallback = {};
 
-                    // reCAPTCHA execution callback used to 
-                    // collect the token and submit the form
-                    cbConfig['setTokenCallback'] = (token) => {
-                        logDebug(formId, 'reCAPTCHA token received; preparing to submit the form.', token);
+                // reCAPTCHA execution callback used to 
+                // collect the token and submit the form
+                cbConfig['setTokenCallback'] = (token) => {
+                    logDebug(formId, 'reCAPTCHA token received; preparing to submit the form.', token);
 
-                        if (invisible) {
-                            // these properties must be set in the 'handleFormSubmission' 
-                            // function when the form is being submitted
-                            const { xhr, formData } = cbConfig;
+                    if (invisible) {
+                        // these properties must be set in the 'handleFormSubmission' 
+                        // function when the form is being submitted
+                        const { xhr, formData } = cbConfig;
 
-                            if (xhr && formData) {
-                                this.reportActivity(formId);
-                                formData.set(verificationTokenName, token);
-                                formData.set('g-recaptcha-version', ver);
-                                xhr.send(formData);
-                            } else {
-                                const message = 'reCAPTCHA: xhr and formData properties not set.';
-                                logError(formId, message);
-                                this.reportActivity(formId, { message, type: 'danger' });
-                            }
-                        } else {
-                            // store the token; it will be used when sending the form
-                            cbConfig.token = token;
-
-                            // clear previous (danger|warning, etc.) message
+                        if (xhr && formData) {
                             this.reportActivity(formId);
+                            formData.set(verificationTokenName, token);
+                            formData.set('g-recaptcha-version', ver);
+                            xhr.send(formData);
+                        } else {
+                            const message = 'reCAPTCHA: xhr and formData properties not set.';
+                            logError(formId, message);
+                            this.reportActivity(formId, { message, type: 'danger' });
+                        }
+                    } else {
+                        // store the token; it will be used when sending the form
+                        cbConfig.token = token;
+
+                        // clear previous (danger|warning, etc.) message
+                        this.reportActivity(formId);
+                    }
+                };
+
+                callbacks[formId] = cbConfig;
+                    
+                if (!global.BlazorFormManagerReCaptchaOnload) {
+                    // fired when reCAPTCHA is ready
+                    global.BlazorFormManagerReCaptchaOnload = () => {
+                        const selector = cssSelector || '.g-recaptcha';
+                        const form = document.getElementById(formId);
+                        const elements = form && form.querySelectorAll(selector) || [];
+                        const count = elements.length;
+
+                        if (count > 0) {
+                            logDebug(formId, `${count} HTML element(s) with ${selector} CSS selector found.`);
+
+                            let hl = '', size = sz, theme = them;
+
+                            if (languageCode)
+                                hl = languageCode;
+
+                            if (invisible)
+                                reCaptcha['size'] = size = 'invisible';
+                            else if (!_isString(size))
+                                reCaptcha['size'] = size = 'normal';
+
+                            if (!_isString(theme))
+                                theme = 'light';
+
+                            const parameters = {
+                                hl,
+                                size,
+                                theme,
+                                'sitekey': siteKey,
+                                'callback': cbConfig.setTokenCallback
+                            };
+
+                            // since a reCAPTCHA response is verified only once,
+                            // we have to store the rendered widget IDs so that 
+                            // we can reset it later, should the submission fail
+                            const widgets = [];
+
+                            for (let i = 0; i < count; i++) {
+                                // grecaptcha.render returns an ID for each created widget
+                                const wid = global.grecaptcha.render(
+                                    elements[i],
+                                    parameters
+                                );
+
+                                widgets.push(wid);
+                            }
+
+                            cbConfig['widgets'] = widgets;
+                        } else {
+                            logError(formId, `No HTML element with ${selector} CSS selector found.`);
                         }
                     };
-
-                    callbacks[formId] = cbConfig;
-                    
-                    if (!global.BlazorFormManagerReCaptchaOnload) {
-                        // fired when reCAPTCHA is ready
-                        global.BlazorFormManagerReCaptchaOnload = () => {
-                            const selector = cssSelector || '.g-recaptcha';
-                            const form = document.getElementById(formId);
-                            const elements = form && form.querySelectorAll(selector) || [];
-                            const count = elements.length;
-
-                            if (count > 0) {
-                                logDebug(formId, `${count} HTML element(s) with ${selector} CSS selector found.`);
-
-                                let hl = '', size = sz, theme = them;
-
-                                if (languageCode)
-                                    hl = languageCode;
-
-                                if (invisible)
-                                    reCaptcha['size'] = size = 'invisible';
-                                else if (!_isString(size))
-                                    reCaptcha['size'] = size = 'normal';
-
-                                if (!_isString(theme))
-                                    theme = 'light';
-
-                                const parameters = {
-                                    hl,
-                                    size,
-                                    theme,
-                                    'sitekey': siteKey,
-                                    'callback': cbConfig.setTokenCallback
-                                };
-
-                                // since a reCAPTCHA response is verified only once,
-                                // we have to store the rendered widget IDs so that 
-                                // we can reset it later, should the submission fail
-                                const widgets = [];
-
-                                for (let i = 0; i < count; i++) {
-                                    // grecaptcha.render returns an ID for each created widget
-                                    const wid = global.grecaptcha.render(
-                                        elements[i],
-                                        parameters
-                                    );
-
-                                    widgets.push(wid);
-                                }
-
-                                cbConfig['widgets'] = widgets;
-                            } else {
-                                logError(formId, `No HTML element with ${selector} CSS selector found.`);
-                            }
-                        };
-                    }
                 }
-
-                if (ver === 'v3') url += siteKey;
-
-                if (!(scripts.inserted || scripts.inserting)) {
-                    scripts.inserting = true;
-                    logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
-
-                    const s = document.createElement('script');
-
-                    s.async = true;
-                    s.defer = true;
-                    s.src = url;
-
-                    const heads = document.getElementsByTagName('head');
-
-                    if (heads.length === 0) {
-                        const h = document.createElement('head');
-                        document.appendChild(h);
-                        h.appendChild(s);
-                    } else {
-                        heads[0].appendChild(s);
-                    }
-
-                    logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
-
-                    scripts.inserted = true;
-                    scripts.inserting = false;
-                }
-
-                success = true;
             }
 
-            return success;
+            if (ver === 'v3') url += siteKey;
+
+            if (!(scripts.inserted || scripts.inserting)) {
+                scripts.inserting = true;
+                logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
+
+                const s = document.createElement('script');
+
+                s.async = true;
+                s.defer = true;
+                s.src = url;
+
+                const heads = document.getElementsByTagName('head');
+
+                if (heads.length === 0) {
+                    const h = document.createElement('head');
+                    document.appendChild(h);
+                    h.appendChild(s);
+                } else {
+                    heads[0].appendChild(s);
+                }
+
+                logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+
+                scripts.inserted = true;
+                scripts.inserting = false;
+            }
+
+            success = true;
         }
+
+        return success;
     }
     
     reset(formId, reCaptcha) {
@@ -227,7 +230,7 @@ export class ReCAPTCHA {
         const { siteKey, version, verificationTokenName, allowLocalHost, invisible, size } = reCaptcha || {};
         let success = false;
 
-        if (_isString(siteKey) && grecaptcha) {
+        if (grecaptcha && _isString(siteKey)) {
             if (!allowLocalHost && global.location.hostname.toLowerCase().indexOf('localhost') > -1) {
                 const message = "reCAPTCHA not allowed on localhost; sending form with XHR.";
                 logWarning(formId, message);
@@ -273,8 +276,8 @@ export class ReCAPTCHA {
                         }
                     }
                 } else if (ver === 'v3') {
-                    grecaptcha.ready(function () {
-                        grecaptcha.execute(siteKey, { action: 'submit' }).then(function (token: string) {
+                    grecaptcha.ready(() => {
+                        grecaptcha.execute(siteKey, { action: 'submit' }).then((token: string) => {
                             const message = "reCAPTCHA token received.";
                             logDebug(formId, message);
                             this.reportActivity(formId, { message, type: 'info', data: token });
