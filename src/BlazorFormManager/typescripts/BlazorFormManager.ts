@@ -487,6 +487,11 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         return true;
     }
 
+    /** Return the dictionary of registered form manager options. */
+    getForms() {
+        return Forms;
+    }
+
     static supportsImageUtil() {
         // before checking for the ImageUtility class, which uses the 
         // <canvas> element, make sure first that the device supports canvas

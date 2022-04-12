@@ -269,6 +269,7 @@ interface IBlazorFormManager {
     filterKeys: (options: FilterKeysOptions) => boolean;
     addEventListener: (targetId: string, eventType: string, callback: string) => boolean;
     removeEventListener: (targetId: string, eventType: string) => boolean;
+    getForms: () => IDictionary<FormManagerOptions>;
 }
 
 interface IQuillEditor {
