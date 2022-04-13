@@ -4,13 +4,15 @@
 {
     var metadata = Metadata;
     var attr = metadata.Attribute;
+    var culture = Form?.Culture;
+    var descr = metadata.GetDisplayString(attr.Description, culture);
     var attrs = GetAttributes
     (
         ("id", InputId),
         ("name", InputName),
         ("class", attr.InputCssClass),
-        ("placeholder", attr.Placeholder),
-        ("title", attr.Description),
+        ("placeholder", metadata.GetDisplayString(attr.Placeholder, culture)),
+        ("title", descr),
         ("accept", attr.FileAttribute?.Accept),
         ("multiple", attr.FileAttribute?.Multiple)
     );
@@ -20,9 +22,9 @@
             {
                 <text><i class="@attr.Icon"></i>&nbsp;</text>
             }
-            @metadata.GetDisplayName()
+            @metadata.GetDisplayName(culture)
         </label>
         <input type="file" @onchange="e => Value = e.Value" @attributes="attrs">
     </div>
-    <HelpText Description="@attr.Description"/>
+    <HelpText Description="@descr"/>
 }

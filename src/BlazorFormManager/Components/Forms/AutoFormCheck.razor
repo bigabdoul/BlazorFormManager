@@ -2,7 +2,9 @@
 
 @if (Metadata != null)
 {
-	var attr = Metadata.Attribute;
+	var meta = Metadata;
+	var attr = meta.Attribute;
+	var culture = Form?.Culture;
 	_ = attr.GetElement(out var type);
 
 	var attributes = GetAttributes
@@ -10,7 +12,7 @@
 		("type", type),
 		("id", InputId),
 		("name", InputName),
-		("title", attr.Description),
+		("title", meta.GetDisplayString(attr.Description, culture)),
 		("class", attr.InputCssClass ?? "form-check-input")
 	);
 
@@ -27,9 +29,9 @@
 		<input @attributes="attributes" @bind-value="Value">
 		@if (!attr.CheckNoLabel)
 		{
-			var cls = "form-check-label" + (Metadata.IsRequired ? " required" : string.Empty);
-			<label @attributes="@(GetAttributes(("class", cls), ("for", InputId)))">@Metadata.GetDisplayName()</label>
+			var cls = "form-check-label" + (meta.IsRequired ? " required" : string.Empty);
+			<label @attributes="@(GetAttributes(("class", cls), ("for", InputId)))">@meta.GetDisplayName(culture)</label>
 		}
 	</div>
-	<AutoValidationMessage Model="Model" Property="@Metadata.PropertyInfo.Name" />
+	<AutoValidationMessage Model="Model" Property="@meta.PropertyInfo.Name" />
 }

@@ -43,12 +43,13 @@
         {
             var propertyName = metadata.PropertyInfo.Name;
             var element = attr.GetElement(out var elementType);
-            var descr = metadata.GetDisplayString(attr.Description);
+            var culture = Form?.Culture;
+            var descr = metadata.GetDisplayString(attr.Description, culture);
             if (attr.IsInputRadio || metadata.IsInputCheckbox)
             {
                 var wrapperClass = $"form-group mb-3 {element} {elementType}";
-                var placeholder = metadata.GetDisplayString(attr.Placeholder);
-                if (placeholder.IsBlank()) placeholder = metadata.GetDisplayName();
+                var placeholder = metadata.GetDisplayString(attr.Placeholder, culture);
+                if (placeholder.IsBlank()) placeholder = metadata.GetDisplayName(culture);
                 <div class="@wrapperClass">
                     <AutoInputBase Id="@id" Name="@name" Metadata="metadata" Model="Model" @bind-Value="Value"
                         PropertyNavigationPath="@PropertyNavigationPath" class="@attr.InputCssClass" 

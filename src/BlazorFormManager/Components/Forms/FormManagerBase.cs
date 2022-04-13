@@ -358,6 +358,11 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         [Parameter] public bool EnableRichText { get; set; }
 
+        /// <summary>
+        /// Gets or sets the culture for the current form.
+        /// </summary>
+        [Parameter] public System.Globalization.CultureInfo? Culture { get; set; }
+
         #endregion
 
         #region read-only

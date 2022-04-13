@@ -4,13 +4,14 @@
 {
     var meta = Metadata;
     var attr = meta.Attribute;
-    var displayName = meta.GetDisplayName();
-    var descr = meta.GetDisplayString(attr.Description);
+    var culture = Form?.Culture;
+    var displayName = meta.GetDisplayName(culture);
+    var descr = meta.GetDisplayString(attr.Description, culture);
     var required = meta.IsRequired;
     var element = attr.GetElement(out var elementType);
     var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
     var wrapperClass = $"{(editor ? "rich-text-editor mb-3" : "form-floating")} {element} {elementType}";
-    var placeholder = editor ? null : meta.GetDisplayString(attr.Placeholder) ?? meta.GetDisplayString(attr.Prompt) ?? descr;
+    var placeholder = editor ? null : meta.GetDisplayString(attr.Placeholder, culture) ?? meta.GetDisplayString(attr.Prompt, culture) ?? descr;
     if (!editor && placeholder.IsBlank())
     {
         placeholder = displayName;
