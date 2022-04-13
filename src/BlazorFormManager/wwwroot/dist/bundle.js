@@ -127,7 +127,7 @@ System.register("ConsoleLogger", ["Shared"], function (exports_2, context_2) {
                         return;
                     func || (func = CONSOLE_FUNC.info);
                     args || (args = []);
-                    args.unshift((func === "log" ? "debug" : func) + ": BlazorFormManager:");
+                    args.unshift((func === "log" ? "debug" : func) + ": " + (formId || 'BlazorFormManager') + ":");
                     if (logLevel === LOG_LEVEL.debug)
                         console[func].apply(console, args);
                     else if (func === CONSOLE_FUNC.error && logLevel >= LOG_LEVEL.error)
@@ -2223,6 +2223,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
         execute: function () {
             global = globalThis;
             RECAPTCHA_SCRIPT_BASE_URL = 'https://www.google.com/recaptcha/api.js';
+            /** Seamlessly integrates Google's reCAPTCHA technology. */
             ReCAPTCHA = /** @class */ (function () {
                 function ReCAPTCHA() {
                     this._greCAPTCHA = {
@@ -2244,121 +2245,102 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                     enumerable: false,
                     configurable: true
                 });
+                /**
+                 * Configure the reCAPTCHA for the specified form identifier.
+                 * @param formId The form identifier.
+                 * @param reCaptcha The configuration options.
+                 */
                 ReCAPTCHA.prototype.configure = function (formId, reCaptcha) {
                     var _this = this;
                     var scripts = this._greCAPTCHA.scripts;
-                    if (!(scripts.inserted || scripts.inserting)) {
-                        var siteKey_1 = reCaptcha.siteKey, version = reCaptcha.version, verificationTokenName_1 = reCaptcha.verificationTokenName, them_1 = reCaptcha.theme, languageCode_1 = reCaptcha.languageCode, invisible_1 = reCaptcha.invisible, sz_1 = reCaptcha.size, cssSelector_1 = reCaptcha.cssSelector;
-                        var ver_1 = (version || '').toLowerCase();
-                        var url = scripts[ver_1] + '';
-                        var success = false;
-                        if (!Utils_5._isString(url)) {
-                            var message = "Unsupported reCAPTCHA version: " + ver_1;
-                            ConsoleLogger_6.logError(formId, message);
-                            this.reportActivity(formId, { message: message, type: 'danger' });
-                        }
-                        else {
-                            if (ver_1 === 'v2') {
-                                // register version 2 callback for this form
-                                var callbacks = this._greCAPTCHA.callbacks;
-                                var cbConfig_1 = {};
-                                // reCAPTCHA execution callback used to 
-                                // collect the token and submit the form
-                                cbConfig_1['setTokenCallback'] = function (token) {
-                                    ConsoleLogger_6.logDebug(formId, 'reCAPTCHA token received; preparing to submit the form.', token);
-                                    if (invisible_1) {
-                                        // these properties must be set in the 'handleFormSubmission' 
-                                        // function when the form is being submitted
-                                        var xhr = cbConfig_1.xhr, formData = cbConfig_1.formData;
-                                        if (xhr && formData) {
-                                            _this.reportActivity(formId);
-                                            formData.set(verificationTokenName_1, token);
-                                            formData.set('g-recaptcha-version', ver_1);
-                                            xhr.send(formData);
-                                        }
-                                        else {
-                                            var message = 'reCAPTCHA: xhr and formData properties not set.';
-                                            ConsoleLogger_6.logError(formId, message);
-                                            _this.reportActivity(formId, { message: message, type: 'danger' });
-                                        }
+                    var siteKey = reCaptcha.siteKey, version = reCaptcha.version, verificationTokenName = reCaptcha.verificationTokenName, invisible = reCaptcha.invisible;
+                    var ver = (version || '').toLowerCase();
+                    var url = scripts[ver] + '';
+                    var success = false;
+                    if (!Utils_5._isString(url)) {
+                        var message = "Unsupported reCAPTCHA version: " + ver;
+                        ConsoleLogger_6.logError(formId, message);
+                        this.reportActivity(formId, { formId: formId, message: message, type: 'danger' });
+                    }
+                    else {
+                        if (ver === 'v2') {
+                            // register version 2 callback for this form
+                            var callbacks = this._greCAPTCHA.callbacks;
+                            var cbConfig_1 = {};
+                            // reCAPTCHA execution callback used to 
+                            // collect the token and submit the form
+                            cbConfig_1['setTokenCallback'] = function (token) {
+                                ConsoleLogger_6.logDebug(formId, 'reCAPTCHA token received; preparing to submit the form.', token);
+                                if (invisible) {
+                                    // these properties must be set in the 'handleFormSubmission' 
+                                    // function when the form is being submitted
+                                    var xhr = cbConfig_1.xhr, formData = cbConfig_1.formData;
+                                    if (xhr && formData) {
+                                        _this.reportActivity(formId);
+                                        formData.set(verificationTokenName, token);
+                                        formData.set('g-recaptcha-version', ver);
+                                        xhr.send(formData);
                                     }
                                     else {
-                                        // store the token; it will be used when sending the form
-                                        cbConfig_1.token = token;
-                                        // clear previous (danger|warning, etc.) message
-                                        _this.reportActivity(formId);
+                                        var message = 'reCAPTCHA: xhr and formData properties not set.';
+                                        ConsoleLogger_6.logError(formId, message);
+                                        _this.reportActivity(formId, { formId: formId, message: message, type: 'danger' });
                                     }
-                                };
-                                callbacks[formId] = cbConfig_1;
-                                if (!global.BlazorFormManagerReCaptchaOnload) {
-                                    // fired when reCAPTCHA is ready
-                                    global.BlazorFormManagerReCaptchaOnload = function () {
-                                        var selector = cssSelector_1 || '.g-recaptcha';
-                                        var form = document.getElementById(formId);
-                                        var elements = form && form.querySelectorAll(selector) || [];
-                                        var count = elements.length;
-                                        if (count > 0) {
-                                            ConsoleLogger_6.logDebug(formId, count + " HTML element(s) with " + selector + " CSS selector found.");
-                                            var hl = '', size = sz_1, theme = them_1;
-                                            if (languageCode_1)
-                                                hl = languageCode_1;
-                                            if (invisible_1)
-                                                reCaptcha['size'] = size = 'invisible';
-                                            else if (!Utils_5._isString(size))
-                                                reCaptcha['size'] = size = 'normal';
-                                            if (!Utils_5._isString(theme))
-                                                theme = 'light';
-                                            var parameters = {
-                                                hl: hl,
-                                                size: size,
-                                                theme: theme,
-                                                'sitekey': siteKey_1,
-                                                'callback': cbConfig_1.setTokenCallback
-                                            };
-                                            // since a reCAPTCHA response is verified only once,
-                                            // we have to store the rendered widget IDs so that 
-                                            // we can reset it later, should the submission fail
-                                            var widgets = [];
-                                            for (var i = 0; i < count; i++) {
-                                                // grecaptcha.render returns an ID for each created widget
-                                                var wid = global.grecaptcha.render(elements[i], parameters);
-                                                widgets.push(wid);
-                                            }
-                                            cbConfig_1['widgets'] = widgets;
-                                        }
-                                        else {
-                                            ConsoleLogger_6.logError(formId, "No HTML element with " + selector + " CSS selector found.");
-                                        }
-                                    };
-                                }
-                            }
-                            if (ver_1 === 'v3')
-                                url += siteKey_1;
-                            if (!(scripts.inserted || scripts.inserting)) {
-                                scripts.inserting = true;
-                                ConsoleLogger_6.logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
-                                var s = document.createElement('script');
-                                s.async = true;
-                                s.defer = true;
-                                s.src = url;
-                                var heads = document.getElementsByTagName('head');
-                                if (heads.length === 0) {
-                                    var h = document.createElement('head');
-                                    document.appendChild(h);
-                                    h.appendChild(s);
                                 }
                                 else {
-                                    heads[0].appendChild(s);
+                                    // store the token; it will be used when sending the form
+                                    cbConfig_1.token = token;
+                                    // clear previous (danger|warning, etc.) message
+                                    _this.reportActivity(formId);
                                 }
-                                ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+                            };
+                            callbacks[formId] = cbConfig_1;
+                            if (!global.BlazorFormManagerReCaptchaOnload) {
+                                // fired when reCAPTCHA is ready
+                                global.BlazorFormManagerReCaptchaOnload = function () { return _this.onload(formId, reCaptcha); };
+                            }
+                            else {
+                                this.onload(formId, reCaptcha);
+                            }
+                        }
+                        if (ver === 'v3')
+                            url += siteKey;
+                        if (!(scripts.inserted || scripts.inserting)) {
+                            scripts.inserting = true;
+                            ConsoleLogger_6.logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
+                            var s_1 = document.createElement('script');
+                            var heads_1 = document.getElementsByTagName('head');
+                            s_1.async = true;
+                            s_1.defer = true;
+                            s_1.src = url;
+                            s_1.onload = function () {
                                 scripts.inserted = true;
                                 scripts.inserting = false;
+                            };
+                            s_1.onerror = function () {
+                                heads_1[0].removeChild(s_1);
+                                scripts.inserted = false;
+                                scripts.inserting = false;
+                            };
+                            if (heads_1.length === 0) {
+                                var h = document.createElement('head');
+                                document.appendChild(h);
+                                h.appendChild(s_1);
                             }
-                            success = true;
+                            else {
+                                heads_1[0].appendChild(s_1);
+                            }
+                            ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
                         }
-                        return success;
+                        success = true;
                     }
+                    return success;
                 };
+                /**
+                 * Reset previously created reCAPTCHA widgets.
+                 * @param formId The form identifier.
+                 * @param reCaptcha The configuration options.
+                 */
                 ReCAPTCHA.prototype.reset = function (formId, reCaptcha) {
                     if (!reCaptcha)
                         return;
@@ -2371,55 +2353,62 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                     if (ver === 'v3')
                         return;
                     // get the widget identifers that have been rendered
-                    var widgets = (this._greCAPTCHA.callbacks[formId] || {}).widgets;
+                    var widgets = this.getCallback(formId).widgets;
                     if (widgets && widgets.length) {
                         for (var i = 0; i < widgets.length; i++)
                             grecaptcha.reset(widgets[i]);
                         var message = "reCAPTCHA was reset.";
                         ConsoleLogger_6.logDebug(formId, message);
-                        this.reportActivity(formId, { message: message, type: 'warning' });
+                        this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
                     }
-                };
-                ReCAPTCHA.prototype.getCallback = function (formId) {
-                    return this._greCAPTCHA.callbacks[formId];
                 };
                 /**
                  * Report an activity related to Google's reCAPTCHA technology.
-                 * @param {any} formId The form identifier.
-                 * @param {{ message: string; type: string; data: string }} activity The activity to report.
+                 * @param formId The form identifier.
+                 * @param activity The activity to report.
                  */
                 ReCAPTCHA.prototype.reportActivity = function (formId, activity) {
                     var onReCaptchaActivity = (Shared_7.Forms[formId] || {}).onReCaptchaActivity;
                     if (Utils_5._isString(onReCaptchaActivity)) {
                         if (!activity)
-                            activity = { message: '', type: '', data: null };
+                            activity = { formId: formId, message: '', type: '', data: null };
                         if (activity.data === undefined)
                             activity.data = null;
                         this._activityEvent.trigger(activity);
                     }
                 };
+                /**
+                 * Execute a reCAPTCHA challenge to obtain a token, and submit the identified form with it.
+                 * @param formId The form identifier.
+                 * @param xhr The object used to send the form.
+                 * @param formData The form data to send.
+                 * @param reCaptcha The reCAPTCHA configuration options.
+                 */
                 ReCAPTCHA.prototype.submitForm = function (formId, xhr, formData, reCaptcha) {
+                    var _this = this;
                     var grecaptcha = global.grecaptcha;
+                    if (!grecaptcha)
+                        return false;
                     var _a = reCaptcha || {}, siteKey = _a.siteKey, version = _a.version, verificationTokenName = _a.verificationTokenName, allowLocalHost = _a.allowLocalHost, invisible = _a.invisible, size = _a.size;
                     var success = false;
-                    if (Utils_5._isString(siteKey) && grecaptcha) {
+                    if (Utils_5._isString(siteKey)) {
                         if (!allowLocalHost && global.location.hostname.toLowerCase().indexOf('localhost') > -1) {
                             var message = "reCAPTCHA not allowed on localhost; sending form with XHR.";
                             ConsoleLogger_6.logWarning(formId, message);
-                            this.reportActivity(formId, { message: message, type: 'warning' });
+                            this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
                             xhr.send(formData);
                             success = true;
                         }
                         else {
-                            var ver_2 = version.toLowerCase();
-                            ConsoleLogger_6.logDebug(formId, "Trying to submit form with reCAPTCHA version " + ver_2);
-                            if (ver_2 === 'v2') {
+                            var ver_1 = version.toLowerCase();
+                            ConsoleLogger_6.logDebug(formId, "Trying to submit form with reCAPTCHA version " + ver_1);
+                            if (ver_1 === 'v2') {
                                 var cbConfig = this.getCallback(formId);
                                 if (!cbConfig) {
                                     var message = 'No callback for reCAPTCHA v2 has been ' +
                                         'configured for this form; submitting without the challenge.';
                                     ConsoleLogger_6.logWarning(formId, message);
-                                    this.reportActivity(formId, { message: message, type: 'warning' });
+                                    this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
                                     xhr.send(formData);
                                     success = true;
                                 }
@@ -2437,39 +2426,82 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                                         if (!Utils_5._isString(token)) {
                                             var message = "Please make sure to complete the reCAPTCHA challenge!";
                                             ConsoleLogger_6.logError(formId, message);
-                                            this.reportActivity(formId, { message: message, type: 'danger' });
+                                            this.reportActivity(formId, { formId: formId, message: message, type: 'danger' });
                                         }
                                         else {
                                             formData.set(verificationTokenName, token);
-                                            formData.set('g-recaptcha-version', ver_2);
+                                            formData.set('g-recaptcha-version', ver_1);
                                             xhr.send(formData);
                                             success = true;
                                         }
                                     }
                                 }
                             }
-                            else if (ver_2 === 'v3') {
+                            else if (ver_1 === 'v3') {
                                 grecaptcha.ready(function () {
                                     grecaptcha.execute(siteKey, { action: 'submit' }).then(function (token) {
                                         var message = "reCAPTCHA token received.";
                                         ConsoleLogger_6.logDebug(formId, message);
-                                        this.reportActivity(formId, { message: message, type: 'info', data: token });
+                                        _this.reportActivity(formId, { formId: formId, message: message, type: 'info', data: token });
                                         formData.set(verificationTokenName, token);
-                                        formData.set('g-recaptcha-version', ver_2);
+                                        formData.set('g-recaptcha-version', ver_1);
                                         xhr.send(formData);
+                                        success = true;
                                     });
                                 });
                             }
                             else {
-                                var message = 'Unsupported reCAPTCHA version: ' + ver_2;
+                                var message = 'Unsupported reCAPTCHA version: ' + ver_1;
                                 ConsoleLogger_6.logWarning(formId, message);
-                                this.reportActivity(formId, { message: message, type: 'warning', data: ver_2 });
+                                this.reportActivity(formId, { formId: formId, message: message, type: 'warning', data: ver_1 });
                                 xhr.send(formData);
                                 success = true;
                             }
                         }
                     }
                     return success;
+                };
+                ReCAPTCHA.prototype.onload = function (formId, reCaptcha) {
+                    var siteKey = reCaptcha.siteKey, them = reCaptcha.theme, languageCode = reCaptcha.languageCode, invisible = reCaptcha.invisible, sz = reCaptcha.size, cssSelector = reCaptcha.cssSelector;
+                    var selector = cssSelector || '.g-recaptcha';
+                    var form = document.getElementById(formId);
+                    var elements = form && form.querySelectorAll(selector) || [];
+                    var count = elements.length;
+                    if (count > 0) {
+                        ConsoleLogger_6.logDebug(formId, count + " HTML element(s) with " + selector + " CSS selector found.");
+                        var hl = '', size = sz, theme = them;
+                        if (languageCode)
+                            hl = languageCode;
+                        if (invisible)
+                            reCaptcha['size'] = size = 'invisible';
+                        else if (!Utils_5._isString(size))
+                            reCaptcha['size'] = size = 'normal';
+                        if (!Utils_5._isString(theme))
+                            theme = 'light';
+                        var cbConfig = this.getCallback(formId);
+                        var parameters = {
+                            hl: hl,
+                            size: size,
+                            theme: theme,
+                            'sitekey': siteKey,
+                            'callback': cbConfig.setTokenCallback
+                        };
+                        // since a reCAPTCHA response is verified only once,
+                        // we have to store the rendered widget IDs so that 
+                        // we can reset them later, should the submission fail
+                        var widgets = [];
+                        var gr = global.grecaptcha;
+                        for (var i = 0; i < count; i++)
+                            // grecaptcha.render returns an ID for each created widget
+                            widgets.push(gr.render(elements[i], parameters));
+                        cbConfig['widgets'] = widgets;
+                    }
+                    else {
+                        ConsoleLogger_6.logError(formId, "No HTML element with " + selector + " CSS selector found.");
+                    }
+                };
+                ReCAPTCHA.prototype.getCallback = function (formId) {
+                    return this._greCAPTCHA.callbacks[formId] || {};
                 };
                 return ReCAPTCHA;
             }());
@@ -2540,6 +2572,16 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     return false;
                 };
                 /**
+                 * Destroy all resources used by formId.
+                 * @param formId The form identifier.
+                 */
+                BlazorFormManager.prototype.destroy = function (formId) {
+                    if (Shared_8.Forms[formId]) {
+                        ConsoleLogger_7.logDebug(formId, "Deleting form manager options...");
+                        delete Shared_8.Forms[formId];
+                    }
+                };
+                /**
                  * Update existing form options with the new one.
                  * @param options The new form options.
                  */
@@ -2548,10 +2590,9 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     if (!Utils_6._isObject(options))
                         return BlazorFormManager.showOptionsUsage(true);
                     var formId = options.formId;
-                    ConsoleLogger_7.logDebug(formId, "Updating form options", options);
                     if (!Shared_8.Forms[formId]) {
                         Shared_8.Forms[formId] = options;
-                        ConsoleLogger_7.logDebug(formId, "Entire script options set.");
+                        ConsoleLogger_7.logDebug(formId, "Script options stored.", options);
                     }
                     else {
                         var storedOptions = Shared_8.Forms[formId];
@@ -2574,7 +2615,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     ConsoleLogger_7.logDebug(formId, "Form submit requested.", formId);
                     var form = document.getElementById(formId);
                     if (!form) {
-                        ConsoleLogger_7.logInfo(formId, "Form #" + formId + " not defined");
+                        ConsoleLogger_7.logError(formId, "Form #" + formId + " not defined");
                         return false;
                     }
                     if (form.onsubmit) {
@@ -2582,7 +2623,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         ConsoleLogger_7.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
                         return true;
                     }
-                    ConsoleLogger_7.logDebug(formId, "'onsubmit' event handler not defined for form #" + formId + ".");
+                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #" + formId + ".");
                     return false;
                 };
                 /**
@@ -2950,6 +2991,10 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     }
                     return true;
                 };
+                /** Return the dictionary of registered form manager options. */
+                BlazorFormManager.prototype.getForms = function () {
+                    return Shared_8.Forms;
+                };
                 BlazorFormManager.supportsImageUtil = function () {
                     // before checking for the ImageUtility class, which uses the 
                     // <canvas> element, make sure first that the device supports canvas
@@ -3085,7 +3130,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         if (!recap) {
                             recap = new ReCAPTCHA_1.ReCAPTCHA();
                             recap.activity.subscribe(function (activity) {
-                                _this_1.invokeDotNet(formId, onReCaptchaActivity, activity);
+                                _this_1.invokeDotNet(activity.formId, onReCaptchaActivity, activity);
                             });
                             this.reCaptcha = recap;
                         }
