@@ -3,6 +3,7 @@ using Carfamsoft.Model2View.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Reflection;
 using System.Resources;
 
@@ -107,8 +108,11 @@ namespace Carfamsoft.Model2View.Annotations
         /// <summary>
         /// Returns the display name for an input.
         /// </summary>
+        /// <param name="culture">
+        /// An object that represents the culture for which the resource is localized.
+        /// </param>
         /// <returns></returns>
-        public virtual string GetDisplayName() => GetDisplayString(Attribute.Name ?? _propertyName);
+        public virtual string GetDisplayName(CultureInfo culture = null) => GetDisplayString(Attribute.Name ?? _propertyName, culture);
 
         /// <summary>
         /// Returns a localized string for a property of the <see cref="FormDisplayAttribute"/> attribute.
@@ -121,7 +125,7 @@ namespace Carfamsoft.Model2View.Annotations
         /// The value of the resource localized for the specified culture, 
         /// or null if name cannot be found in a resource set.
         /// </returns>
-        public virtual string GetDisplayString(string name, System.Globalization.CultureInfo culture = null)
+        public virtual string GetDisplayString(string name, CultureInfo culture = null)
             => EnsureNotEmpty(_resourceManager.GetDisplayString(name, culture));
 
         /// <summary>
