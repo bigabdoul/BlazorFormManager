@@ -2,13 +2,15 @@
 
 @if (Metadata != null)
 {
-    var attr = Metadata.Attribute;
-    var displayName = Metadata.GetDisplayName();
-    var required = Metadata.IsRequired;
+    var meta = Metadata;
+    var attr = meta.Attribute;
+    var displayName = meta.GetDisplayName();
+    var descr = meta.GetDisplayString(attr.Description);
+    var required = meta.IsRequired;
     var element = attr.GetElement(out var elementType);
     var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
     var wrapperClass = $"{(editor ? "rich-text-editor mb-3" : "form-floating")} {element} {elementType}";
-    var placeholder = editor ? null : attr.Placeholder ?? attr.Prompt ?? attr.Description;
+    var placeholder = editor ? null : meta.GetDisplayString(attr.Placeholder) ?? meta.GetDisplayString(attr.Prompt) ?? descr;
     if (!editor && placeholder.IsBlank())
     {
         placeholder = displayName;
@@ -17,16 +19,16 @@
     (
         ("class", attr.InputCssClass),
         ("placeholder", placeholder),
-        ("title", attr.Description)
+        ("title", descr)
     );
     <div class="@wrapperClass">
         @if (editor)
         {
             <QuillEditor Target="@("#" + Id)" />
-            var labelAttr = GetAttributes(("class", Metadata.IsRequired ? "required" : null));
+            var labelAttr = GetAttributes(("class", meta.IsRequired ? "required" : null));
             <label @attributes="@labelAttr">@displayName</label>
         }
-        <AutoInputBase @ref="autoInputBaseRef" @bind-Value="Value" Id="@Id" Name="@Name" Metadata="Metadata" Model="Model" PropertyNavigationPath="@PropertyNavigationPath" @attributes="attributes">
+        <AutoInputBase @ref="autoInputBaseRef" @bind-Value="Value" Id="@Id" Name="@Name" Metadata="meta" Model="Model" PropertyNavigationPath="@PropertyNavigationPath" @attributes="attributes">
             @ChildContent
         </AutoInputBase>
         @if (!editor)
@@ -34,16 +36,16 @@
             var labelAttr = GetAttributes
             (
                 ("for", editor ? null : autoInputBaseRef?.Id),
-                ("class", Metadata.IsRequired ? "required" : null)
+                ("class", meta.IsRequired ? "required" : null)
             );
             <label @attributes="@labelAttr">@displayName</label>
         }
         @if (editor)
         {
-            <HelpText Description="@attr.Description" />
+            <HelpText Description="@descr" />
         }
     </div>
-    @*<AutoValidationMessage Model="Model" Property="@Metadata.PropertyInfo.Name" />*@
+    @*<AutoValidationMessage Model="Model" Property="@meta.PropertyInfo.Name" />*@
 }
 
 @code {

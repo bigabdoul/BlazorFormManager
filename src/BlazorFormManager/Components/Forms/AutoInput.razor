@@ -43,15 +43,17 @@
         {
             var propertyName = metadata.PropertyInfo.Name;
             var element = attr.GetElement(out var elementType);
+            var descr = metadata.GetDisplayString(attr.Description);
             if (attr.IsInputRadio || metadata.IsInputCheckbox)
             {
-                var placeholder = attr.Placeholder.IsNotBlank() ? attr.Placeholder : Metadata.GetDisplayName();
                 var wrapperClass = $"form-group mb-3 {element} {elementType}";
+                var placeholder = metadata.GetDisplayString(attr.Placeholder);
+                if (placeholder.IsBlank()) placeholder = metadata.GetDisplayName();
                 <div class="@wrapperClass">
                     <AutoInputBase Id="@id" Name="@name" Metadata="metadata" Model="Model" @bind-Value="Value"
                         PropertyNavigationPath="@PropertyNavigationPath" class="@attr.InputCssClass" 
-                        placeholder="@placeholder" title="@attr.Description" />
-                    <HelpText Description="@attr.Description"/>
+                        placeholder="@placeholder" title="@descr" />
+                    <HelpText Description="@descr"/>
                     <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
                 </div>
             }
@@ -60,13 +62,13 @@
                 var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
                 if (editor)
                 {
-                    <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="Metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                    <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
                 }
                 else
                 {
-                    <InputGroupEntry Icon="@attr.Icon" HelpText="@attr.Description">
+                    <InputGroupEntry Icon="@attr.Icon" HelpText="@descr">
                         <ChildContent>
-                            <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="Metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                            <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
                         </ChildContent>
                         <ValidationContent>
                             <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
