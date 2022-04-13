@@ -28,7 +28,7 @@ class ConsoleLogger {
 
         func || (func = CONSOLE_FUNC.info);
         args || (args = []);
-        args.unshift(`${func === "log" ? "debug" : func}: BlazorFormManager:`);
+        args.unshift(`${func === "log" ? "debug" : func}: ${formId || 'BlazorFormManager'}:`);
         
         if (logLevel === LOG_LEVEL.debug)
             console[func].apply(console, args);
