@@ -4,22 +4,19 @@
     {
         if (recaptcha.SiteKey.IsNotBlank() && recaptcha.Version.EqualsIgnoreCase("v2"))
         {
-            if (recaptcha.Version.EqualsIgnoreCase("v2"))
-            {
-                var cssClass = recaptcha.CssSelector;
+            var cssClass = recaptcha.CssSelector;
 
-                if (cssClass.IsBlank()) cssClass = "g-recaptcha";
+            if (cssClass.IsBlank()) cssClass = "g-recaptcha";
 
-                if (cssClass.StartsWith("."))
-                    cssClass = cssClass.Substring(1);
+            if (cssClass.StartsWith("."))
+                cssClass = cssClass.Substring(1);
 
-                var attrs = GetAttributes(
-                    ("id", Id),
-                    ("class", cssClass)
-                );
+            var attrs = GetAttributes(
+                ("id", Id),
+                ("class", cssClass)
+            );
 
-                <div @attributes="attrs"></div>
-            }
+            <div @attributes="attrs"></div>
         }
     }
 }
