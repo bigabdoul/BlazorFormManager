@@ -1805,6 +1805,17 @@ namespace BlazorFormManager.Components.Forms
                         _stopWatchTimer.Enabled = false;
                         _stopWatchTimer.Elapsed -= _stopWatchTimerElapsedHandler;
                     }
+
+                    if (_scriptInitialized)
+                    {
+                        try
+                        {
+                            _ = JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.destroy", FormId);
+                        }
+                        catch
+                        {
+                        }
+                    }
                 }
                 _disposed = true;
             }

@@ -254,6 +254,7 @@ interface DragDropInputFilesOptions {
 
 interface IBlazorFormManager {
     init: (options: FormManagerOptions) => boolean;
+    destroy: (formId: string) => void;
     setLogLevel: (options: LogLevelOptions) => boolean;
     updateOptions: (options: FormManagerOptions) => boolean;
     raiseAjaxUploadWithProgressNotSupported: (formId: string) => Promise<boolean>;

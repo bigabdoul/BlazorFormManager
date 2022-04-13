@@ -56,6 +56,17 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     }
 
     /**
+     * Destroy all resources used by formId.
+     * @param formId The form identifier.
+     */
+    destroy(formId: string) {
+        if (Forms[formId]) {
+            logDebug(formId, "Deleting form manager options...");
+            delete Forms[formId];
+        }
+    }
+
+    /**
      * Update existing form options with the new one.
      * @param options The new form options.
      */
@@ -66,11 +77,9 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
 
         const { formId } = options;
 
-        logDebug(formId, "Updating form options", options);
-
         if (!Forms[formId]) {
             Forms[formId] = options;
-            logDebug(formId, "Entire script options set.");
+            logDebug(formId, "Script options stored.", options);
         } else {
             const storedOptions = Forms[formId];
             let count = 0;
@@ -96,7 +105,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         const form = document.getElementById(formId) as HTMLFormElement;
 
         if (!form) {
-            logInfo(formId, `Form #${formId} not defined`);
+            logError(formId, `Form #${formId} not defined`);
             return false;
         }
 
@@ -106,7 +115,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             return true;
         }
 
-        logDebug(formId, `'onsubmit' event handler not defined for form #${formId}.`);
+        logError(formId, `'onsubmit' event handler not defined for form #${formId}.`);
         return false;
     }
 
