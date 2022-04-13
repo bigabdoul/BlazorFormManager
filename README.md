@@ -36,7 +36,8 @@ class, such as `AutoEditForm`.
             Delay="2000" ForceReload EnforceLocalUri/>
     </ChildContent>
 </AutoEditForm>
-
+```
+```C#
 @code {
     ReCaptchaOptions recaptchaOptions = new ReCaptchaOptions
     {
