@@ -12,9 +12,10 @@ interface ReCaptchaOptions {
 }
 
 interface ReCaptchaActivity {
+    formId: string;
     message?: string;
     type?: string;
-    data?: string
+    data?: string;
 }
 
 interface ReCaptchaCallback {

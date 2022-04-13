@@ -628,7 +628,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             if (!recap) {
                 recap = new ReCAPTCHA();
                 recap.activity.subscribe(activity => {
-                    this.invokeDotNet(formId, onReCaptchaActivity, activity);
+                    this.invokeDotNet(activity.formId, onReCaptchaActivity, activity);
                 });
                 this.reCaptcha = recap;
             }
