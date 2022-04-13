@@ -463,6 +463,12 @@ namespace BlazorFormManager.Components.Forms
                 {
                     _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
                     var hasProgressBar = EnableProgressBar;
+
+                    if (Culture != null && ReCaptcha != null && ReCaptcha.LanguageCode.IsBlank())
+                    {
+                        ReCaptcha.LanguageCode = Culture.Name;
+                    }
+
                     // script options
                     var options = new
                     {
