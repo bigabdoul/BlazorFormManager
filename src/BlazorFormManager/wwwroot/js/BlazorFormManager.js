@@ -22,39 +22,28 @@
         "https://unpkg.com/systemjs@6.11.0/dist/extras/named-register.min.js"
     ];
 
-    var scriptCount = scripts.length;
-    insertScripts(scripts);
+    Promise.all([insertScripts(scripts)]).then(function () {
+        const href = getElementByTag("base", { href: '/' }).href;
+        System.import(href + "_content/BlazorFormManager/dist/bundle.js");
+    });
 
     /**
      * Insert one or more scripts into the DOM.
      * @param {string|Array<string>} srcs A URL or array of URL of the scripts to load.
      */
     function insertScripts(srcs) {
-        if (!(srcs instanceof Array)) srcs = [srcs];
-        for (var i = 0; i < srcs.length; i++) {
-            var s = d.createElement("script");
-            s.onload = scriptLoaded;
-            s.src = srcs[i];
-            s.async = true;
-            s.defer = true;
-            head.appendChild(s);
-        }
-    }
-
-    /** script onload event handler; fires after each script has been loaded. */
-    function scriptLoaded() {
-        // decrement the script count
-        if (--scriptCount === 0) {
-            // now that the 2 systemjs scripts have been loaded, insert the bundle
-            const href = getElementByTag("base", { href: '/' }).href;
-            insertScripts(href + "_content/BlazorFormManager/dist/bundle.js");
-
-        } else if (scriptCount === -1) {
-            // this signals that the bundle.js has been loaded as well;
-            // it's now safe to assume that all modules and their 
-            // dependencies are available
-            registerIndex();
-        }
+        return new Promise(function (resolve, reject) {
+            if (!(srcs instanceof Array)) srcs = [srcs];
+            var count = srcs.length;
+            for (var i = 0; i < srcs.length; i++) {
+                var s = d.createElement("script");
+                s.onload = function () { if (--count === 0) resolve(); };
+                s.onerror = function () { reject(new Error("Error while loading systemjs script!")); };
+                s.src = srcs[i];
+                s.async = false;
+                head.appendChild(s);
+            }
+        })
     }
 
     /**
@@ -65,53 +54,5 @@
     function getElementByTag(name, factory) {
         const elms = d.getElementsByTagName(name);
         return elms && elms.length && elms[0] || (typeof factory === 'function' ? factory(name) : factory);
-    }
-
-    /** 
-     *  Register the 'BlazorFormManagerIndex' module, which initializes 
-     *  the default instance of the BlazorFormManager class.
-     */
-    function registerIndex() {
-        System.register("BlazorFormManagerIndex", ["BlazorFormManager", "QuillEditor"], function () {
-            var BlazorFormManagerModule, QuillEditorModule;
-            return {
-                setters: [
-                    function (blazorFormManagerModule) {
-                        BlazorFormManagerModule = blazorFormManagerModule;
-                    },
-                    function (quillEditorModule) {
-                        QuillEditorModule = quillEditorModule;
-                    }
-                ],
-                execute: function () {
-                    // make BlazorFormManager object globally available;
-                    // only one instance is used for all forms' management
-                    var BlazorFormManager = new BlazorFormManagerModule.BlazorFormManager();
-
-                    Object.defineProperty(global, 'BlazorFormManager', { value: BlazorFormManager });
-
-                    // class QuillEditor
-                    var QuillEditor = QuillEditorModule.QuillEditor;
-
-                    // define immutable properties
-                    Object.defineProperty(BlazorFormManager, 'QuillEditor', { value: QuillEditor });
-                    Object.defineProperty(BlazorFormManager, 'Quill', { value: {} });
-                    Object.defineProperty(BlazorFormManager.Quill, 'create', {
-                        /**
-                        * Create a new QuillEditor instance.
-                        * @param {string} selector A DOM query selector.
-                        * @param {any} options The options.
-                        */
-                        value: function (selector, options) {
-                            var editor = new QuillEditor(selector, options);
-                            return editor;
-                        }
-                    });
-                }
-            };
-        });
-
-        // import the module, which will invoke the setters and execute
-        System.import("BlazorFormManagerIndex");
     }
 })(window, document);

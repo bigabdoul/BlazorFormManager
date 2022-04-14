@@ -3,6 +3,7 @@ import { addEventListener, filterKeys, removeEventListener } from "./DomEventMan
 import { DragDropManager } from "./DragDropManager";
 import { FileReaderManager } from "./FileReaderManager";
 import { ReCAPTCHA } from "./ReCAPTCHA";
+import { QuillEditor } from "./QuillEditor";
 import { AssemblyName, Forms } from "./Shared";
 import { containsFiles, formDataKeys, formDataMerge, populateDictionary, removeFileList, _isDictionary, _isFunction, _isObject, _isString } from "./Utils";
 
@@ -820,3 +821,24 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         logWarning(formId, 'raiseFormSubmitted not implemented!');
     }
 }
+
+(function () {
+    const blazorFormManager = new BlazorFormManager();
+
+    Object.defineProperty(global, 'BlazorFormManager', { value: blazorFormManager });
+
+    // define immutable properties
+    Object.defineProperty(blazorFormManager, 'QuillEditor', { value: QuillEditor });
+    Object.defineProperty(blazorFormManager, 'Quill', { value: {} });
+    Object.defineProperty(blazorFormManager['Quill'], 'create', {
+        /**
+        * Create a new QuillEditor instance.
+        * @param {string} selector A DOM query selector.
+        * @param {any} options The options.
+        */
+        value: function (selector, options) {
+            var editor = new QuillEditor(selector, options);
+            return editor;
+        }
+    });
+})();

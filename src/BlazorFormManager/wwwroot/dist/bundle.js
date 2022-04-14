@@ -2509,795 +2509,14 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
         }
     };
 });
-System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "Shared", "Utils"], function (exports_10, context_10) {
+System.register("QuillEditor", ["Utils"], function (exports_10, context_10) {
     "use strict";
-    var ConsoleLogger_7, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, Shared_8, Utils_6, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
+    var Utils_6, global, throwDependenciesMissing, parseDelta, Quill, _installed, _installing, _pendingResolvers, QuillEditor;
     var __moduleName = context_10 && context_10.id;
     return {
         setters: [
-            function (ConsoleLogger_7_1) {
-                ConsoleLogger_7 = ConsoleLogger_7_1;
-            },
-            function (DomEventManager_3_1) {
-                DomEventManager_3 = DomEventManager_3_1;
-            },
-            function (DragDropManager_1_1) {
-                DragDropManager_1 = DragDropManager_1_1;
-            },
-            function (FileReaderManager_1_1) {
-                FileReaderManager_1 = FileReaderManager_1_1;
-            },
-            function (ReCAPTCHA_1_1) {
-                ReCAPTCHA_1 = ReCAPTCHA_1_1;
-            },
-            function (Shared_8_1) {
-                Shared_8 = Shared_8_1;
-            },
             function (Utils_6_1) {
                 Utils_6 = Utils_6_1;
-            }
-        ],
-        execute: function () {
-            global = globalThis;
-            dotNet = global.DotNet;
-            XHRSTATE = { UNSENT: 0, OPENED: 1, HEADERS_RECEIVED: 2, LOADING: 3, DONE: 4 };
-            _resolvedPromise = new Promise(function (resolve, _) { return resolve(false); });
-            BlazorFormManager = /** @class */ (function () {
-                /** Construct a new instance of the form manager class. */
-                function BlazorFormManager() {
-                    this.processedFileStorage = {};
-                    this.fileManager = new FileReaderManager_1.FileReaderManager(this);
-                    this.dragdropManager = new DragDropManager_1.DragDropManager(this.fileManager, this);
-                }
-                /**
-                 * Register a form submit manager.
-                 * @param options The options used to initialize the form manager.
-                 */
-                BlazorFormManager.prototype.init = function (options) {
-                    if (!this.updateOptions(options))
-                        return BlazorFormManager.showOptionsUsage(false);
-                    var dotNetObjectReference = options.dotNetObjectReference, formId = options.formId;
-                    ConsoleLogger_7.logDebug(formId, "Initializing with options:", options);
-                    if (!this.validateFormAttributes(formId))
-                        return false;
-                    if (!dotNetObjectReference) {
-                        ConsoleLogger_7.logWarning(formId, "Invokable object instance reference not received. " +
-                            "This is the preferred way of invoking.NET methods from within " +
-                            "Blazor components.");
-                    }
-                    if (this.registerSubmitHandler(options)) {
-                        ConsoleLogger_7.logInfo(formId, "Initialized successfully!");
-                        return true;
-                    }
-                    return false;
-                };
-                /**
-                 * Destroy all resources used by formId.
-                 * @param formId The form identifier.
-                 */
-                BlazorFormManager.prototype.destroy = function (formId) {
-                    if (Shared_8.Forms[formId]) {
-                        ConsoleLogger_7.logDebug(formId, "Deleting form manager options...");
-                        delete Shared_8.Forms[formId];
-                    }
-                };
-                /**
-                 * Update existing form options with the new one.
-                 * @param options The new form options.
-                 */
-                BlazorFormManager.prototype.updateOptions = function (options) {
-                    // fail early
-                    if (!Utils_6._isObject(options))
-                        return BlazorFormManager.showOptionsUsage(true);
-                    var formId = options.formId;
-                    if (!Shared_8.Forms[formId]) {
-                        Shared_8.Forms[formId] = options;
-                        ConsoleLogger_7.logDebug(formId, "Script options stored.", options);
-                    }
-                    else {
-                        var storedOptions = Shared_8.Forms[formId];
-                        var count = 0;
-                        for (var key in options) {
-                            if (options.hasOwnProperty(key)) {
-                                storedOptions[key] = options[key];
-                                count++;
-                            }
-                        }
-                        ConsoleLogger_7.logDebug(formId, count + " script properties updated.");
-                    }
-                    return true;
-                };
-                /**
-                 * Submit the form identified by the given parameter.
-                 * @param formId The identifier of the form to submit.
-                 */
-                BlazorFormManager.prototype.submitForm = function (formId) {
-                    ConsoleLogger_7.logDebug(formId, "Form submit requested.", formId);
-                    var form = document.getElementById(formId);
-                    if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form #" + formId + " not defined");
-                        return false;
-                    }
-                    if (form.onsubmit) {
-                        form.onsubmit(new Event('submit'));
-                        ConsoleLogger_7.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
-                        return true;
-                    }
-                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #" + formId + ".");
-                    return false;
-                };
-                /**
-                 * Sets the value of the pair identified by key to value, creating
-                 * a new key/value pair if none existed for key previously.
-                 * @param key The key of the value to set.
-                 * @param value The value to set.
-                 */
-                BlazorFormManager.prototype.localStorageSetItem = function (key, value) {
-                    localStorage.setItem(key, value);
-                };
-                /**
-                 * Removes the key/value pair with the given key from the list associated
-                 * with the object, if a key/value pair with the given key exists.
-                 * @param key The key of the value to remove.
-                 */
-                BlazorFormManager.prototype.localStorageRemoveItem = function (key) {
-                    localStorage.removeItem(key);
-                };
-                /**
-                 * Returns the current value associated with the given key, or null if
-                 * the given key does not exist in the list associated with the object.
-                 * @param key The key of the value to retrieve.
-                 */
-                BlazorFormManager.prototype.localStorageGetItem = function (key) {
-                    return localStorage.getItem(key);
-                };
-                /**
-                 * Register an AJAX handler for the submission of a form.
-                 * @param options An configuration object used to register the form submit handler.
-                 */
-                BlazorFormManager.prototype.registerSubmitHandler = function (options) {
-                    var _this_1 = this;
-                    var formId = options.formId, onGetModel = options.onGetModel, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
-                    var _this = this;
-                    var recaptcha = _this.initReCaptcha(formId, reCaptcha, onReCaptchaActivity);
-                    return this.handleFormSubmission({
-                        formId: formId,
-                        requireModel: requireModel,
-                        reCaptcha: reCaptcha,
-                        getFormData: function () { return __awaiter(_this_1, void 0, void 0, function () {
-                            var model, form, enctype, hasFiles, formData;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (!Utils_6._isString(onGetModel)) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, this.invokeDotNet(formId, onGetModel)];
-                                    case 1:
-                                        model = _a.sent();
-                                        ConsoleLogger_7.logDebug(formId, "Model", model);
-                                        _a.label = 2;
-                                    case 2:
-                                        if (model === null) {
-                                            if (requireModel) {
-                                                ConsoleLogger_7.logError(formId, "A model is required.");
-                                            }
-                                            else {
-                                                ConsoleLogger_7.logDebug(formId, "Model not defined. FormData will be collected by caller.");
-                                            }
-                                            return [2 /*return*/, { hasFiles: false }];
-                                        }
-                                        form = document.getElementById(formId);
-                                        enctype = form.getAttribute("enctype") || 'multipart/form-data';
-                                        hasFiles = Utils_6.containsFiles(form);
-                                        if (enctype.toLowerCase().indexOf('json') > -1) {
-                                            if (hasFiles)
-                                                ConsoleLogger_7.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
-                                            else
-                                                ConsoleLogger_7.logDebug(formId, "Collecting form model data as JSON...");
-                                            // send as JSON
-                                            return [2 /*return*/, { json: JSON.stringify(model), hasFiles: hasFiles }];
-                                        }
-                                        else {
-                                            ConsoleLogger_7.logDebug(formId, "Collecting form model data...");
-                                            formData = new FormData();
-                                            // add additional form data values using the model...
-                                            this.collectModelData(model, formData);
-                                            Utils_6.formDataMerge(formData, new FormData(form));
-                                            return [2 /*return*/, { hasFiles: hasFiles, formData: formData }];
-                                        }
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); },
-                        beforeSubmit: function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var cancel;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            cancel = false;
-                                            if (!Utils_6._isString(onBeforeSubmit)) return [3 /*break*/, 2];
-                                            return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSubmit)];
-                                        case 1:
-                                            cancel = _a.sent();
-                                            _a.label = 2;
-                                        case 2: return [2 /*return*/, cancel];
-                                    }
-                                });
-                            });
-                        },
-                        beforeSend: function () {
-                            return __awaiter(this, void 0, void 0, function () {
-                                var cancel;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0:
-                                            cancel = false;
-                                            if (!Utils_6._isString(onBeforeSend)) return [3 /*break*/, 2];
-                                            return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSend, getXhrResult.call(this, true))];
-                                        case 1:
-                                            cancel = _a.sent();
-                                            _a.label = 2;
-                                        case 2: return [2 /*return*/, cancel];
-                                    }
-                                });
-                            });
-                        },
-                        done: function () {
-                            ConsoleLogger_7.logInfo(formId, "Form data successfully uploaded.", this);
-                            if (Utils_6._isString(onSendSucceeded))
-                                _this.invokeDotNet(formId, onSendSucceeded, getXhrResult.call(this, false));
-                            // eventually free up the processed file storage for this form
-                            _this.fileManager.deleteProcessedFileList({ formId: formId });
-                            _this.raiseFormSubmitted(formId);
-                        },
-                        fail: function (error) {
-                            ConsoleLogger_7.logError(formId, "Form upload failed.", this);
-                            if (Utils_6._isString(onSendFailed))
-                                _this.invokeDotNet(formId, onSendFailed, getXhrResult.call(this, false, error));
-                            recaptcha && recaptcha.reset(formId, reCaptcha);
-                        }
-                    });
-                    function getXhrResult(excludeHeaders, error) {
-                        var extraProperties = { error: error };
-                        var xhr = this;
-                        // these properties may throw an "InvalidStateError" DOMException
-                        var responseText, responseType, responseXML;
-                        // so we safely access them
-                        try {
-                            responseText = xhr.responseText || '';
-                        }
-                        catch (_a) {
-                            responseText = null;
-                        }
-                        try {
-                            responseType = xhr.responseType || '';
-                        }
-                        catch (_b) {
-                            responseType = null;
-                        }
-                        try {
-                            responseXML = xhr.responseXML && xhr.responseXML.textContent || null;
-                        }
-                        catch (_c) {
-                            responseXML = null;
-                        }
-                        return {
-                            response: xhr.response || null,
-                            responseHeaders: excludeHeaders ? null : xhr.getAllResponseHeaders(),
-                            responseText: responseText,
-                            responseType: responseType,
-                            responseXML: responseXML,
-                            status: xhr.status,
-                            statusText: xhr.statusText || "",
-                            timeout: xhr.timeout,
-                            extraProperties: extraProperties,
-                        };
-                    }
-                };
-                /**
-                 * Set the log level.
-                 * @param config The configuration options.
-                 */
-                BlazorFormManager.prototype.setLogLevel = function (config) {
-                    var formId = config.formId, level = config.logLevel;
-                    var options = Shared_8.Forms[formId];
-                    if (!options) {
-                        ConsoleLogger_7.logError(formId, "The form #" + formId + " has not been initialized yet.");
-                    }
-                    else if (options.logLevel !== level) {
-                        if (typeof level === "number") {
-                            var validLevel = 0 | level; // force the number to be an integer
-                            if (validLevel > -1 && validLevel < 5) {
-                                options.logLevel = validLevel;
-                                ConsoleLogger_7.logInfo(formId, "Log level changed to", validLevel);
-                                return true;
-                            }
-                        }
-                        ConsoleLogger_7.logError(formId, "Log level must be an integer between 0 and 4 inclusive.");
-                    }
-                    return false;
-                };
-                /**
-                 * Handle all aspects of an asynchronous form submission.
-                 * @param options The configuration object to use.
-                 */
-                BlazorFormManager.prototype.handleFormSubmission = function (options) {
-                    var _this_1 = this;
-                    if (!Utils_6._isObject(options))
-                        return false;
-                    var formId = options.formId, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
-                    if (!Utils_6._isString(formId)) {
-                        ConsoleLogger_7.logError(formId, "No form identified!");
-                        return false;
-                    }
-                    var form = document.getElementById(formId);
-                    if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form with id #" + formId + " not found!");
-                        return false;
-                    }
-                    form.onsubmit = function () { return __awaiter(_this_1, void 0, void 0, function () {
-                        var cancel, beforeSubmit, beforeSend, done, fail, getFormData, _a, formData, hasFiles, json, xhr, url, method, headersSet, xhrResult;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0:
-                                    ConsoleLogger_7.logDebug(formId, "Submitting form...");
-                                    cancel = false;
-                                    beforeSubmit = options.beforeSubmit;
-                                    if (!Utils_6._isFunction(beforeSubmit)) return [3 /*break*/, 2];
-                                    return [4 /*yield*/, beforeSubmit.call(form)];
-                                case 1:
-                                    cancel = _b.sent();
-                                    _b.label = 2;
-                                case 2:
-                                    if (cancel) {
-                                        ConsoleLogger_7.logInfo(formId, "Form submission was cancelled.");
-                                        return [2 /*return*/, false];
-                                    }
-                                    if (!!BlazorFormManager._supportsAJAXwithUpload) return [3 /*break*/, 4];
-                                    ConsoleLogger_7.logWarning(formId, "AJAX upload with progress report not supported.");
-                                    return [4 /*yield*/, this.raiseAjaxUploadWithProgressNotSupported(formId)];
-                                case 3:
-                                    cancel = _b.sent();
-                                    if (cancel) {
-                                        // do not allow full page refresh
-                                        ConsoleLogger_7.logInfo(formId, "Blocked submitting form with full-page refresh.");
-                                        return [2 /*return*/, false];
-                                    }
-                                    // allow normal form submission (post back with full page refresh)
-                                    return [2 /*return*/, true];
-                                case 4:
-                                    beforeSend = options.beforeSend, done = options.done, fail = options.fail, getFormData = options.getFormData;
-                                    return [4 /*yield*/, getFormData()];
-                                case 5:
-                                    _a = _b.sent(), formData = _a.formData, hasFiles = _a.hasFiles, json = _a.json;
-                                    if (!formData) {
-                                        if (requireModel) {
-                                            ConsoleLogger_7.logError(formId, "Form submission cancelled because a model is required to continue.");
-                                            return [2 /*return*/, false];
-                                        }
-                                        else {
-                                            formData = new FormData(form);
-                                            hasFiles = Utils_6.containsFiles(form);
-                                        }
-                                    }
-                                    if (!json && this.clearFilesAppendProcessed(formId, formData))
-                                        hasFiles = true;
-                                    xhr = new XMLHttpRequest();
-                                    xhr.onreadystatechange = function () {
-                                        if (this.readyState === XHRSTATE.DONE) {
-                                            // any status code between 200 and 299 inclusive is success
-                                            if (this.status > 199 && this.status < 300) {
-                                                if (Utils_6._isFunction(done))
-                                                    done.call(this);
-                                            }
-                                            else if (Utils_6._isFunction(fail)) {
-                                                fail.call(this);
-                                            }
-                                        }
-                                    };
-                                    this.addXHRUploadEventListeners(formId, xhr, hasFiles);
-                                    url = form.getAttribute("action") || global.location.href;
-                                    method = (form.getAttribute("method") || "POST").toUpperCase();
-                                    ConsoleLogger_7.logDebug(formId, "Form action URL and method are:", url, method);
-                                    xhr.open(method, url, true);
-                                    headersSet = false;
-                                    if (!Utils_6._isFunction(beforeSend)) return [3 /*break*/, 7];
-                                    return [4 /*yield*/, beforeSend.call(xhr)];
-                                case 6:
-                                    xhrResult = _b.sent();
-                                    ConsoleLogger_7.logDebug(formId, "beforeSend was called:", xhrResult);
-                                    if (Utils_6._isObject(xhrResult)) {
-                                        if (xhrResult.cancel) {
-                                            ConsoleLogger_7.logDebug(formId, "XMLHttpRequest.send was cancelled.");
-                                            return [2 /*return*/, false];
-                                        }
-                                        ConsoleLogger_7.logDebug(formId, "Trying to set XMLHttpRequest (XHR) properties...");
-                                        try {
-                                            headersSet = this.setRequestHeaders(formId, xhr, xhrResult.requestHeaders);
-                                            xhr.withCredentials = xhrResult.withCredentials;
-                                        }
-                                        catch (e) {
-                                            ConsoleLogger_7.logError(formId, "Error setting XHR properties.", e);
-                                            if (Utils_6._isFunction(fail))
-                                                fail.call(xhr, e.message);
-                                            return [2 /*return*/, false];
-                                        }
-                                    }
-                                    _b.label = 7;
-                                case 7:
-                                    if (!headersSet && Shared_8.Forms[formId])
-                                        this.setRequestHeaders(formId, xhr, Shared_8.Forms[formId].requestHeaders);
-                                    if (json) {
-                                        this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
-                                    }
-                                    this.adjustBadFormDataKeys(formData);
-                                    if (this.reCaptcha) {
-                                        this.reCaptcha.submitForm(formId, xhr, formData, reCaptcha);
-                                    }
-                                    else {
-                                        xhr.send(formData);
-                                    }
-                                    return [2 /*return*/, false]; // To avoid actual submission of the form
-                            }
-                        });
-                    }); };
-                    return true;
-                };
-                BlazorFormManager.prototype.deleteProcessedFileList = function (options) {
-                    return this.fileManager.deleteProcessedFileList(options);
-                };
-                BlazorFormManager.prototype.dragDropEnable = function (options) {
-                    return this.dragdropManager.enable(options);
-                };
-                BlazorFormManager.prototype.dragDropDisable = function (options) {
-                    return this.dragdropManager.disable(options);
-                };
-                BlazorFormManager.prototype.dragDropRemoveFileList = function (options) {
-                    return Utils_6.removeFileList(options);
-                };
-                BlazorFormManager.prototype.dragDropInputFilesOnTarget = function (options) {
-                    return this.dragdropManager.dragDropInputFilesOnTarget(options);
-                };
-                BlazorFormManager.prototype.filterKeys = function (options) {
-                    return DomEventManager_3.filterKeys(options);
-                };
-                BlazorFormManager.prototype.addEventListener = function (targetId, eventType, callback) {
-                    return DomEventManager_3.addEventListener(targetId, eventType, callback);
-                };
-                /**
-                 * Remove an event listener from a target element identified by 'targetId'.
-                 * @param targetId The identifier of the target element.
-                 * @param eventType The type of event to remove the listener for.
-                 */
-                BlazorFormManager.prototype.removeEventListener = function (targetId, eventType) {
-                    return DomEventManager_3.removeEventListener(targetId, eventType);
-                };
-                /**
-                 * Set request headers on the specified XMLHttpRequest object.
-                 * @param formId The form identifier.
-                 * @param xhr The XMLHttpRequest object.
-                 * @param headers A collection of key=value pairs.
-                 */
-                BlazorFormManager.prototype.setRequestHeaders = function (formId, xhr, headers) {
-                    if (!Utils_6._isDictionary(headers))
-                        return false;
-                    ConsoleLogger_7.logDebug(formId, "Setting request headers...");
-                    for (var name_1 in headers) {
-                        if (headers.hasOwnProperty(name_1)) {
-                            var value = headers[name_1];
-                            ConsoleLogger_7.logDebug(formId, "Header:", { name: name_1, value: value });
-                            xhr.setRequestHeader(name_1, value);
-                        }
-                    }
-                    return true;
-                };
-                /** Return the dictionary of registered form manager options. */
-                BlazorFormManager.prototype.getForms = function () {
-                    return Shared_8.Forms;
-                };
-                BlazorFormManager.supportsImageUtil = function () {
-                    // before checking for the ImageUtility class, which uses the 
-                    // <canvas> element, make sure first that the device supports canvas
-                    return !!window.CanvasRenderingContext2D;
-                };
-                /**
-                 * Invoke dotnet method 'onAjaxUploadWithProgressNotSupported'.
-                 * @param formId The form identifier.
-                 */
-                BlazorFormManager.prototype.raiseAjaxUploadWithProgressNotSupported = function (formId) {
-                    return __awaiter(this, void 0, void 0, function () {
-                        var cancel, onAjaxUploadWithProgressNotSupported, navigatorInfo;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    cancel = false;
-                                    if (!Shared_8.Forms[formId]) return [3 /*break*/, 2];
-                                    onAjaxUploadWithProgressNotSupported = Shared_8.Forms[formId].onAjaxUploadWithProgressNotSupported;
-                                    if (!Utils_6._isString(onAjaxUploadWithProgressNotSupported)) return [3 /*break*/, 2];
-                                    navigatorInfo = {};
-                                    Utils_6.populateDictionary(navigatorInfo, global.navigator);
-                                    ConsoleLogger_7.logDebug(formId, "Navigator properties collected", navigatorInfo);
-                                    return [4 /*yield*/, this.invokeDotNet(formId, onAjaxUploadWithProgressNotSupported, { extraProperties: navigatorInfo })];
-                                case 1:
-                                    cancel = _a.sent();
-                                    _a.label = 2;
-                                case 2: return [2 /*return*/, cancel];
-                            }
-                        });
-                    });
-                };
-                /**
-                 * Read input files using the specified options.
-                 * @param options
-                 */
-                BlazorFormManager.prototype.readInputFiles = function (options) {
-                    var _this_1 = this;
-                    return this.fileManager.readInputFiles(options, function (processedFiles) {
-                        var formId = options.formId, inputId = options.inputId, inputName = options.inputName;
-                        ConsoleLogger_7.logDebug(formId, "Received processed files.");
-                        if (processedFiles && processedFiles.length > 0) {
-                            ConsoleLogger_7.logDebug(formId, "Storing processed files...");
-                            // store files that have been processed so that they can be 
-                            // used later to validate when the form is being submitted
-                            var config = _this_1.processedFileStorage[formId];
-                            if (!config) {
-                                // create the configuration and store it
-                                config = {
-                                    inputs: []
-                                };
-                                _this_1.processedFileStorage[formId] = config;
-                            }
-                            var input = config.inputs.find(function (obj) { return obj.id === inputId; });
-                            // update the configuration
-                            if (!input) {
-                                config.inputs.push({
-                                    id: inputId,
-                                    name: inputName,
-                                    files: processedFiles
-                                });
-                                ConsoleLogger_7.logDebug(formId, "Created processed files configuration.");
-                            }
-                            else {
-                                input.files = processedFiles;
-                                ConsoleLogger_7.logDebug(formId, "Updated processed files configuration.");
-                            }
-                        }
-                        else {
-                            ConsoleLogger_7.logDebug(formId, "No files processed!");
-                        }
-                    });
-                };
-                /**
-                 * Invoke a .NET method.
-                 * @param formId The form identifier.
-                 * @param method The .NET method to invoke.
-                 * @param arg The argument to the .NET method to invoke.
-                 */
-                BlazorFormManager.prototype.invokeDotNet = function (formId, method, arg) {
-                    if (arg === undefined)
-                        arg = null;
-                    var obj = Shared_8.Forms[formId].dotNetObjectReference;
-                    if (obj) {
-                        //logDebug(formId, `Invoking .NET method "${method}" using object instance.`, arg);
-                        return obj.invokeMethodAsync(method, arg);
-                    }
-                    else if (dotNet && Shared_8.AssemblyName) {
-                        //logDebug(formId, `Invoking .NET method "${method}" using static type`, arg);
-                        return dotNet.invokeMethodAsync(Shared_8.AssemblyName, method, arg);
-                    }
-                    ConsoleLogger_7.logWarning(formId, 'No DotNetObjectReference nor static .NET interop reference defined!');
-                    return _resolvedPromise;
-                };
-                /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
-                BlazorFormManager.supportsAjaxUploadWithProgress = function () {
-                    return supportsFileAPI() &&
-                        supportsAjaxUploadProgressEvents() &&
-                        supportsFormData();
-                    function supportsFileAPI() {
-                        var fi = document.createElement("INPUT");
-                        fi.type = "file";
-                        return "files" in fi;
-                    }
-                    ;
-                    function supportsAjaxUploadProgressEvents() {
-                        var xhr = "XMLHttpRequest" in globalThis && new XMLHttpRequest();
-                        return !!(xhr && ("upload" in xhr) && ("onprogress" in xhr.upload));
-                    }
-                    ;
-                    function supportsFormData() {
-                        return !!global.FormData;
-                    }
-                };
-                BlazorFormManager.prototype.validateFormAttributes = function (formId) {
-                    var frm = document.getElementById(formId);
-                    if (!frm) {
-                        ConsoleLogger_7.logError(formId, "The form element identified by '" + formId + "' does not exist in the DOM.");
-                        return false;
-                    }
-                    return true;
-                };
-                BlazorFormManager.prototype.addXHRUploadEventListeners = function (formId, xhr, hasFiles) {
-                    var onUploadChanged = Shared_8.Forms[formId].onUploadChanged;
-                    if (!Utils_6._isString(onUploadChanged))
-                        return;
-                    ConsoleLogger_7.logDebug(formId, "Setting up upload event handlers...");
-                    this.fileManager.addFileReaderOrUploadEventListeners(formId, xhr, xhr.upload, onUploadChanged, hasFiles, null);
-                };
-                BlazorFormManager.prototype.initReCaptcha = function (formId, reCaptcha, onReCaptchaActivity) {
-                    var _this_1 = this;
-                    if (Utils_6._isObject(reCaptcha)) {
-                        var recap = this.reCaptcha;
-                        if (!recap) {
-                            recap = new ReCAPTCHA_1.ReCAPTCHA();
-                            recap.activity.subscribe(function (activity) {
-                                _this_1.invokeDotNet(activity.formId, onReCaptchaActivity, activity);
-                            });
-                            this.reCaptcha = recap;
-                        }
-                        recap.configure(formId, reCaptcha);
-                    }
-                    return this.reCaptcha;
-                };
-                BlazorFormManager.showOptionsUsage = function (isError) {
-                    var optionalNameOfMethodWhen = "string (optional): The name of the .NET method to invoke when ";
-                    var options = {
-                        formId: "string (required): The unique identifier of the form to submit.",
-                        requireModel: "boolean (optional): Gets or sets a value that indicates whether specifying a " +
-                            "non-null reference model is required when the 'onGetModel' event is invoked. If this value is " +
-                            "true and no valid model is provided after that event, the form submission will be cancelled.",
-                        assembly: "string (optional): The name of the .NET assembly on which " +
-                            "to invoke static methods. Required if any of the 'onXXX' static " +
-                            "method names are set.",
-                        logLevel: "number (optional): The level of details when logging messages " +
-                            "to the console. Supported values are: 0 (none), 1 (information), " +
-                            "2 (warning), 3 (error), 4 (debug). The default is 3.",
-                        requestHeaders: "object (optional): A dictionary of key-value pairs to set on an instance of XMLHttpRequest.",
-                        reCaptcha: "object (optional): An object that encapsulates configuration settings for Google's reCAPTCHA technology.",
-                        onGetModel: optionalNameOfMethodWhen + "retrieving the form model.",
-                        onBeforeSubmit: optionalNameOfMethodWhen + "submitting the form. This event can be cancelled.",
-                        onBeforeSend: optionalNameOfMethodWhen + "sending the HTTP request. This event can be cancelled.",
-                        onSendFailed: optionalNameOfMethodWhen + "the HTTP request fails.",
-                        onSendSucceeded: optionalNameOfMethodWhen + "the HTTP request completes successfully.",
-                        onUploadChanged: optionalNameOfMethodWhen + "an upload operation occurs.",
-                        onFileReaderChanged: optionalNameOfMethodWhen + "a change occurs in a file reading operation.",
-                        onFileReaderResult: optionalNameOfMethodWhen + "a file reading operation is completed successfully.",
-                        onReCaptchaActivity: optionalNameOfMethodWhen + "a Google reCAPTCHA activity is reported.",
-                        onAjaxUploadWithProgressNotSupported: optionalNameOfMethodWhen + "the browser does not support AJAX uploads with progress report.",
-                    };
-                    var message = "Initialization options must be a variation of the following format:";
-                    var formId = undefined;
-                    if (isError)
-                        ConsoleLogger_7.logError(formId, message, options);
-                    else
-                        ConsoleLogger_7.logInfo(formId, message, options);
-                    return false;
-                };
-                /**
-                 * Collect all processed (approved) files before submitting the form.
-                 * @param formId The form identifier.
-                 */
-                BlazorFormManager.prototype.collectFilesOnFormSubmit = function (formId) {
-                    return this.collectInputFiles(formId).concat(this.dragdropManager.collectFiles(formId));
-                };
-                /**
-                 * Collect all input files found in the specified form identifier.
-                 * @param formId The form identifier.
-                 */
-                BlazorFormManager.prototype.collectInputFiles = function (formId) {
-                    var config = this.processedFileStorage[formId];
-                    if (!config) {
-                        ConsoleLogger_7.logDebug(formId, "No processed files found for form #" + formId);
-                        return [];
-                    }
-                    var inputs = config.inputs;
-                    var collected = [];
-                    for (var i = 0; i < inputs.length; i++) {
-                        var _a = inputs[i], name_2 = _a.name, files = _a.files;
-                        for (var k = 0; k < files.length; k++) {
-                            collected.push({
-                                name: name_2,
-                                value: files[k]
-                            });
-                        }
-                    }
-                    return collected;
-                };
-                /**
-                 * Make sure that only successfully processed files are submitted with the form data.
-                 * @param formId The form identifier.
-                 * @param formData The form data to check.
-                 */
-                BlazorFormManager.prototype.clearFilesAppendProcessed = function (formId, formData) {
-                    if (!formId || !formData) {
-                        ConsoleLogger_7.logError(formId, "formId and formData parameters must be set when validating processed files.");
-                        return false;
-                    }
-                    ConsoleLogger_7.logDebug(formId, "Validating processed files on form submit");
-                    // get processed files...
-                    var processedFiles = this.collectFilesOnFormSubmit(formId);
-                    var hasFiles = processedFiles.length > 0;
-                    if (hasFiles) {
-                        this.clearFormDataFiles(formId, formData);
-                    }
-                    // ... and append them
-                    processedFiles.forEach(function (_a) {
-                        var name = _a.name, file = _a.value;
-                        formData.append(name, file, file.name);
-                    });
-                    return hasFiles;
-                };
-                /**
-                 * Remove all files from the specified form data.
-                 * @param formId The form identifier.
-                 * @param formData The form data to clear.
-                 */
-                BlazorFormManager.prototype.clearFormDataFiles = function (formId, formData) {
-                    if (!formData)
-                        return false;
-                    // first, grab the keys to avoid deleting 
-                    // entries from the formData while enumerating
-                    var keys = Utils_6.formDataKeys(formData);
-                    ConsoleLogger_7.logDebug(formId, "Removing all files from form data; keys are: ", keys);
-                    var success = false;
-                    // delete all files
-                    for (var i = 0; i < keys.length; i++) {
-                        var entry = formData.get(keys[i]);
-                        if (entry instanceof File) {
-                            formData.delete(keys[i]);
-                            success = true;
-                        }
-                    }
-                    return success;
-                };
-                /**
-                 * Remove inappropriate form data keys.
-                 * @param formData The form data to clean up.
-                 */
-                BlazorFormManager.prototype.adjustBadFormDataKeys = function (formData) {
-                    var RVT_KEY1 = '__RequestVerificationToken';
-                    var RVT_KEY2 = 'requestVerificationToken';
-                    var rvt1 = formData.get(RVT_KEY1);
-                    var rvt2 = formData.get(RVT_KEY2);
-                    if (!Utils_6._isString(rvt1))
-                        formData.set(RVT_KEY1, rvt2);
-                    formData.delete(RVT_KEY2);
-                };
-                /**
-                 * Recursively append to the specified form data properties and values from the given model.
-                 * @param model The model from which to collect form data.
-                 * @param formData The FormData object to which collected values are appended.
-                 * @param path The current navigation path to a given property of the model.
-                 */
-                BlazorFormManager.prototype.collectModelData = function (model, formData, path) {
-                    var _this_1 = this;
-                    if (Utils_6._isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
-                        Object.keys(model).forEach(function (key) {
-                            _this_1.collectModelData(model[key], formData, path ? path + "[" + key + "]" : key);
-                        });
-                    }
-                    else {
-                        var value = (model === null || model === undefined) ? '' : model;
-                        formData.append(path, value);
-                    }
-                };
-                BlazorFormManager.prototype.raiseFormSubmitted = function (formId) {
-                    ConsoleLogger_7.logWarning(formId, 'raiseFormSubmitted not implemented!');
-                };
-                BlazorFormManager._supportsAJAXwithUpload = BlazorFormManager.supportsAjaxUploadWithProgress();
-                return BlazorFormManager;
-            }());
-            exports_10("BlazorFormManager", BlazorFormManager);
-        }
-    };
-});
-System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
-    "use strict";
-    var Utils_7, global, throwDependenciesMissing, parseDelta, Quill, _installed, _installing, _pendingResolvers, QuillEditor;
-    var __moduleName = context_11 && context_11.id;
-    return {
-        setters: [
-            function (Utils_7_1) {
-                Utils_7 = Utils_7_1;
             }
         ],
         execute: function () {
@@ -3305,7 +2524,7 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
             throwDependenciesMissing = function () {
                 throw new Error("Couldn't install Quill dependencies.");
             };
-            parseDelta = function (delta) { return Utils_7._isString(delta) ? JSON.parse(delta) : delta; };
+            parseDelta = function (delta) { return Utils_6._isString(delta) ? JSON.parse(delta) : delta; };
             Quill = global.Quill;
             _pendingResolvers = [];
             /**
@@ -3484,8 +2703,8 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
                             var _a = options.theme, theme = _a === void 0 ? 'snow' : _a, _b = options.version, version = _b === void 0 ? '1.3.6' : _b;
                             var basepath = "https://cdn.quilljs.com/" + version;
                             var _c = options.scriptUrl, scriptUrl = _c === void 0 ? basepath + "/quill.min.js" : _c, _d = options.styleUrl, styleUrl = _d === void 0 ? basepath + "/quill." + theme + ".css" : _d;
-                            Utils_7.insertStyles(styleUrl);
-                            Utils_7.insertScripts(scriptUrl, function () {
+                            Utils_6.insertStyles(styleUrl);
+                            Utils_6.insertScripts(scriptUrl, function () {
                                 // installation done
                                 Quill = global.Quill;
                                 _installed = !!Quill;
@@ -3533,7 +2752,809 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
                 };
                 return QuillEditor;
             }());
-            exports_11("QuillEditor", QuillEditor);
+            exports_10("QuillEditor", QuillEditor);
+        }
+    };
+});
+System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "Shared", "Utils"], function (exports_11, context_11) {
+    "use strict";
+    var ConsoleLogger_7, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, Shared_8, Utils_7, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
+    var __moduleName = context_11 && context_11.id;
+    return {
+        setters: [
+            function (ConsoleLogger_7_1) {
+                ConsoleLogger_7 = ConsoleLogger_7_1;
+            },
+            function (DomEventManager_3_1) {
+                DomEventManager_3 = DomEventManager_3_1;
+            },
+            function (DragDropManager_1_1) {
+                DragDropManager_1 = DragDropManager_1_1;
+            },
+            function (FileReaderManager_1_1) {
+                FileReaderManager_1 = FileReaderManager_1_1;
+            },
+            function (ReCAPTCHA_1_1) {
+                ReCAPTCHA_1 = ReCAPTCHA_1_1;
+            },
+            function (QuillEditor_1_1) {
+                QuillEditor_1 = QuillEditor_1_1;
+            },
+            function (Shared_8_1) {
+                Shared_8 = Shared_8_1;
+            },
+            function (Utils_7_1) {
+                Utils_7 = Utils_7_1;
+            }
+        ],
+        execute: function () {
+            global = globalThis;
+            dotNet = global.DotNet;
+            XHRSTATE = { UNSENT: 0, OPENED: 1, HEADERS_RECEIVED: 2, LOADING: 3, DONE: 4 };
+            _resolvedPromise = new Promise(function (resolve, _) { return resolve(false); });
+            BlazorFormManager = /** @class */ (function () {
+                /** Construct a new instance of the form manager class. */
+                function BlazorFormManager() {
+                    this.processedFileStorage = {};
+                    this.fileManager = new FileReaderManager_1.FileReaderManager(this);
+                    this.dragdropManager = new DragDropManager_1.DragDropManager(this.fileManager, this);
+                }
+                /**
+                 * Register a form submit manager.
+                 * @param options The options used to initialize the form manager.
+                 */
+                BlazorFormManager.prototype.init = function (options) {
+                    if (!this.updateOptions(options))
+                        return BlazorFormManager.showOptionsUsage(false);
+                    var dotNetObjectReference = options.dotNetObjectReference, formId = options.formId;
+                    ConsoleLogger_7.logDebug(formId, "Initializing with options:", options);
+                    if (!this.validateFormAttributes(formId))
+                        return false;
+                    if (!dotNetObjectReference) {
+                        ConsoleLogger_7.logWarning(formId, "Invokable object instance reference not received. " +
+                            "This is the preferred way of invoking.NET methods from within " +
+                            "Blazor components.");
+                    }
+                    if (this.registerSubmitHandler(options)) {
+                        ConsoleLogger_7.logInfo(formId, "Initialized successfully!");
+                        return true;
+                    }
+                    return false;
+                };
+                /**
+                 * Destroy all resources used by formId.
+                 * @param formId The form identifier.
+                 */
+                BlazorFormManager.prototype.destroy = function (formId) {
+                    if (Shared_8.Forms[formId]) {
+                        ConsoleLogger_7.logDebug(formId, "Deleting form manager options...");
+                        delete Shared_8.Forms[formId];
+                    }
+                };
+                /**
+                 * Update existing form options with the new one.
+                 * @param options The new form options.
+                 */
+                BlazorFormManager.prototype.updateOptions = function (options) {
+                    // fail early
+                    if (!Utils_7._isObject(options))
+                        return BlazorFormManager.showOptionsUsage(true);
+                    var formId = options.formId;
+                    if (!Shared_8.Forms[formId]) {
+                        Shared_8.Forms[formId] = options;
+                        ConsoleLogger_7.logDebug(formId, "Script options stored.", options);
+                    }
+                    else {
+                        var storedOptions = Shared_8.Forms[formId];
+                        var count = 0;
+                        for (var key in options) {
+                            if (options.hasOwnProperty(key)) {
+                                storedOptions[key] = options[key];
+                                count++;
+                            }
+                        }
+                        ConsoleLogger_7.logDebug(formId, count + " script properties updated.");
+                    }
+                    return true;
+                };
+                /**
+                 * Submit the form identified by the given parameter.
+                 * @param formId The identifier of the form to submit.
+                 */
+                BlazorFormManager.prototype.submitForm = function (formId) {
+                    ConsoleLogger_7.logDebug(formId, "Form submit requested.", formId);
+                    var form = document.getElementById(formId);
+                    if (!form) {
+                        ConsoleLogger_7.logError(formId, "Form #" + formId + " not defined");
+                        return false;
+                    }
+                    if (form.onsubmit) {
+                        form.onsubmit(new Event('submit'));
+                        ConsoleLogger_7.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
+                        return true;
+                    }
+                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #" + formId + ".");
+                    return false;
+                };
+                /**
+                 * Sets the value of the pair identified by key to value, creating
+                 * a new key/value pair if none existed for key previously.
+                 * @param key The key of the value to set.
+                 * @param value The value to set.
+                 */
+                BlazorFormManager.prototype.localStorageSetItem = function (key, value) {
+                    localStorage.setItem(key, value);
+                };
+                /**
+                 * Removes the key/value pair with the given key from the list associated
+                 * with the object, if a key/value pair with the given key exists.
+                 * @param key The key of the value to remove.
+                 */
+                BlazorFormManager.prototype.localStorageRemoveItem = function (key) {
+                    localStorage.removeItem(key);
+                };
+                /**
+                 * Returns the current value associated with the given key, or null if
+                 * the given key does not exist in the list associated with the object.
+                 * @param key The key of the value to retrieve.
+                 */
+                BlazorFormManager.prototype.localStorageGetItem = function (key) {
+                    return localStorage.getItem(key);
+                };
+                /**
+                 * Register an AJAX handler for the submission of a form.
+                 * @param options An configuration object used to register the form submit handler.
+                 */
+                BlazorFormManager.prototype.registerSubmitHandler = function (options) {
+                    var _this_1 = this;
+                    var formId = options.formId, onGetModel = options.onGetModel, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
+                    var _this = this;
+                    var recaptcha = _this.initReCaptcha(formId, reCaptcha, onReCaptchaActivity);
+                    return this.handleFormSubmission({
+                        formId: formId,
+                        requireModel: requireModel,
+                        reCaptcha: reCaptcha,
+                        getFormData: function () { return __awaiter(_this_1, void 0, void 0, function () {
+                            var model, form, enctype, hasFiles, formData;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if (!Utils_7._isString(onGetModel)) return [3 /*break*/, 2];
+                                        return [4 /*yield*/, this.invokeDotNet(formId, onGetModel)];
+                                    case 1:
+                                        model = _a.sent();
+                                        ConsoleLogger_7.logDebug(formId, "Model", model);
+                                        _a.label = 2;
+                                    case 2:
+                                        if (model === null) {
+                                            if (requireModel) {
+                                                ConsoleLogger_7.logError(formId, "A model is required.");
+                                            }
+                                            else {
+                                                ConsoleLogger_7.logDebug(formId, "Model not defined. FormData will be collected by caller.");
+                                            }
+                                            return [2 /*return*/, { hasFiles: false }];
+                                        }
+                                        form = document.getElementById(formId);
+                                        enctype = form.getAttribute("enctype") || 'multipart/form-data';
+                                        hasFiles = Utils_7.containsFiles(form);
+                                        if (enctype.toLowerCase().indexOf('json') > -1) {
+                                            if (hasFiles)
+                                                ConsoleLogger_7.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
+                                            else
+                                                ConsoleLogger_7.logDebug(formId, "Collecting form model data as JSON...");
+                                            // send as JSON
+                                            return [2 /*return*/, { json: JSON.stringify(model), hasFiles: hasFiles }];
+                                        }
+                                        else {
+                                            ConsoleLogger_7.logDebug(formId, "Collecting form model data...");
+                                            formData = new FormData();
+                                            // add additional form data values using the model...
+                                            this.collectModelData(model, formData);
+                                            Utils_7.formDataMerge(formData, new FormData(form));
+                                            return [2 /*return*/, { hasFiles: hasFiles, formData: formData }];
+                                        }
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); },
+                        beforeSubmit: function () {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var cancel;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            cancel = false;
+                                            if (!Utils_7._isString(onBeforeSubmit)) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSubmit)];
+                                        case 1:
+                                            cancel = _a.sent();
+                                            _a.label = 2;
+                                        case 2: return [2 /*return*/, cancel];
+                                    }
+                                });
+                            });
+                        },
+                        beforeSend: function () {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var cancel;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            cancel = false;
+                                            if (!Utils_7._isString(onBeforeSend)) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSend, getXhrResult.call(this, true))];
+                                        case 1:
+                                            cancel = _a.sent();
+                                            _a.label = 2;
+                                        case 2: return [2 /*return*/, cancel];
+                                    }
+                                });
+                            });
+                        },
+                        done: function () {
+                            ConsoleLogger_7.logInfo(formId, "Form data successfully uploaded.", this);
+                            if (Utils_7._isString(onSendSucceeded))
+                                _this.invokeDotNet(formId, onSendSucceeded, getXhrResult.call(this, false));
+                            // eventually free up the processed file storage for this form
+                            _this.fileManager.deleteProcessedFileList({ formId: formId });
+                            _this.raiseFormSubmitted(formId);
+                        },
+                        fail: function (error) {
+                            ConsoleLogger_7.logError(formId, "Form upload failed.", this);
+                            if (Utils_7._isString(onSendFailed))
+                                _this.invokeDotNet(formId, onSendFailed, getXhrResult.call(this, false, error));
+                            recaptcha && recaptcha.reset(formId, reCaptcha);
+                        }
+                    });
+                    function getXhrResult(excludeHeaders, error) {
+                        var extraProperties = { error: error };
+                        var xhr = this;
+                        // these properties may throw an "InvalidStateError" DOMException
+                        var responseText, responseType, responseXML;
+                        // so we safely access them
+                        try {
+                            responseText = xhr.responseText || '';
+                        }
+                        catch (_a) {
+                            responseText = null;
+                        }
+                        try {
+                            responseType = xhr.responseType || '';
+                        }
+                        catch (_b) {
+                            responseType = null;
+                        }
+                        try {
+                            responseXML = xhr.responseXML && xhr.responseXML.textContent || null;
+                        }
+                        catch (_c) {
+                            responseXML = null;
+                        }
+                        return {
+                            response: xhr.response || null,
+                            responseHeaders: excludeHeaders ? null : xhr.getAllResponseHeaders(),
+                            responseText: responseText,
+                            responseType: responseType,
+                            responseXML: responseXML,
+                            status: xhr.status,
+                            statusText: xhr.statusText || "",
+                            timeout: xhr.timeout,
+                            extraProperties: extraProperties,
+                        };
+                    }
+                };
+                /**
+                 * Set the log level.
+                 * @param config The configuration options.
+                 */
+                BlazorFormManager.prototype.setLogLevel = function (config) {
+                    var formId = config.formId, level = config.logLevel;
+                    var options = Shared_8.Forms[formId];
+                    if (!options) {
+                        ConsoleLogger_7.logError(formId, "The form #" + formId + " has not been initialized yet.");
+                    }
+                    else if (options.logLevel !== level) {
+                        if (typeof level === "number") {
+                            var validLevel = 0 | level; // force the number to be an integer
+                            if (validLevel > -1 && validLevel < 5) {
+                                options.logLevel = validLevel;
+                                ConsoleLogger_7.logInfo(formId, "Log level changed to", validLevel);
+                                return true;
+                            }
+                        }
+                        ConsoleLogger_7.logError(formId, "Log level must be an integer between 0 and 4 inclusive.");
+                    }
+                    return false;
+                };
+                /**
+                 * Handle all aspects of an asynchronous form submission.
+                 * @param options The configuration object to use.
+                 */
+                BlazorFormManager.prototype.handleFormSubmission = function (options) {
+                    var _this_1 = this;
+                    if (!Utils_7._isObject(options))
+                        return false;
+                    var formId = options.formId, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
+                    if (!Utils_7._isString(formId)) {
+                        ConsoleLogger_7.logError(formId, "No form identified!");
+                        return false;
+                    }
+                    var form = document.getElementById(formId);
+                    if (!form) {
+                        ConsoleLogger_7.logError(formId, "Form with id #" + formId + " not found!");
+                        return false;
+                    }
+                    form.onsubmit = function () { return __awaiter(_this_1, void 0, void 0, function () {
+                        var cancel, beforeSubmit, beforeSend, done, fail, getFormData, _a, formData, hasFiles, json, xhr, url, method, headersSet, xhrResult;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    ConsoleLogger_7.logDebug(formId, "Submitting form...");
+                                    cancel = false;
+                                    beforeSubmit = options.beforeSubmit;
+                                    if (!Utils_7._isFunction(beforeSubmit)) return [3 /*break*/, 2];
+                                    return [4 /*yield*/, beforeSubmit.call(form)];
+                                case 1:
+                                    cancel = _b.sent();
+                                    _b.label = 2;
+                                case 2:
+                                    if (cancel) {
+                                        ConsoleLogger_7.logInfo(formId, "Form submission was cancelled.");
+                                        return [2 /*return*/, false];
+                                    }
+                                    if (!!BlazorFormManager._supportsAJAXwithUpload) return [3 /*break*/, 4];
+                                    ConsoleLogger_7.logWarning(formId, "AJAX upload with progress report not supported.");
+                                    return [4 /*yield*/, this.raiseAjaxUploadWithProgressNotSupported(formId)];
+                                case 3:
+                                    cancel = _b.sent();
+                                    if (cancel) {
+                                        // do not allow full page refresh
+                                        ConsoleLogger_7.logInfo(formId, "Blocked submitting form with full-page refresh.");
+                                        return [2 /*return*/, false];
+                                    }
+                                    // allow normal form submission (post back with full page refresh)
+                                    return [2 /*return*/, true];
+                                case 4:
+                                    beforeSend = options.beforeSend, done = options.done, fail = options.fail, getFormData = options.getFormData;
+                                    return [4 /*yield*/, getFormData()];
+                                case 5:
+                                    _a = _b.sent(), formData = _a.formData, hasFiles = _a.hasFiles, json = _a.json;
+                                    if (!formData) {
+                                        if (requireModel) {
+                                            ConsoleLogger_7.logError(formId, "Form submission cancelled because a model is required to continue.");
+                                            return [2 /*return*/, false];
+                                        }
+                                        else {
+                                            formData = new FormData(form);
+                                            hasFiles = Utils_7.containsFiles(form);
+                                        }
+                                    }
+                                    if (!json && this.clearFilesAppendProcessed(formId, formData))
+                                        hasFiles = true;
+                                    xhr = new XMLHttpRequest();
+                                    xhr.onreadystatechange = function () {
+                                        if (this.readyState === XHRSTATE.DONE) {
+                                            // any status code between 200 and 299 inclusive is success
+                                            if (this.status > 199 && this.status < 300) {
+                                                if (Utils_7._isFunction(done))
+                                                    done.call(this);
+                                            }
+                                            else if (Utils_7._isFunction(fail)) {
+                                                fail.call(this);
+                                            }
+                                        }
+                                    };
+                                    this.addXHRUploadEventListeners(formId, xhr, hasFiles);
+                                    url = form.getAttribute("action") || global.location.href;
+                                    method = (form.getAttribute("method") || "POST").toUpperCase();
+                                    ConsoleLogger_7.logDebug(formId, "Form action URL and method are:", url, method);
+                                    xhr.open(method, url, true);
+                                    headersSet = false;
+                                    if (!Utils_7._isFunction(beforeSend)) return [3 /*break*/, 7];
+                                    return [4 /*yield*/, beforeSend.call(xhr)];
+                                case 6:
+                                    xhrResult = _b.sent();
+                                    ConsoleLogger_7.logDebug(formId, "beforeSend was called:", xhrResult);
+                                    if (Utils_7._isObject(xhrResult)) {
+                                        if (xhrResult.cancel) {
+                                            ConsoleLogger_7.logDebug(formId, "XMLHttpRequest.send was cancelled.");
+                                            return [2 /*return*/, false];
+                                        }
+                                        ConsoleLogger_7.logDebug(formId, "Trying to set XMLHttpRequest (XHR) properties...");
+                                        try {
+                                            headersSet = this.setRequestHeaders(formId, xhr, xhrResult.requestHeaders);
+                                            xhr.withCredentials = xhrResult.withCredentials;
+                                        }
+                                        catch (e) {
+                                            ConsoleLogger_7.logError(formId, "Error setting XHR properties.", e);
+                                            if (Utils_7._isFunction(fail))
+                                                fail.call(xhr, e.message);
+                                            return [2 /*return*/, false];
+                                        }
+                                    }
+                                    _b.label = 7;
+                                case 7:
+                                    if (!headersSet && Shared_8.Forms[formId])
+                                        this.setRequestHeaders(formId, xhr, Shared_8.Forms[formId].requestHeaders);
+                                    if (json) {
+                                        this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
+                                    }
+                                    this.adjustBadFormDataKeys(formData);
+                                    if (this.reCaptcha) {
+                                        this.reCaptcha.submitForm(formId, xhr, formData, reCaptcha);
+                                    }
+                                    else {
+                                        xhr.send(formData);
+                                    }
+                                    return [2 /*return*/, false]; // To avoid actual submission of the form
+                            }
+                        });
+                    }); };
+                    return true;
+                };
+                BlazorFormManager.prototype.deleteProcessedFileList = function (options) {
+                    return this.fileManager.deleteProcessedFileList(options);
+                };
+                BlazorFormManager.prototype.dragDropEnable = function (options) {
+                    return this.dragdropManager.enable(options);
+                };
+                BlazorFormManager.prototype.dragDropDisable = function (options) {
+                    return this.dragdropManager.disable(options);
+                };
+                BlazorFormManager.prototype.dragDropRemoveFileList = function (options) {
+                    return Utils_7.removeFileList(options);
+                };
+                BlazorFormManager.prototype.dragDropInputFilesOnTarget = function (options) {
+                    return this.dragdropManager.dragDropInputFilesOnTarget(options);
+                };
+                BlazorFormManager.prototype.filterKeys = function (options) {
+                    return DomEventManager_3.filterKeys(options);
+                };
+                BlazorFormManager.prototype.addEventListener = function (targetId, eventType, callback) {
+                    return DomEventManager_3.addEventListener(targetId, eventType, callback);
+                };
+                /**
+                 * Remove an event listener from a target element identified by 'targetId'.
+                 * @param targetId The identifier of the target element.
+                 * @param eventType The type of event to remove the listener for.
+                 */
+                BlazorFormManager.prototype.removeEventListener = function (targetId, eventType) {
+                    return DomEventManager_3.removeEventListener(targetId, eventType);
+                };
+                /**
+                 * Set request headers on the specified XMLHttpRequest object.
+                 * @param formId The form identifier.
+                 * @param xhr The XMLHttpRequest object.
+                 * @param headers A collection of key=value pairs.
+                 */
+                BlazorFormManager.prototype.setRequestHeaders = function (formId, xhr, headers) {
+                    if (!Utils_7._isDictionary(headers))
+                        return false;
+                    ConsoleLogger_7.logDebug(formId, "Setting request headers...");
+                    for (var name_1 in headers) {
+                        if (headers.hasOwnProperty(name_1)) {
+                            var value = headers[name_1];
+                            ConsoleLogger_7.logDebug(formId, "Header:", { name: name_1, value: value });
+                            xhr.setRequestHeader(name_1, value);
+                        }
+                    }
+                    return true;
+                };
+                /** Return the dictionary of registered form manager options. */
+                BlazorFormManager.prototype.getForms = function () {
+                    return Shared_8.Forms;
+                };
+                BlazorFormManager.supportsImageUtil = function () {
+                    // before checking for the ImageUtility class, which uses the 
+                    // <canvas> element, make sure first that the device supports canvas
+                    return !!window.CanvasRenderingContext2D;
+                };
+                /**
+                 * Invoke dotnet method 'onAjaxUploadWithProgressNotSupported'.
+                 * @param formId The form identifier.
+                 */
+                BlazorFormManager.prototype.raiseAjaxUploadWithProgressNotSupported = function (formId) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var cancel, onAjaxUploadWithProgressNotSupported, navigatorInfo;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    cancel = false;
+                                    if (!Shared_8.Forms[formId]) return [3 /*break*/, 2];
+                                    onAjaxUploadWithProgressNotSupported = Shared_8.Forms[formId].onAjaxUploadWithProgressNotSupported;
+                                    if (!Utils_7._isString(onAjaxUploadWithProgressNotSupported)) return [3 /*break*/, 2];
+                                    navigatorInfo = {};
+                                    Utils_7.populateDictionary(navigatorInfo, global.navigator);
+                                    ConsoleLogger_7.logDebug(formId, "Navigator properties collected", navigatorInfo);
+                                    return [4 /*yield*/, this.invokeDotNet(formId, onAjaxUploadWithProgressNotSupported, { extraProperties: navigatorInfo })];
+                                case 1:
+                                    cancel = _a.sent();
+                                    _a.label = 2;
+                                case 2: return [2 /*return*/, cancel];
+                            }
+                        });
+                    });
+                };
+                /**
+                 * Read input files using the specified options.
+                 * @param options
+                 */
+                BlazorFormManager.prototype.readInputFiles = function (options) {
+                    var _this_1 = this;
+                    return this.fileManager.readInputFiles(options, function (processedFiles) {
+                        var formId = options.formId, inputId = options.inputId, inputName = options.inputName;
+                        ConsoleLogger_7.logDebug(formId, "Received processed files.");
+                        if (processedFiles && processedFiles.length > 0) {
+                            ConsoleLogger_7.logDebug(formId, "Storing processed files...");
+                            // store files that have been processed so that they can be 
+                            // used later to validate when the form is being submitted
+                            var config = _this_1.processedFileStorage[formId];
+                            if (!config) {
+                                // create the configuration and store it
+                                config = {
+                                    inputs: []
+                                };
+                                _this_1.processedFileStorage[formId] = config;
+                            }
+                            var input = config.inputs.find(function (obj) { return obj.id === inputId; });
+                            // update the configuration
+                            if (!input) {
+                                config.inputs.push({
+                                    id: inputId,
+                                    name: inputName,
+                                    files: processedFiles
+                                });
+                                ConsoleLogger_7.logDebug(formId, "Created processed files configuration.");
+                            }
+                            else {
+                                input.files = processedFiles;
+                                ConsoleLogger_7.logDebug(formId, "Updated processed files configuration.");
+                            }
+                        }
+                        else {
+                            ConsoleLogger_7.logDebug(formId, "No files processed!");
+                        }
+                    });
+                };
+                /**
+                 * Invoke a .NET method.
+                 * @param formId The form identifier.
+                 * @param method The .NET method to invoke.
+                 * @param arg The argument to the .NET method to invoke.
+                 */
+                BlazorFormManager.prototype.invokeDotNet = function (formId, method, arg) {
+                    if (arg === undefined)
+                        arg = null;
+                    var obj = Shared_8.Forms[formId].dotNetObjectReference;
+                    if (obj) {
+                        //logDebug(formId, `Invoking .NET method "${method}" using object instance.`, arg);
+                        return obj.invokeMethodAsync(method, arg);
+                    }
+                    else if (dotNet && Shared_8.AssemblyName) {
+                        //logDebug(formId, `Invoking .NET method "${method}" using static type`, arg);
+                        return dotNet.invokeMethodAsync(Shared_8.AssemblyName, method, arg);
+                    }
+                    ConsoleLogger_7.logWarning(formId, 'No DotNetObjectReference nor static .NET interop reference defined!');
+                    return _resolvedPromise;
+                };
+                /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
+                BlazorFormManager.supportsAjaxUploadWithProgress = function () {
+                    return supportsFileAPI() &&
+                        supportsAjaxUploadProgressEvents() &&
+                        supportsFormData();
+                    function supportsFileAPI() {
+                        var fi = document.createElement("INPUT");
+                        fi.type = "file";
+                        return "files" in fi;
+                    }
+                    ;
+                    function supportsAjaxUploadProgressEvents() {
+                        var xhr = "XMLHttpRequest" in globalThis && new XMLHttpRequest();
+                        return !!(xhr && ("upload" in xhr) && ("onprogress" in xhr.upload));
+                    }
+                    ;
+                    function supportsFormData() {
+                        return !!global.FormData;
+                    }
+                };
+                BlazorFormManager.prototype.validateFormAttributes = function (formId) {
+                    var frm = document.getElementById(formId);
+                    if (!frm) {
+                        ConsoleLogger_7.logError(formId, "The form element identified by '" + formId + "' does not exist in the DOM.");
+                        return false;
+                    }
+                    return true;
+                };
+                BlazorFormManager.prototype.addXHRUploadEventListeners = function (formId, xhr, hasFiles) {
+                    var onUploadChanged = Shared_8.Forms[formId].onUploadChanged;
+                    if (!Utils_7._isString(onUploadChanged))
+                        return;
+                    ConsoleLogger_7.logDebug(formId, "Setting up upload event handlers...");
+                    this.fileManager.addFileReaderOrUploadEventListeners(formId, xhr, xhr.upload, onUploadChanged, hasFiles, null);
+                };
+                BlazorFormManager.prototype.initReCaptcha = function (formId, reCaptcha, onReCaptchaActivity) {
+                    var _this_1 = this;
+                    if (Utils_7._isObject(reCaptcha)) {
+                        var recap = this.reCaptcha;
+                        if (!recap) {
+                            recap = new ReCAPTCHA_1.ReCAPTCHA();
+                            recap.activity.subscribe(function (activity) {
+                                _this_1.invokeDotNet(activity.formId, onReCaptchaActivity, activity);
+                            });
+                            this.reCaptcha = recap;
+                        }
+                        recap.configure(formId, reCaptcha);
+                    }
+                    return this.reCaptcha;
+                };
+                BlazorFormManager.showOptionsUsage = function (isError) {
+                    var optionalNameOfMethodWhen = "string (optional): The name of the .NET method to invoke when ";
+                    var options = {
+                        formId: "string (required): The unique identifier of the form to submit.",
+                        requireModel: "boolean (optional): Gets or sets a value that indicates whether specifying a " +
+                            "non-null reference model is required when the 'onGetModel' event is invoked. If this value is " +
+                            "true and no valid model is provided after that event, the form submission will be cancelled.",
+                        assembly: "string (optional): The name of the .NET assembly on which " +
+                            "to invoke static methods. Required if any of the 'onXXX' static " +
+                            "method names are set.",
+                        logLevel: "number (optional): The level of details when logging messages " +
+                            "to the console. Supported values are: 0 (none), 1 (information), " +
+                            "2 (warning), 3 (error), 4 (debug). The default is 3.",
+                        requestHeaders: "object (optional): A dictionary of key-value pairs to set on an instance of XMLHttpRequest.",
+                        reCaptcha: "object (optional): An object that encapsulates configuration settings for Google's reCAPTCHA technology.",
+                        onGetModel: optionalNameOfMethodWhen + "retrieving the form model.",
+                        onBeforeSubmit: optionalNameOfMethodWhen + "submitting the form. This event can be cancelled.",
+                        onBeforeSend: optionalNameOfMethodWhen + "sending the HTTP request. This event can be cancelled.",
+                        onSendFailed: optionalNameOfMethodWhen + "the HTTP request fails.",
+                        onSendSucceeded: optionalNameOfMethodWhen + "the HTTP request completes successfully.",
+                        onUploadChanged: optionalNameOfMethodWhen + "an upload operation occurs.",
+                        onFileReaderChanged: optionalNameOfMethodWhen + "a change occurs in a file reading operation.",
+                        onFileReaderResult: optionalNameOfMethodWhen + "a file reading operation is completed successfully.",
+                        onReCaptchaActivity: optionalNameOfMethodWhen + "a Google reCAPTCHA activity is reported.",
+                        onAjaxUploadWithProgressNotSupported: optionalNameOfMethodWhen + "the browser does not support AJAX uploads with progress report.",
+                    };
+                    var message = "Initialization options must be a variation of the following format:";
+                    var formId = undefined;
+                    if (isError)
+                        ConsoleLogger_7.logError(formId, message, options);
+                    else
+                        ConsoleLogger_7.logInfo(formId, message, options);
+                    return false;
+                };
+                /**
+                 * Collect all processed (approved) files before submitting the form.
+                 * @param formId The form identifier.
+                 */
+                BlazorFormManager.prototype.collectFilesOnFormSubmit = function (formId) {
+                    return this.collectInputFiles(formId).concat(this.dragdropManager.collectFiles(formId));
+                };
+                /**
+                 * Collect all input files found in the specified form identifier.
+                 * @param formId The form identifier.
+                 */
+                BlazorFormManager.prototype.collectInputFiles = function (formId) {
+                    var config = this.processedFileStorage[formId];
+                    if (!config) {
+                        ConsoleLogger_7.logDebug(formId, "No processed files found for form #" + formId);
+                        return [];
+                    }
+                    var inputs = config.inputs;
+                    var collected = [];
+                    for (var i = 0; i < inputs.length; i++) {
+                        var _a = inputs[i], name_2 = _a.name, files = _a.files;
+                        for (var k = 0; k < files.length; k++) {
+                            collected.push({
+                                name: name_2,
+                                value: files[k]
+                            });
+                        }
+                    }
+                    return collected;
+                };
+                /**
+                 * Make sure that only successfully processed files are submitted with the form data.
+                 * @param formId The form identifier.
+                 * @param formData The form data to check.
+                 */
+                BlazorFormManager.prototype.clearFilesAppendProcessed = function (formId, formData) {
+                    if (!formId || !formData) {
+                        ConsoleLogger_7.logError(formId, "formId and formData parameters must be set when validating processed files.");
+                        return false;
+                    }
+                    ConsoleLogger_7.logDebug(formId, "Validating processed files on form submit");
+                    // get processed files...
+                    var processedFiles = this.collectFilesOnFormSubmit(formId);
+                    var hasFiles = processedFiles.length > 0;
+                    if (hasFiles) {
+                        this.clearFormDataFiles(formId, formData);
+                    }
+                    // ... and append them
+                    processedFiles.forEach(function (_a) {
+                        var name = _a.name, file = _a.value;
+                        formData.append(name, file, file.name);
+                    });
+                    return hasFiles;
+                };
+                /**
+                 * Remove all files from the specified form data.
+                 * @param formId The form identifier.
+                 * @param formData The form data to clear.
+                 */
+                BlazorFormManager.prototype.clearFormDataFiles = function (formId, formData) {
+                    if (!formData)
+                        return false;
+                    // first, grab the keys to avoid deleting 
+                    // entries from the formData while enumerating
+                    var keys = Utils_7.formDataKeys(formData);
+                    ConsoleLogger_7.logDebug(formId, "Removing all files from form data; keys are: ", keys);
+                    var success = false;
+                    // delete all files
+                    for (var i = 0; i < keys.length; i++) {
+                        var entry = formData.get(keys[i]);
+                        if (entry instanceof File) {
+                            formData.delete(keys[i]);
+                            success = true;
+                        }
+                    }
+                    return success;
+                };
+                /**
+                 * Remove inappropriate form data keys.
+                 * @param formData The form data to clean up.
+                 */
+                BlazorFormManager.prototype.adjustBadFormDataKeys = function (formData) {
+                    var RVT_KEY1 = '__RequestVerificationToken';
+                    var RVT_KEY2 = 'requestVerificationToken';
+                    var rvt1 = formData.get(RVT_KEY1);
+                    var rvt2 = formData.get(RVT_KEY2);
+                    if (!Utils_7._isString(rvt1))
+                        formData.set(RVT_KEY1, rvt2);
+                    formData.delete(RVT_KEY2);
+                };
+                /**
+                 * Recursively append to the specified form data properties and values from the given model.
+                 * @param model The model from which to collect form data.
+                 * @param formData The FormData object to which collected values are appended.
+                 * @param path The current navigation path to a given property of the model.
+                 */
+                BlazorFormManager.prototype.collectModelData = function (model, formData, path) {
+                    var _this_1 = this;
+                    if (Utils_7._isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
+                        Object.keys(model).forEach(function (key) {
+                            _this_1.collectModelData(model[key], formData, path ? path + "[" + key + "]" : key);
+                        });
+                    }
+                    else {
+                        var value = (model === null || model === undefined) ? '' : model;
+                        formData.append(path, value);
+                    }
+                };
+                BlazorFormManager.prototype.raiseFormSubmitted = function (formId) {
+                    ConsoleLogger_7.logWarning(formId, 'raiseFormSubmitted not implemented!');
+                };
+                BlazorFormManager._supportsAJAXwithUpload = BlazorFormManager.supportsAjaxUploadWithProgress();
+                return BlazorFormManager;
+            }());
+            exports_11("BlazorFormManager", BlazorFormManager);
+            (function () {
+                var blazorFormManager = new BlazorFormManager();
+                Object.defineProperty(global, 'BlazorFormManager', { value: blazorFormManager });
+                // define immutable properties
+                Object.defineProperty(blazorFormManager, 'QuillEditor', { value: QuillEditor_1.QuillEditor });
+                Object.defineProperty(blazorFormManager, 'Quill', { value: {} });
+                Object.defineProperty(blazorFormManager['Quill'], 'create', {
+                    /**
+                    * Create a new QuillEditor instance.
+                    * @param {string} selector A DOM query selector.
+                    * @param {any} options The options.
+                    */
+                    value: function (selector, options) {
+                        var editor = new QuillEditor_1.QuillEditor(selector, options);
+                        return editor;
+                    }
+                });
+            })();
         }
     };
 });
