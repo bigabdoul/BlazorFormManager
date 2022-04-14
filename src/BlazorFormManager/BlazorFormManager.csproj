@@ -17,6 +17,13 @@
 		<PackageTags>c#, .net, razor, class, library, blazor, blazorformmanager, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
 		<PackageReleaseNotes>
+			Issues addressed in release 3.0.1
+			
+			- Fixed systemjs scripts loading randomly causing the BlazorFormManager object not being 
+			  available when a form component is first rendered.
+
+			Issues addressed in release 3.0.0
+			
 			This release is a major rewrite of the entire code base and introduces new namespaces
 			thus introducing breaking changes. However, these breaking changes are relatively easy
 			to fix by renaming some namespaces, and importing new ones.
@@ -34,7 +41,7 @@
 
 			For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.
 		</PackageReleaseNotes>
-		<Version>3.0.0</Version>
+		<Version>3.0.1</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
