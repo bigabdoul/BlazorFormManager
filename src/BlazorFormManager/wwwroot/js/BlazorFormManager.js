@@ -22,7 +22,7 @@
         "https://unpkg.com/systemjs@6.11.0/dist/extras/named-register.min.js"
     ];
 
-    Promise.all([insertScripts(scripts)]).then(function () {
+    insertScripts(scripts).then(function () {
         const href = getElementByTag("base", { href: '/' }).href;
         System.import(href + "_content/BlazorFormManager/dist/bundle.js");
     });
