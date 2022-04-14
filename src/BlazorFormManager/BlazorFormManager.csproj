@@ -21,24 +21,7 @@
 			
 			- Fixed systemjs scripts loading randomly causing the BlazorFormManager object not being 
 			  available when a form component is first rendered.
-
-			Issues addressed in release 3.0.0
-			
-			This release is a major rewrite of the entire code base and introduces new namespaces
-			thus introducing breaking changes. However, these breaking changes are relatively easy
-			to fix by renaming some namespaces, and importing new ones.
-
-			This most notable changes are:
-
-			- Global .NET code refactoring: namespace changes (Carfamsoft.ModelToView to Carfamsoft.Model2View, etc.)
-			- Multi-framework targeting: netstandard2.0; net6.0
-			- Project-wide C# nullable context enabled.
-			- TypeScript: JavaScript projects are now written in TypeScript
-			- SystemJS: As a result of using TypeScript, SystemJS is used as the default module loader.
-			- Proper multi-form management: include as many forms as required on one page.
-			- Google reCAPTCHA support.
-			- Rich Text Editor support.
-
+			  
 			For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.
 		</PackageReleaseNotes>
 		<Version>3.0.1</Version>
