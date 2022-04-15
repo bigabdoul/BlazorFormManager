@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net5.0;net6.0</TargetFrameworks>
 		<AssemblyName>Carfamsoft.Model2View.Shared</AssemblyName>
 		<RootNamespace>Carfamsoft.Model2View.Shared</RootNamespace>
 		<LangVersion>8.0</LangVersion>
@@ -12,10 +12,13 @@
 		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
 		<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
-		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageTags>c#, blazorformmanager</PackageTags>
 		<Description>Shared library for BlazorFormManager</Description>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>3.1.0</Version>
+		<Authors>Abdourahamane Kaba</Authors>
+		<Company>Karfamsoft</Company>
+		<NeutralLanguage>en-US</NeutralLanguage>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

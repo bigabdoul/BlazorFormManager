@@ -24,7 +24,7 @@ namespace BlazorFormManager.Components.Forms
     /// Provides core functionalities for handling AJAX form submissions
     /// with zero or more files, and report back data upload progress.
     /// </summary>
-    public abstract class FormManagerBase : ComponentBase, IDisposable
+    public abstract class FormManagerBase : ComponentBase, IDisposable, IAsyncDisposable
     {
         #region private fields & properties
 
@@ -1793,11 +1793,20 @@ namespace BlazorFormManager.Components.Forms
         }
 
         /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        public async ValueTask DisposeAsync()
+        {
+            await DisposeAsyncCore().ConfigureAwait(false);
+            Dispose(disposing: false);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
         /// Releases used resources.
         /// </summary>
         /// <param name="disposing">
-        /// true to release managed resources only;
-        /// otherwise, false to release only unmanaged resources.
+        /// true to release managed resources only; otherwise, false.
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
@@ -1816,19 +1825,26 @@ namespace BlazorFormManager.Components.Forms
                         _stopWatchTimer.Enabled = false;
                         _stopWatchTimer.Elapsed -= _stopWatchTimerElapsedHandler;
                     }
-
-                    if (_scriptInitialized)
-                    {
-                        try
-                        {
-                            _ = JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.destroy", FormId);
-                        }
-                        catch
-                        {
-                        }
-                    }
                 }
                 _disposed = true;
+            }
+        }
+
+        /// <summary>
+        /// Disposes unmanaged resources asynchronously.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+            if (_scriptInitialized)
+            {
+                try
+                {
+                    await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.destroy", FormId);
+                }
+                catch
+                {
+                }
             }
         }
 

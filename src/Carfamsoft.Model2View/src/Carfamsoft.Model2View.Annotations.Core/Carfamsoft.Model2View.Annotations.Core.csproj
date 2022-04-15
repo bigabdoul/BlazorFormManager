@@ -1,29 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net6.0</TargetFrameworks>
+	<TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net5.0;net6.0</TargetFrameworks>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_").Replace(".Core", ""))</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <NeutralLanguage>en-US</NeutralLanguage>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
     <Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
     <Description>Core model annotations for BlazorFormManager</Description>
     <PackageTags>c#, blazorformmanager</PackageTags>
     <PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Version>3.1.0</Version>
+    <Authors>Abdourahamane Kaba</Authors>
+    <Company>Karfamsoft</Company>
+	<NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Carfamsoft.Model2View.Annotations.xml</DocumentationFile>
   </PropertyGroup>
 	
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net6.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and '$(TargetFramework)' != 'net6.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and '$(TargetFramework)' != 'net5.0' and '$(TargetFramework)' != 'net6.0'">
     <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
 

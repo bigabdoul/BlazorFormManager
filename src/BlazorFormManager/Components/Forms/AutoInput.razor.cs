@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
-#if NET6_0_OR_GREATER
+#if NET5_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
 using System.Globalization;
@@ -111,8 +111,8 @@ namespace BlazorFormManager.Components.Forms
 
             if (_propertyType == null)
             {
-                if (Metadata == null) throw new ArgumentNullException(nameof(Metadata));
-                if (Model == null) throw new ArgumentNullException(nameof(Model));
+                if (Metadata == null) throw new ArgumentNullException($"{nameof(Metadata)} cannot be null.", (Exception?)null);
+                if (Model == null) throw new ArgumentNullException($"{nameof(Model)} cannot be null.", (Exception?)null);
 
                 _formDisplayAttribute = Metadata.Attribute;
 
@@ -609,10 +609,10 @@ namespace BlazorFormManager.Components.Forms
         /// <inheritdoc/>
         protected override bool TryParseValueFromString
         (
-#if NETSTANDARD2_0
-            string? value, out object? result, out string? validationErrorMessage
-#else
+#if NET5_0_OR_GREATER
             string? value, [MaybeNullWhen(false)] out object result, [NotNullWhen(false)] out string? validationErrorMessage
+#else
+            string? value, out object? result, out string? validationErrorMessage
 #endif
         )
         {

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
 		<RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
@@ -17,14 +17,13 @@
 		<PackageTags>c#, .net, razor, class, library, blazor, blazorformmanager, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
 		<PackageReleaseNotes>
-			Issues addressed in release 3.0.1
+			Issues addressed in release 3.1.0
 			
-			- Fixed systemjs scripts loading randomly causing the BlazorFormManager object not being 
-			  available when a form component is first rendered.
+			- Fixed MissingMethodException: Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetDisplayName(System.Globalization.CultureInfo)
 			  
 			For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.
 		</PackageReleaseNotes>
-		<Version>3.0.1</Version>
+		<Version>3.1.0</Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -63,6 +62,11 @@
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
+	</ItemGroup>
+	
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.1" />
