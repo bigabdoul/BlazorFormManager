@@ -11,7 +11,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager.git</RepositoryUrl>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>Multi-target frameworks and version consolidation</PackageReleaseNotes>
 	<Version>3.1.0</Version>
 	<Authors>Abdourahamane Kaba</Authors>
 	<Company>Karfamsoft</Company>

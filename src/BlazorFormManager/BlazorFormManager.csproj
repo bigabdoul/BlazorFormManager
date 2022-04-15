@@ -16,13 +16,11 @@
 		<RepositoryType>Git</RepositoryType>
 		<PackageTags>c#, .net, razor, class, library, blazor, blazorformmanager, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-		<PackageReleaseNotes>
-			Issues addressed in release 3.1.0
+		<PackageReleaseNotes>Issues addressed in release 3.1.0
 			
-			- Fixed MissingMethodException: Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetDisplayName(System.Globalization.CultureInfo)
-			  
-			For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.
-		</PackageReleaseNotes>
+- Fixed MissingMethodException: Carfamsoft.Model2View.Annotations.AutoInputMetadata.GetDisplayName(System.Globalization.CultureInfo)
+
+For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.		</PackageReleaseNotes>
 		<Version>3.1.0</Version>
 	</PropertyGroup>
 

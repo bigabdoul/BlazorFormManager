@@ -6,6 +6,18 @@
     <RootNamespace>Carfamsoft.Model2View.Mvc</RootNamespace>
 	<MvcBuildViews>true</MvcBuildViews>
 	<LangVersion>8.0</LangVersion>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Version>3.1.0</Version>
+	<Authors>Abdourahamane Kaba</Authors>
+	<Company>Karfamsoft</Company>
+	<NeutralLanguage>en-US</NeutralLanguage>
+	<PackageReleaseNotes>Multi-target frameworks and version consolidation</PackageReleaseNotes>
+	<PackageTags>c#, asp.net, mvc, blazorformmanager</PackageTags>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+	<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
+	<Description>BlazorFormManager for ASP.NET MVC projects</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|AnyCPU'">

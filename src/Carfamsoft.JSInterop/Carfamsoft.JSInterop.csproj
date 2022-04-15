@@ -16,6 +16,7 @@
 		<Authors>Abdourahamane Kaba</Authors>
 		<Company>Karfamsoft</Company>
 		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageReleaseNotes>Multi-target frameworks and version consolidation</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
