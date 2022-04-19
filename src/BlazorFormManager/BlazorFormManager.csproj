@@ -36,24 +36,6 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 		</PackageReference>
 	</ItemGroup>
 	
-	<ItemGroup>
-		<Compile Remove="Collections\**" />
-		<Compile Remove="ComponentModel\**" />
-		<Content Remove="Collections\**" />
-		<Content Remove="ComponentModel\**" />
-		<EmbeddedResource Remove="Collections\**" />
-		<EmbeddedResource Remove="ComponentModel\**" />
-		<None Remove="Collections\**" />
-		<None Remove="ComponentModel\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Remove="LocalStorage.cs" />
-		<Compile Remove="SelectOption.cs" />
-		<Compile Remove="SelectOptionList.cs" />
-		<Compile Remove="TypeExtensions.cs" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.6" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.6" />
