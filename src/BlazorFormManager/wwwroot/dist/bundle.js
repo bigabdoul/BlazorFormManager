@@ -1,9 +1,11 @@
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -94,28 +96,28 @@ System.register("ConsoleLogger", ["Shared"], function (exports_2, context_2) {
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    this.log.apply(this, __spreadArrays([formId, CONSOLE_FUNC.info], args));
+                    this.log.apply(this, __spreadArray([formId, CONSOLE_FUNC.info], args, false));
                 };
                 ConsoleLogger.logWarning = function (formId) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    this.log.apply(this, __spreadArrays([formId, CONSOLE_FUNC.warn], args));
+                    this.log.apply(this, __spreadArray([formId, CONSOLE_FUNC.warn], args, false));
                 };
                 ConsoleLogger.logError = function (formId) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    this.log.apply(this, __spreadArrays([formId, CONSOLE_FUNC.error], args));
+                    this.log.apply(this, __spreadArray([formId, CONSOLE_FUNC.error], args, false));
                 };
                 ConsoleLogger.logDebug = function (formId) {
                     var args = [];
                     for (var _i = 1; _i < arguments.length; _i++) {
                         args[_i - 1] = arguments[_i];
                     }
-                    this.log.apply(this, __spreadArrays([formId, CONSOLE_FUNC.log], args));
+                    this.log.apply(this, __spreadArray([formId, CONSOLE_FUNC.log], args, false));
                 };
                 ConsoleLogger.log = function (formId, func) {
                     var args = [];
@@ -127,7 +129,7 @@ System.register("ConsoleLogger", ["Shared"], function (exports_2, context_2) {
                         return;
                     func || (func = CONSOLE_FUNC.info);
                     args || (args = []);
-                    args.unshift((func === "log" ? "debug" : func) + ": " + (formId || 'BlazorFormManager') + ":");
+                    args.unshift("".concat(func === "log" ? "debug" : func, ": ").concat(formId || 'BlazorFormManager', ":"));
                     if (logLevel === LOG_LEVEL.debug)
                         console[func].apply(console, args);
                     else if (func === CONSOLE_FUNC.error && logLevel >= LOG_LEVEL.error)
@@ -261,7 +263,7 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                  * @param {string} name Optional: The name of the element.
                  */
                 Utils.notFound = function (targetId, name) {
-                    var error = "The " + name + " element identified by #" + targetId + " has not been found in the DOM tree.";
+                    var error = "The ".concat(name, " element identified by #").concat(targetId, " has not been found in the DOM tree.");
                     return error;
                 };
                 /**
@@ -272,12 +274,12 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                     if (size <= 0)
                         return "";
                     if (size < Shared_2.SIZE_KB)
-                        return size + " B";
+                        return "".concat(size, " B");
                     if (size < Shared_2.SIZE_MB)
-                        return (size / Shared_2.SIZE_KB).toFixed(1) + " KB";
+                        return "".concat((size / Shared_2.SIZE_KB).toFixed(1), " KB");
                     if (size < Shared_2.SIZE_GB)
-                        return (size / Shared_2.SIZE_MB).toFixed(1) + " MB";
-                    return (size / Shared_2.SIZE_TB).toFixed(2) + " GB";
+                        return "".concat((size / Shared_2.SIZE_MB).toFixed(1), " MB");
+                    return "".concat((size / Shared_2.SIZE_TB).toFixed(2), " GB");
                 };
                 /**
                  * Add classes to the element's classList collection.
@@ -329,7 +331,7 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                  */
                 Utils.removeFileList = function (options) {
                     var formId = options.formId, targetId = options.targetId;
-                    ConsoleLogger_1.logDebug(formId, "Attempting to remove dropped files for target element #" + targetId + "...");
+                    ConsoleLogger_1.logDebug(formId, "Attempting to remove dropped files for target element #".concat(targetId, "..."));
                     if (targetId in Shared_2.DragDropStorage) {
                         var config = Shared_2.DragDropStorage[targetId];
                         var options_1 = config.options;
@@ -352,7 +354,7 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                                     ConsoleLogger_1.logDebug(formId, "Removed image preview.");
                                 }
                                 else
-                                    ConsoleLogger_1.logDebug(formId, "Image #" + previewId + " not found in the DOM tree.");
+                                    ConsoleLogger_1.logDebug(formId, "Image #".concat(previewId, " not found in the DOM tree."));
                             }
                         }
                         var dropTarget = document.getElementById(targetId);
@@ -454,7 +456,7 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                  * @param {HTMLElement} container Optional: The HTML element that contains the images. Defaults to document.
                  */
                 Utils.removeAutoGeneratedImages = function (container) {
-                    var images = (container || document).querySelectorAll("." + Shared_2.DefaultImagePreviewOptions.autoGeneratedClass);
+                    var images = (container || document).querySelectorAll(".".concat(Shared_2.DefaultImagePreviewOptions.autoGeneratedClass));
                     for (var i = 0; i < images.length; i++) {
                         var img = images[i];
                         img.remove();
@@ -526,7 +528,7 @@ System.register("DomEventManager", ["ConsoleLogger", "Utils", "Shared"], functio
                  * @param callback The static .NET method to invoke when an event occurs.
                  */
                 DomEventManager.addEventListener = function (targetId, eventType, callback) {
-                    ConsoleLogger_2.logDebug(null, "Adding '" + eventType + "' event listener for #" + targetId + ".");
+                    ConsoleLogger_2.logDebug(null, "Adding '".concat(eventType, "' event listener for #").concat(targetId, "."));
                     var target = document.getElementById(targetId);
                     if (target) {
                         var callbackDefined_1 = dotnet && Utils_1._isString(callback);
@@ -561,7 +563,7 @@ System.register("DomEventManager", ["ConsoleLogger", "Utils", "Shared"], functio
                  * @param eventType The type of event to remove the listener for.
                  */
                 DomEventManager.removeEventListener = function (targetId, eventType) {
-                    ConsoleLogger_2.logDebug("Removing event listener " + eventType + " for #" + targetId + ".");
+                    ConsoleLogger_2.logDebug("Removing event listener ".concat(eventType, " for #").concat(targetId, "."));
                     var listener = Listeners[targetId + eventType];
                     return DomEventManager.removeEventHandler(targetId, eventType, listener);
                 };
@@ -593,7 +595,7 @@ System.register("DomEventManager", ["ConsoleLogger", "Utils", "Shared"], functio
                         success = true;
                     }
                     else {
-                        ConsoleLogger_2.logDebug("Could not add '" + eventType + "' event listener for #" + targetElement);
+                        ConsoleLogger_2.logDebug("Could not add '".concat(eventType, "' event listener for #").concat(targetElement));
                     }
                     if (success) {
                         addListener(targetElement.id, eventType, listener);
@@ -623,7 +625,7 @@ System.register("DomEventManager", ["ConsoleLogger", "Utils", "Shared"], functio
                         removeListener(targetId, eventType);
                     }
                     else {
-                        ConsoleLogger_2.logDebug("Could not remove '" + eventType + "' event listener for #" + targetElement);
+                        ConsoleLogger_2.logDebug("Could not remove '".concat(eventType, "' event listener for #").concat(targetElement));
                     }
                     return success;
                 };
@@ -766,7 +768,7 @@ System.register("ImageUtility", [], function (exports_5, context_5) {
                         this.readFile(source, function (data) { return _this.url = data; });
                     }
                     else {
-                        throw new Error("Source type " + typeof (source) + " not supported.");
+                        throw new Error("Source type ".concat(typeof (source), " not supported."));
                     }
                 }
                 /**
@@ -983,7 +985,7 @@ System.register("ImagePreviewGenerator", ["ConsoleLogger", "ImageUtility", "Shar
                                         }
                                         if (!container) {
                                             // if an image container has been specified but not found, that's an error
-                                            ConsoleLogger_3.logError(formId, "Wrapper " + wrapperSelector + " for auto-generated image not found in the DOM tree.");
+                                            ConsoleLogger_3.logError(formId, "Wrapper ".concat(wrapperSelector, " for auto-generated image not found in the DOM tree."));
                                         }
                                     }
                                     if (!container)
@@ -1042,7 +1044,7 @@ System.register("ImagePreviewGenerator", ["ConsoleLogger", "ImageUtility", "Shar
                         eldimmed.setAttribute("class", "bg-dimmed");
                         elfilesize.textContent = fileSize;
                         elfilename.textContent = file.name;
-                        eldimensions && (eldimensions.textContent = naturalWidth + "x" + naturalHeight);
+                        eldimensions && (eldimensions.textContent = "".concat(naturalWidth, "x").concat(naturalHeight));
                         elmeta.appendChild(elfilesize);
                         elmeta.appendChild(elfilename);
                         eldimensions && elmeta.appendChild(eldimensions);
@@ -1052,7 +1054,7 @@ System.register("ImagePreviewGenerator", ["ConsoleLogger", "ImageUtility", "Shar
                         return elcontainer;
                     }
                     else {
-                        Utils_2.addClassList(img, autoGeneratedClass).setAttribute("title", file.name + " (" + fileSize + ")");
+                        Utils_2.addClassList(img, autoGeneratedClass).setAttribute("title", "".concat(file.name, " (").concat(fileSize, ")"));
                         return img;
                     }
                 };
@@ -1083,7 +1085,7 @@ System.register("ImagePreviewGenerator", ["ConsoleLogger", "ImageUtility", "Shar
                  * @param {HTMLElement} container Optional: The HTML element that contains the images. Defaults to document.
                  */
                 ImagePreviewGenerator.prototype.removeAutoGeneratedImages = function (container) {
-                    var images = (container || document).querySelectorAll("." + Shared_4.DefaultImagePreviewOptions.autoGeneratedClass);
+                    var images = (container || document).querySelectorAll(".".concat(Shared_4.DefaultImagePreviewOptions.autoGeneratedClass));
                     for (var i = 0; i < images.length; i++) {
                         var img = images[i];
                         img.remove();
@@ -1286,7 +1288,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                             if (FILE_READER_FUNC[method] === undefined) {
                                 succeeded = false;
                                 code = ERROR_CODE_BASE + 2;
-                                error = "Unsupported file reader method: " + method;
+                                error = "Unsupported file reader method: ".concat(method);
                             }
                             else if (Utils_3._isString(inputId)) {
                                 if (!Utils_3._isString(onFileReaderResult))
@@ -1297,7 +1299,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                 }
                                 else {
                                     code = ERROR_CODE_BASE + 4;
-                                    error = "Specified input id #" + inputId + " does not identify an input element of type 'file'.";
+                                    error = "Specified input id #".concat(inputId, " does not identify an input element of type 'file'.");
                                 }
                             }
                             else {
@@ -1312,7 +1314,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                 };
                 FileReaderManager.prototype.enforceMultipleFilesPolicy = function (formId, targetId, fileCount) {
                     if (fileCount > 1)
-                        ConsoleLogger_4.logWarning(null, "Dropping multiple files (" + fileCount + ") here is not allowed. Picking first and ignoring the rest.");
+                        ConsoleLogger_4.logWarning(null, "Dropping multiple files (".concat(fileCount, ") here is not allowed. Picking first and ignoring the rest."));
                     fileCount = this.dragDropGetFileCount(targetId);
                     ConsoleLogger_4.logDebug(formId, "dragDropGetFileCount", fileCount);
                     // remove existing files
@@ -1365,15 +1367,15 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                 case 2:
                                     _loop_1 = function (i) {
                                         var file, evArgs, cancel, evArgs, cancel, result, evArgs, cancel, evArgs;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
+                                        return __generator(this, function (_b) {
+                                            switch (_b.label) {
                                                 case 0:
-                                                    ConsoleLogger_4.logDebug(formId, "Processing file... " + (i + 1) + " of " + fileCount);
+                                                    ConsoleLogger_4.logDebug(formId, "Processing file... ".concat(i + 1, " of ").concat(fileCount));
                                                     file = fileList[i];
                                                     if (!!acceptAllFiles) return [3 /*break*/, 6];
                                                     if (!hasAccept) return [3 /*break*/, 3];
                                                     if (!!Utils_3.supportsFileExtension(file.name, supportedFiles)) return [3 /*break*/, 3];
-                                                    ConsoleLogger_4.logWarning(formId, "File \"" + file.name + "\" is not allowed.");
+                                                    ConsoleLogger_4.logWarning(formId, "File \"".concat(file.name, "\" is not allowed."));
                                                     notAllowed = true;
                                                     if (!hasOnReadFileList) return [3 /*break*/, 2];
                                                     evArgs = {
@@ -1385,18 +1387,18 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                     };
                                                     return [4 /*yield*/, this_1.interopInvoker.invokeDotNet(formId, onReadFileList, evArgs)];
                                                 case 1:
-                                                    cancel = _a.sent();
+                                                    cancel = _b.sent();
                                                     if (cancel) {
                                                         this_1._readFileListAborted = true;
-                                                        ConsoleLogger_4.logDebug(formId, abortedByUser + " after rejected file extension.");
+                                                        ConsoleLogger_4.logDebug(formId, "".concat(abortedByUser, " after rejected file extension."));
                                                         return [2 /*return*/, "break"];
                                                     }
-                                                    _a.label = 2;
+                                                    _b.label = 2;
                                                 case 2: return [2 /*return*/, "continue"];
                                                 case 3:
                                                     if (!hasAcceptType) return [3 /*break*/, 6];
                                                     if (!(file.type && file.type.indexOf(acceptType) === -1)) return [3 /*break*/, 6];
-                                                    ConsoleLogger_4.logWarning(formId, "File \"" + file.name + "\" of type " + file.type + " is not allowed.");
+                                                    ConsoleLogger_4.logWarning(formId, "File \"".concat(file.name, "\" of type ").concat(file.type, " is not allowed."));
                                                     notAllowed = true;
                                                     if (!hasOnReadFileList) return [3 /*break*/, 5];
                                                     evArgs = {
@@ -1408,18 +1410,18 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                     };
                                                     return [4 /*yield*/, this_1.interopInvoker.invokeDotNet(formId, onReadFileList, evArgs)];
                                                 case 4:
-                                                    cancel = _a.sent();
+                                                    cancel = _b.sent();
                                                     if (cancel) {
                                                         this_1._readFileListAborted = true;
-                                                        ConsoleLogger_4.logDebug(formId, abortedByUser + " after rejected file type.");
+                                                        ConsoleLogger_4.logDebug(formId, "".concat(abortedByUser, " after rejected file type."));
                                                         return [2 /*return*/, "break"];
                                                     }
-                                                    _a.label = 5;
+                                                    _b.label = 5;
                                                 case 5: return [2 /*return*/, "continue"];
                                                 case 6:
                                                     dimensions_1 = null;
                                                     if (!!storeOnly) return [3 /*break*/, 8];
-                                                    ConsoleLogger_4.logDebug(formId, "Reading file " + file.name);
+                                                    ConsoleLogger_4.logDebug(formId, "Reading file ".concat(file.name));
                                                     return [4 /*yield*/, this_1.readFileCore(file, options, function (dataURL) { return __awaiter(_this, void 0, void 0, function () {
                                                             return __generator(this, function (_a) {
                                                                 switch (_a.label) {
@@ -1435,12 +1437,12 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                             });
                                                         }); })];
                                                 case 7:
-                                                    result = _a.sent();
+                                                    result = _b.sent();
                                                     if (result.aborted) {
                                                         this_1._readFileListAborted = true;
                                                         return [2 /*return*/, "break"];
                                                     }
-                                                    _a.label = 8;
+                                                    _b.label = 8;
                                                 case 8:
                                                     if (!hasOnReadFileList) return [3 /*break*/, 10];
                                                     evArgs = {
@@ -1451,7 +1453,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                     };
                                                     return [4 /*yield*/, this_1.interopInvoker.invokeDotNet(formId, onReadFileList, evArgs)];
                                                 case 9:
-                                                    cancel = _a.sent();
+                                                    cancel = _b.sent();
                                                     if (cancel) {
                                                         if (cancel === 5)
                                                             return [2 /*return*/, "continue"]; // rejection by application policy (file ignored)
@@ -1459,7 +1461,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                         ConsoleLogger_4.logDebug(formId, abortedByUser);
                                                         return [2 /*return*/, "break"];
                                                     }
-                                                    _a.label = 10;
+                                                    _b.label = 10;
                                                 case 10:
                                                     if (hasCallback)
                                                         processedFileList.push(file);
@@ -1467,19 +1469,19 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                                         return [2 /*return*/, "break"];
                                                     if (!!multiple) return [3 /*break*/, 13];
                                                     if (!(fileCount > 1)) return [3 /*break*/, 12];
-                                                    ConsoleLogger_4.logWarning(formId, "Processing multiple files (" + fileCount + ") is not allowed. The remaining files are ignored.");
+                                                    ConsoleLogger_4.logWarning(formId, "Processing multiple files (".concat(fileCount, ") is not allowed. The remaining files are ignored."));
                                                     if (!hasOnReadFileList) return [3 /*break*/, 12];
                                                     evArgs = {
                                                         type: READ_FILE_LIST_EVENTS["rejected"],
                                                         reason: READ_FILE_LIST_REJECTION["multiple"],
-                                                        files: __spreadArrays(fileList).slice(i + 1).map(function (f) { return Utils_3.createFileInfo(f, null, createObjectUrl_1); }),
+                                                        files: __spreadArray([], fileList, true).slice(i + 1).map(function (f) { return Utils_3.createFileInfo(f, null, createObjectUrl_1); }),
                                                         filesRead: i + 1,
                                                         totalFilesToRead: fileCount
                                                     };
                                                     return [4 /*yield*/, this_1.interopInvoker.invokeDotNet(formId, onReadFileList, evArgs)];
                                                 case 11:
-                                                    _a.sent();
-                                                    _a.label = 12;
+                                                    _b.sent();
+                                                    _b.label = 12;
                                                 case 12: return [2 /*return*/, "break"];
                                                 case 13: return [2 /*return*/];
                                             }
@@ -1711,7 +1713,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            error = "Failed to read file! Reason: " + reader_1.error;
+                                            error = "Failed to read file! Reason: ".concat(reader_1.error);
                                             ConsoleLogger_4.logDebug(formId, error);
                                             return [4 /*yield*/, raiseNotification(e, error)];
                                         case 1:
@@ -1744,7 +1746,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                     reader_1.readAsText(file);
                                     break;
                                 default:
-                                    reject(new Error("Unsupported method: " + method));
+                                    reject(new Error("Unsupported method: ".concat(method)));
                             }
                         }
                         catch (e) {
@@ -1782,13 +1784,13 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                  * @param {string} inputFileId The identifier of the input file to reset.
                  */
                 FileReaderManager.prototype.resetInputFile = function (formId, inputFileId) {
-                    ConsoleLogger_4.logDebug(formId, "Resetting input file #" + inputFileId);
+                    ConsoleLogger_4.logDebug(formId, "Resetting input file #".concat(inputFileId));
                     try {
                         var input = document.getElementById(inputFileId);
                         input && (input.value = "");
                     }
                     catch (e) {
-                        ConsoleLogger_4.logError(formId, "Error resetting the value of file input #" + inputFileId, e);
+                        ConsoleLogger_4.logError(formId, "Error resetting the value of file input #".concat(inputFileId), e);
                     }
                 };
                 /**
@@ -1848,7 +1850,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                             targetId = "" + dropTargetId;
                             if (targetId in Shared_6.DragDropStorage) {
                                 code = ERROR_CODE_BASE + 1;
-                                error = "The drop target element identified by #" + targetId + " has already been registered.";
+                                error = "The drop target element identified by #".concat(targetId, " has already been registered.");
                                 ConsoleLogger_5.logDebug(formId, error);
                             }
                             else {
@@ -1864,7 +1866,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                                     e.preventDefault();
                                                     effectSet = false;
                                                     dt = e.dataTransfer;
-                                                    ConsoleLogger_5.logDebug(formId, "dragStart: dropEffect = " + dt.dropEffect + " ; effectAllowed = " + dt.effectAllowed);
+                                                    ConsoleLogger_5.logDebug(formId, "dragStart: dropEffect = ".concat(dt.dropEffect, " ; effectAllowed = ").concat(dt.effectAllowed));
                                                     onDragStart = Shared_6.Forms[formId].onDragStart;
                                                     if (!Utils_4._isString(onDragStart)) return [3 /*break*/, 2];
                                                     args = DomEventManager_2.getMouseEventArgs(e);
@@ -1872,7 +1874,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                                         dropEffect: dt.dropEffect,
                                                         effectAllowed: dt.effectAllowed,
                                                         files: [],
-                                                        items: __spreadArrays(Array.from(dt.items)).map(function (i) { return ({ kind: i.kind, type: i.type }); }),
+                                                        items: __spreadArray([], Array.from(dt.items), true).map(function (i) { return ({ kind: i.kind, type: i.type }); }),
                                                         types: dt.types
                                                     };
                                                     return [4 /*yield*/, this.interopInvoker.invokeDotNet(formId, onDragStart, args)];
@@ -1882,7 +1884,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                                         data = result.data, dataFormat = result.dataFormat, effect = result.effectAllowed;
                                                         if (Utils_4._isString(data) && Utils_4._isString(dataFormat)) {
                                                             dt.setData(dataFormat, data);
-                                                            ConsoleLogger_5.logDebug(formId, "Drag start event data set. Format=" + dataFormat, data);
+                                                            ConsoleLogger_5.logDebug(formId, "Drag start event data set. Format=".concat(dataFormat), data);
                                                         }
                                                         if (Utils_4._isString(effect)) {
                                                             dt.effectAllowed = effect;
@@ -1918,7 +1920,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     };
                                     succeeded = true;
                                     error = null;
-                                    ConsoleLogger_5.logDebug(formId, "Drag and drop enabled for target element #" + targetId + ".");
+                                    ConsoleLogger_5.logDebug(formId, "Drag and drop enabled for target element #".concat(targetId, "."));
                                 }
                                 else {
                                     code = ERROR_CODE_BASE + 2;
@@ -1954,7 +1956,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                 delete config.droppedFiles;
                             error = null;
                             succeeded = true;
-                            ConsoleLogger_5.logDebug(formId, "Drag and drop disabled for #" + targetId + ".");
+                            ConsoleLogger_5.logDebug(formId, "Drag and drop disabled for #".concat(targetId, "."));
                         }
                         else {
                             code = ERROR_CODE_BASE + 2;
@@ -1964,7 +1966,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                     }
                     else {
                         code = ERROR_CODE_BASE + 1;
-                        error = "The event listeners for the drop target element #" + targetId + " " +
+                        error = "The event listeners for the drop target element #".concat(targetId, " ") +
                             "do not exist or have already been removed.";
                         ConsoleLogger_5.logDebug(formId, error);
                     }
@@ -1989,7 +1991,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     config = Shared_6.DragDropStorage[targetId];
                                     if (!!config) return [3 /*break*/, 1];
                                     code = ERROR_CODE_BASE + 1;
-                                    error = "Drag and drop settings not found for element #" + targetId + ".";
+                                    error = "Drag and drop settings not found for element #".concat(targetId, ".");
                                     ConsoleLogger_5.logError(formId, error);
                                     return [2 /*return*/, { succeeded: succeeded, error: error, code: code }];
                                 case 1:
@@ -2032,14 +2034,14 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     files = existingFiles.concat(files);
                             }
                             config.droppedFiles = (_a = {}, _a[inputName] = files, _a.fileCount = files.length, _a);
-                            ConsoleLogger_5.logDebug(formId, "Dropped files stored for target #" + dropTargetId + " and input " + inputName + ".");
+                            ConsoleLogger_5.logDebug(formId, "Dropped files stored for target #".concat(dropTargetId, " and input ").concat(inputName, "."));
                             if (!keepEmtpyClass) {
                                 dropTargetElement || (dropTargetElement = document.getElementById(dropTargetId));
                                 dropTargetElement && dropTargetElement.classList.remove("drag-drop-area-empty");
                             }
                         }
                         else {
-                            ConsoleLogger_5.logError(formId, "No drop store found for target #" + dropTargetId + ".");
+                            ConsoleLogger_5.logError(formId, "No drop store found for target #".concat(dropTargetId, "."));
                         }
                     }
                 };
@@ -2069,11 +2071,11 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                 }
                             }
                             else {
-                                ConsoleLogger_5.logDebug(formId, "No file dropped onto target #" + dropTargetId + ".");
+                                ConsoleLogger_5.logDebug(formId, "No file dropped onto target #".concat(dropTargetId, "."));
                             }
                         }
                     }
-                    ConsoleLogger_5.logDebug(formId, "Collected " + collectedFiles.length + " drag and drop file(s) for target elements.");
+                    ConsoleLogger_5.logDebug(formId, "Collected ".concat(collectedFiles.length, " drag and drop file(s) for target elements."));
                     return collectedFiles;
                 };
                 /**
@@ -2096,7 +2098,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     fileList = Array.from(dt.files);
                                     fileCount = fileList && fileList.length || 0;
                                     hasFiles = fileCount > 0;
-                                    files = hasFiles ? __spreadArrays(fileList) : [];
+                                    files = hasFiles ? __spreadArray([], fileList, true) : [];
                                     onDropInterop = Shared_6.Forms[formId].onDrop;
                                     filesToProcess = files;
                                     storeFilesOnly = false;
@@ -2104,7 +2106,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     if (hasFiles) {
                                         if (!multiple)
                                             filesToProcess = [files[0]];
-                                        ConsoleLogger_5.logDebug(formId, fileCount + " file(s) dropped onto target element #" + dropTarget.id);
+                                        ConsoleLogger_5.logDebug(formId, "".concat(fileCount, " file(s) dropped onto target element #").concat(dropTarget.id));
                                         if (Utils_4._isString(inputFileId))
                                             this.fileManager.resetInputFile(formId, inputFileId);
                                     }
@@ -2114,7 +2116,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                             dropEffect: DROP_EFFECTS[dt.dropEffect],
                                             effectAllowed: DROP_EFFECTS_ALLOWED[dt.effectAllowed],
                                             files: hasFiles ? files.map(function (f) { return Utils_4.createFileInfo(f, null, createObjectUrl); }) : [],
-                                            items: dt.items ? __spreadArrays(Array.from(dt.items)).map(function (dti) { return ({ kind: dti.kind, type: dti.type }); }) : [],
+                                            items: dt.items ? __spreadArray([], Array.from(dt.items), true).map(function (dti) { return ({ kind: dti.kind, type: dti.type }); }) : [],
                                             types: dt.types,
                                         },
                                         targetId: dropTarget.id,
@@ -2144,10 +2146,10 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                             maxcount = maxFileCount | 0;
                                             if (maxcount > 0) {
                                                 filesToProcess = filesToProcess.slice(0, maxcount);
-                                                ConsoleLogger_5.logDebug(formId, "Maximum " + maxcount + " of " + fileCount + " files selected for processing.");
+                                                ConsoleLogger_5.logDebug(formId, "Maximum ".concat(maxcount, " of ").concat(fileCount, " files selected for processing."));
                                             }
                                             if (maxTotalSize > 0) {
-                                                ConsoleLogger_5.logDebug("Limiting total file size to " + maxTotalSize + " MB.");
+                                                ConsoleLogger_5.logDebug("Limiting total file size to ".concat(maxTotalSize, " MB."));
                                                 sum = 0;
                                                 totalFiles = [];
                                                 maxTotalSizeBytes = Shared_6.SIZE_MB * maxTotalSize;
@@ -2163,8 +2165,8 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                                 }
                                                 initialFileCount = filesToProcess.length;
                                                 filesToProcess = totalFiles;
-                                                ConsoleLogger_5.logDebug(formId, filesToProcess.length + " of " + initialFileCount + " files " +
-                                                    ("selected for processing.Total size: " + Utils_4.fileSizeToString(sum)));
+                                                ConsoleLogger_5.logDebug(formId, "".concat(filesToProcess.length, " of ").concat(initialFileCount, " files ") +
+                                                    "selected for processing.Total size: ".concat(Utils_4.fileSizeToString(sum)));
                                             }
                                             storeFilesOnly = storeOnly;
                                             if (Utils_4._isObject(imagePreviewOptions))
@@ -2174,7 +2176,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                                     _a.label = 2;
                                 case 2:
                                     if (!(hasFiles && filesToProcess.length)) return [3 /*break*/, 4];
-                                    ConsoleLogger_5.logDebug(formId, "Processing " + filesToProcess.length + " dropped file(s)...");
+                                    ConsoleLogger_5.logDebug(formId, "Processing ".concat(filesToProcess.length, " dropped file(s)..."));
                                     cb = function (processedFileList) {
                                         var dropTargetId = dropTarget.id;
                                         if (storeFilesOnly)
@@ -2258,7 +2260,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                     var url = scripts[ver] + '';
                     var success = false;
                     if (!Utils_5._isString(url)) {
-                        var message = "Unsupported reCAPTCHA version: " + ver;
+                        var message = "Unsupported reCAPTCHA version: ".concat(ver);
                         ConsoleLogger_6.logError(formId, message);
                         this.reportActivity(formId, { formId: formId, message: message, type: 'danger' });
                     }
@@ -2468,7 +2470,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                     var elements = form && form.querySelectorAll(selector) || [];
                     var count = elements.length;
                     if (count > 0) {
-                        ConsoleLogger_6.logDebug(formId, count + " HTML element(s) with " + selector + " CSS selector found.");
+                        ConsoleLogger_6.logDebug(formId, "".concat(count, " HTML element(s) with ").concat(selector, " CSS selector found."));
                         var hl = '', size = sz, theme = them;
                         if (languageCode)
                             hl = languageCode;
@@ -2497,7 +2499,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                         cbConfig['widgets'] = widgets;
                     }
                     else {
-                        ConsoleLogger_6.logError(formId, "No HTML element with " + selector + " CSS selector found.");
+                        ConsoleLogger_6.logError(formId, "No HTML element with ".concat(selector, " CSS selector found."));
                     }
                 };
                 ReCAPTCHA.prototype.getCallback = function (formId) {
@@ -2701,8 +2703,8 @@ System.register("QuillEditor", ["Utils"], function (exports_10, context_10) {
                             // queue the first resolver
                             _pendingResolvers.push(resolve);
                             var _a = options.theme, theme = _a === void 0 ? 'snow' : _a, _b = options.version, version = _b === void 0 ? '1.3.6' : _b;
-                            var basepath = "https://cdn.quilljs.com/" + version;
-                            var _c = options.scriptUrl, scriptUrl = _c === void 0 ? basepath + "/quill.min.js" : _c, _d = options.styleUrl, styleUrl = _d === void 0 ? basepath + "/quill." + theme + ".css" : _d;
+                            var basepath = "https://cdn.quilljs.com/".concat(version);
+                            var _c = options.scriptUrl, scriptUrl = _c === void 0 ? "".concat(basepath, "/quill.min.js") : _c, _d = options.styleUrl, styleUrl = _d === void 0 ? "".concat(basepath, "/quill.").concat(theme, ".css") : _d;
                             Utils_6.insertStyles(styleUrl);
                             Utils_6.insertScripts(scriptUrl, function () {
                                 // installation done
@@ -2853,7 +2855,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                 count++;
                             }
                         }
-                        ConsoleLogger_7.logDebug(formId, count + " script properties updated.");
+                        ConsoleLogger_7.logDebug(formId, "".concat(count, " script properties updated."));
                     }
                     return true;
                 };
@@ -2865,15 +2867,15 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     ConsoleLogger_7.logDebug(formId, "Form submit requested.", formId);
                     var form = document.getElementById(formId);
                     if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form #" + formId + " not defined");
+                        ConsoleLogger_7.logError(formId, "Form #".concat(formId, " not defined"));
                         return false;
                     }
                     if (form.onsubmit) {
-                        form.onsubmit(new Event('submit'));
+                        form.onsubmit(new SubmitEvent('submit'));
                         ConsoleLogger_7.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
                         return true;
                     }
-                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #" + formId + ".");
+                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #".concat(formId, "."));
                     return false;
                 };
                 /**
@@ -3052,7 +3054,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var formId = config.formId, level = config.logLevel;
                     var options = Shared_8.Forms[formId];
                     if (!options) {
-                        ConsoleLogger_7.logError(formId, "The form #" + formId + " has not been initialized yet.");
+                        ConsoleLogger_7.logError(formId, "The form #".concat(formId, " has not been initialized yet."));
                     }
                     else if (options.logLevel !== level) {
                         if (typeof level === "number") {
@@ -3082,7 +3084,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     }
                     var form = document.getElementById(formId);
                     if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form with id #" + formId + " not found!");
+                        ConsoleLogger_7.logError(formId, "Form with id #".concat(formId, " not found!"));
                         return false;
                     }
                     form.onsubmit = function () { return __awaiter(_this_1, void 0, void 0, function () {
@@ -3361,7 +3363,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager.prototype.validateFormAttributes = function (formId) {
                     var frm = document.getElementById(formId);
                     if (!frm) {
-                        ConsoleLogger_7.logError(formId, "The form element identified by '" + formId + "' does not exist in the DOM.");
+                        ConsoleLogger_7.logError(formId, "The form element identified by '".concat(formId, "' does not exist in the DOM."));
                         return false;
                     }
                     return true;
@@ -3522,7 +3524,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var _this_1 = this;
                     if (Utils_7._isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
                         Object.keys(model).forEach(function (key) {
-                            _this_1.collectModelData(model[key], formData, path ? path + "[" + key + "]" : key);
+                            _this_1.collectModelData(model[key], formData, path ? "".concat(path, "[").concat(key, "]") : key);
                         });
                     }
                     else {
