@@ -166,7 +166,7 @@ interface XhrResult {
 }
 
 interface DragEventResponse {
-    effectAllowed: string;
+    effectAllowed: "none" | "copy" | "copyLink" | "copyMove" | "link" | "linkMove" | "move" | "all" | "uninitialized";
     data: string;
     dataFormat: string;
     acceptedFiles: string[];
