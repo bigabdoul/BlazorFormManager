@@ -111,7 +111,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         }
 
         if (form.onsubmit) {
-            form.onsubmit(new Event('submit'));
+            form.onsubmit(new SubmitEvent('submit'));
             logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.")
             return true;
         }
