@@ -39,6 +39,20 @@
         {
             <AutoFileInput Id="@id" Model="Model" Metadata="Metadata" />
         }
+        else if (attr.Is("button") || attr.Is("submit"))
+        {
+            var culture = Form?.Culture;
+            var prompt = metadata.GetDisplayString(attr.Prompt, culture);
+            var descr = metadata.GetDisplayString(attr.Description, culture);
+            <input type="@attr.Type" id="@id" name="@name" value="@prompt" class="@attr.InputCssClass" title="@descr" />
+        }
+        else if (attr.Tag.EqualsIgnoreCase("button"))
+        {
+            var culture = Form?.Culture;
+            var prompt = metadata.GetDisplayString(attr.Prompt, culture);
+            var descr = metadata.GetDisplayString(attr.Description, culture);
+            <button id="@id" name="@name" class="@attr.InputCssClass" title="@descr">@prompt</button>
+        }
         else
         {
             var propertyName = metadata.PropertyInfo.Name;
