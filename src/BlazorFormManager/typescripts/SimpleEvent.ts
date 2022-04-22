@@ -3,7 +3,7 @@
     unsubscribe(handler: { (data?: T): void }): void;
 }
 
-class SimpleEvent<T> implements ISimpleEvent<T> {
+export class SimpleEvent<T> implements ISimpleEvent<T> {
     private delegates: { (data?: T): void; }[] = [];
 
     subscribe(handler: { (data?: T): void }): void {

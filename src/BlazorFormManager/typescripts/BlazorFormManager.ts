@@ -6,6 +6,7 @@ import { ReCAPTCHA } from "./ReCAPTCHA";
 import { QuillEditor } from "./QuillEditor";
 import { AssemblyName, Forms } from "./Shared";
 import { containsFiles, formDataKeys, formDataMerge, populateDictionary, removeFileList, _isDictionary, _isFunction, _isObject, _isString } from "./Utils";
+import { SimpleEvent } from "./SimpleEvent";
 
 const global = globalThis;
 const dotNet: DotNetStaticReference = global.DotNet;

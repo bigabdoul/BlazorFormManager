@@ -1,6 +1,7 @@
 ﻿import { Forms } from "./Shared";
 import { logDebug, logError, logWarning } from "./ConsoleLogger";
 import { _isString, _isObject, _isFunction, _isDictionary } from "./Utils";
+import { SimpleEvent } from "./SimpleEvent";
 
 const global = globalThis;
 const RECAPTCHA_SCRIPT_BASE_URL = 'https://www.google.com/recaptcha/api.js';

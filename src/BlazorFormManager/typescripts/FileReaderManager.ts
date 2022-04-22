@@ -2,6 +2,7 @@
 import { addEventHandler } from "./DomEventManager";
 import { ImagePreviewGenerator } from "./ImagePreviewGenerator";
 import { DragDropStorage, Forms } from "./Shared";
+import { SimpleEvent } from "./SimpleEvent";
 import { createFileInfo, removeFileList, supportsFileExtension, _isFunction, _isString } from "./Utils";
 
 const _supportsFileReader = !!globalThis.FileReader;

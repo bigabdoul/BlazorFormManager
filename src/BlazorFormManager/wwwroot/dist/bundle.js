@@ -1121,10 +1121,42 @@ System.register("ImagePreviewGenerator", ["ConsoleLogger", "ImageUtility", "Shar
         }
     };
 });
-System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "ImagePreviewGenerator", "Shared", "Utils"], function (exports_7, context_7) {
+System.register("SimpleEvent", [], function (exports_7, context_7) {
     "use strict";
-    var ConsoleLogger_4, DomEventManager_1, ImagePreviewGenerator_1, Shared_5, Utils_3, _supportsFileReader, CompletedPromise, UPLOAD_EVENTS, READ_FILE_LIST_EVENTS, READ_FILE_LIST_REJECTION, FILE_READER_FUNC, FileReaderManager;
+    var SimpleEvent;
     var __moduleName = context_7 && context_7.id;
+    return {
+        setters: [],
+        execute: function () {
+            SimpleEvent = /** @class */ (function () {
+                function SimpleEvent() {
+                    this.delegates = [];
+                }
+                SimpleEvent.prototype.subscribe = function (handler) {
+                    this.delegates.push(handler);
+                };
+                SimpleEvent.prototype.unsubscribe = function (handler) {
+                    this.delegates = this.delegates.filter(function (h) { return h !== handler; });
+                };
+                SimpleEvent.prototype.trigger = function (data) {
+                    this.delegates.slice(0).forEach(function (d) { return d(data); });
+                };
+                SimpleEvent.prototype.expose = function () {
+                    return this;
+                };
+                SimpleEvent.prototype.anySubscriber = function () {
+                    return this.delegates.length > 0;
+                };
+                return SimpleEvent;
+            }());
+            exports_7("SimpleEvent", SimpleEvent);
+        }
+    };
+});
+System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "ImagePreviewGenerator", "Shared", "SimpleEvent", "Utils"], function (exports_8, context_8) {
+    "use strict";
+    var ConsoleLogger_4, DomEventManager_1, ImagePreviewGenerator_1, Shared_5, SimpleEvent_1, Utils_3, _supportsFileReader, CompletedPromise, UPLOAD_EVENTS, READ_FILE_LIST_EVENTS, READ_FILE_LIST_REJECTION, FILE_READER_FUNC, FileReaderManager;
+    var __moduleName = context_8 && context_8.id;
     return {
         setters: [
             function (ConsoleLogger_4_1) {
@@ -1138,6 +1170,9 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
             },
             function (Shared_5_1) {
                 Shared_5 = Shared_5_1;
+            },
+            function (SimpleEvent_1_1) {
+                SimpleEvent_1 = SimpleEvent_1_1;
             },
             function (Utils_3_1) {
                 Utils_3 = Utils_3_1;
@@ -1154,7 +1189,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
             FileReaderManager = /** @class */ (function () {
                 function FileReaderManager(interopInvoker) {
                     this.interopInvoker = interopInvoker;
-                    this.progressEvent = new SimpleEvent();
+                    this.progressEvent = new SimpleEvent_1.SimpleEvent();
                     this._readFileListAborted = false;
                     this._processedFileStorage = {};
                 }
@@ -1803,14 +1838,14 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                 };
                 return FileReaderManager;
             }());
-            exports_7("FileReaderManager", FileReaderManager);
+            exports_8("FileReaderManager", FileReaderManager);
         }
     };
 });
-System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared", "Utils"], function (exports_8, context_8) {
+System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared", "Utils"], function (exports_9, context_9) {
     "use strict";
     var ConsoleLogger_5, DomEventManager_2, Shared_6, Utils_4, DROP_EFFECTS, DROP_EFFECTS_ALLOWED, DragDropManager;
-    var __moduleName = context_8 && context_8.id;
+    var __moduleName = context_9 && context_9.id;
     return {
         setters: [
             function (ConsoleLogger_5_1) {
@@ -2202,14 +2237,14 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
                 };
                 return DragDropManager;
             }());
-            exports_8("DragDropManager", DragDropManager);
+            exports_9("DragDropManager", DragDropManager);
         }
     };
 });
-System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exports_9, context_9) {
+System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"], function (exports_10, context_10) {
     "use strict";
-    var Shared_7, ConsoleLogger_6, Utils_5, global, RECAPTCHA_SCRIPT_BASE_URL, ReCAPTCHA;
-    var __moduleName = context_9 && context_9.id;
+    var Shared_7, ConsoleLogger_6, Utils_5, SimpleEvent_2, global, RECAPTCHA_SCRIPT_BASE_URL, ReCAPTCHA;
+    var __moduleName = context_10 && context_10.id;
     return {
         setters: [
             function (Shared_7_1) {
@@ -2220,6 +2255,9 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
             },
             function (Utils_5_1) {
                 Utils_5 = Utils_5_1;
+            },
+            function (SimpleEvent_2_1) {
+                SimpleEvent_2 = SimpleEvent_2_1;
             }
         ],
         execute: function () {
@@ -2238,7 +2276,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                             inserting: false
                         }
                     };
-                    this._activityEvent = new SimpleEvent();
+                    this._activityEvent = new SimpleEvent_2.SimpleEvent();
                 }
                 Object.defineProperty(ReCAPTCHA.prototype, "activity", {
                     get: function () {
@@ -2507,14 +2545,14 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils"], function (exp
                 };
                 return ReCAPTCHA;
             }());
-            exports_9("ReCAPTCHA", ReCAPTCHA);
+            exports_10("ReCAPTCHA", ReCAPTCHA);
         }
     };
 });
-System.register("QuillEditor", ["Utils"], function (exports_10, context_10) {
+System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
     "use strict";
     var Utils_6, global, throwDependenciesMissing, parseDelta, Quill, _installed, _installing, _pendingResolvers, QuillEditor;
-    var __moduleName = context_10 && context_10.id;
+    var __moduleName = context_11 && context_11.id;
     return {
         setters: [
             function (Utils_6_1) {
@@ -2754,14 +2792,14 @@ System.register("QuillEditor", ["Utils"], function (exports_10, context_10) {
                 };
                 return QuillEditor;
             }());
-            exports_10("QuillEditor", QuillEditor);
+            exports_11("QuillEditor", QuillEditor);
         }
     };
 });
-System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "Shared", "Utils"], function (exports_11, context_11) {
+System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "Shared", "Utils"], function (exports_12, context_12) {
     "use strict";
     var ConsoleLogger_7, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, Shared_8, Utils_7, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
-    var __moduleName = context_11 && context_11.id;
+    var __moduleName = context_12 && context_12.id;
     return {
         setters: [
             function (ConsoleLogger_7_1) {
@@ -3538,7 +3576,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager._supportsAJAXwithUpload = BlazorFormManager.supportsAjaxUploadWithProgress();
                 return BlazorFormManager;
             }());
-            exports_11("BlazorFormManager", BlazorFormManager);
+            exports_12("BlazorFormManager", BlazorFormManager);
             (function () {
                 var blazorFormManager = new BlazorFormManager();
                 Object.defineProperty(global, 'BlazorFormManager', { value: blazorFormManager });
@@ -3560,25 +3598,4 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
         }
     };
 });
-var SimpleEvent = /** @class */ (function () {
-    function SimpleEvent() {
-        this.delegates = [];
-    }
-    SimpleEvent.prototype.subscribe = function (handler) {
-        this.delegates.push(handler);
-    };
-    SimpleEvent.prototype.unsubscribe = function (handler) {
-        this.delegates = this.delegates.filter(function (h) { return h !== handler; });
-    };
-    SimpleEvent.prototype.trigger = function (data) {
-        this.delegates.slice(0).forEach(function (d) { return d(data); });
-    };
-    SimpleEvent.prototype.expose = function () {
-        return this;
-    };
-    SimpleEvent.prototype.anySubscriber = function () {
-        return this.delegates.length > 0;
-    };
-    return SimpleEvent;
-}());
 //# sourceMappingURL=bundle.js.map
