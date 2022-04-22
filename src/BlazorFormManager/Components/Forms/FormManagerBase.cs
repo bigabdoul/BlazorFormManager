@@ -498,7 +498,7 @@ namespace BlazorFormManager.Components.Forms
                         dotNetObjectReference = _thisObjRef
                     };
 
-                    _scriptInitialized = await JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.init", options);
+                    await SafeInteropInitAsync(options);
 
                     AjaxUploadNotSupported = null;
 
@@ -516,6 +516,36 @@ namespace BlazorFormManager.Components.Forms
             }
 
             await base.OnAfterRenderAsync(firstRender);
+        }
+
+        /// <summary>
+        /// Safely attempts to initialize the BlazorFormManager object through JSInterop.
+        /// </summary>
+        /// <param name="options">The initialization options.</param>
+        /// <param name="maxAttempts">The maximum number of initialization attempts.</param>
+        /// <param name="millisecondsDelay">
+        /// The number of milliseconds to wait before completing the returned task, or -1 to wait indefinitely.
+        /// </param>
+        /// <returns>A task that represents the initialization attempt.</returns>
+        protected virtual async Task SafeInteropInitAsync(object options, int maxAttempts = 3, int millisecondsDelay = 500)
+        {
+            var initCount = 0;
+
+            while (!_scriptInitialized)
+            {
+                try
+                {
+                    _scriptInitialized = await JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.init", options);
+                }
+                catch (Exception)
+                {
+                    if (++initCount >= maxAttempts)
+                    {
+                        throw;
+                    }
+                    await Task.Delay(millisecondsDelay);
+                }
+            }
         }
 
         #endregion
