@@ -3,6 +3,7 @@ using BlazorFormManager.Debugging;
 using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
 using Carfamsoft.JSInterop;
+using Carfamsoft.JSInterop.Extensions;
 using Carfamsoft.Model2View.Annotations;
 using Carfamsoft.Model2View.Shared;
 using Carfamsoft.Model2View.Shared.Extensions;
@@ -527,25 +528,9 @@ namespace BlazorFormManager.Components.Forms
         /// The number of milliseconds to wait before completing the returned task, or -1 to wait indefinitely.
         /// </param>
         /// <returns>A task that represents the initialization attempt.</returns>
-        protected virtual async Task SafeInteropInitAsync(object options, int maxAttempts = 3, int millisecondsDelay = 500)
+        protected virtual async Task SafeInteropInitAsync(object options, int maxAttempts = 5, int millisecondsDelay = 500)
         {
-            var initCount = 0;
-
-            while (!_scriptInitialized)
-            {
-                try
-                {
-                    _scriptInitialized = await JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.init", options);
-                }
-                catch (Exception)
-                {
-                    if (++initCount >= maxAttempts)
-                    {
-                        throw;
-                    }
-                    await Task.Delay(millisecondsDelay);
-                }
-            }
+            _scriptInitialized = await JS!.SafeInvokeAsync<bool>(maxAttempts, millisecondsDelay, $"{BlazorFormManagerNS}.init", options);
         }
 
         #endregion

@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+		<LangVersion>9.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>JavaScript interop services for BlazorFormManager</Description>
+		<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/bigabdoul/BlazorFormManager</RepositoryUrl>
+		<PackageTags>c#, blazor, blazorformmanager, javascript, interop</PackageTags>
+		<PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<RepositoryType>git</RepositoryType>
+		<Version>3.1.0</Version>
+		<Authors>Abdourahamane Kaba</Authors>
+		<Company>Karfamsoft</Company>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<PackageReleaseNotes>Multi-target frameworks and version consolidation</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<PackageReference Include="System.Text.Json" Version="5.0.0" />
+		<PackageReference Include="Microsoft.JSInterop" Version="3.1.6" />
+	</ItemGroup>
+	
+	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<PackageReference Include="System.Text.Json" Version="5.0.0" />
+		<PackageReference Include="Microsoft.JSInterop" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="System.Text.Json" Version="6.0.1" />
+		<PackageReference Include="Microsoft.JSInterop" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Extensions\" />
+	</ItemGroup>
+
+</Project>
