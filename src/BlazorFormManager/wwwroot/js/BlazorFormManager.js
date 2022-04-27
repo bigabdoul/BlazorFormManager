@@ -12,7 +12,7 @@
     "use strict";
 
     var head = getElementByTag("head", function (name) {
-        const h = d.createElement(name);
+        var h = d.createElement(name);
         return d.insertBefore(h, d.body);
     });
 
@@ -23,7 +23,7 @@
     ];
 
     insertScripts(scripts).then(function () {
-        const href = getElementByTag("base", { href: '/' }).href;
+        var href = getElementByTag("base", { href: '/' }).href;
         System.import(href + "_content/BlazorFormManager/dist/bundle.js");
     });
 
@@ -52,7 +52,7 @@
      * @param {any} factory A fallback factory function or object.
      */
     function getElementByTag(name, factory) {
-        const elms = d.getElementsByTagName(name);
+        var elms = d.getElementsByTagName(name);
         return elms && elms.length && elms[0] || (typeof factory === 'function' ? factory(name) : factory);
     }
 })(window, document);
