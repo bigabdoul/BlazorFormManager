@@ -16,7 +16,7 @@
 		<Authors>Abdourahamane Kaba</Authors>
 		<Company>Karfamsoft</Company>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<PackageReleaseNotes>Added extension methods for safe (repeatable) JavaScript method invocations.</PackageReleaseNotes>
+		<PackageReleaseNotes>Added extension methods for safe (repeatable) JavaScript method invocations. See "Blazor ensure javascript dependencies are loaded before rendering component" (https://github.com/dotnet/aspnetcore/issues/22643) for this common issue.</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
