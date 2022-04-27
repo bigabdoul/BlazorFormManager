@@ -30,7 +30,7 @@
                 Theme,
                 //modules = new { toolbar = $"#{ToolbarId}" }
             };
-            await JSRuntime.SafeInvokeAsync<JsonElement>(5, 500, "BlazorFormManager.Quill.create", selector, options);
+            await JSRuntime.SafeInvokeAsync<JsonElement>(10, 500, "BlazorFormManager.Quill.create", selector, options);
         }
     }
 }
