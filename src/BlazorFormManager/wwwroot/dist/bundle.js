@@ -2343,10 +2343,10 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                 this.onload(formId, reCaptcha);
                             }
                         }
-                        if (ver === 'v3')
-                            url += siteKey;
                         if (!(scripts.inserted || scripts.inserting)) {
                             scripts.inserting = true;
+                            if (ver === 'v3')
+                                url += siteKey;
                             ConsoleLogger_6.logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
                             var s_1 = document.createElement('script');
                             var heads_1 = document.getElementsByTagName('head');
@@ -2382,11 +2382,15 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                  * @param reCaptcha The configuration options.
                  */
                 ReCAPTCHA.prototype.reset = function (formId, reCaptcha) {
-                    if (!reCaptcha)
+                    if (!reCaptcha) {
+                        ConsoleLogger_6.logError(formId, 'reCAPTCHA argument to reset is not defined!');
                         return;
+                    }
                     var grecaptcha = globalThis['grecaptcha'];
-                    if (!grecaptcha)
+                    if (!grecaptcha) {
+                        ConsoleLogger_6.logError(formId, 'Google reCAPTCHA not loaded!');
                         return;
+                    }
                     var version = reCaptcha.version;
                     var ver = version.toLowerCase();
                     // version 3 is executed when the form is submitted
@@ -2400,6 +2404,9 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                         var message = "reCAPTCHA was reset.";
                         ConsoleLogger_6.logDebug(formId, message);
                         this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
+                    }
+                    else {
+                        ConsoleLogger_6.logDebug(formId, 'No reCAPTCHA widgets found to reset!');
                     }
                 };
                 /**
@@ -3377,6 +3384,16 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     }
                     ConsoleLogger_7.logWarning(formId, 'No DotNetObjectReference nor static .NET interop reference defined!');
                     return _resolvedPromise;
+                };
+                /**
+                 * Reset previously created reCAPTCHA widgets for the specfified form.
+                 * @param formId The form identifier.
+                 * @param options The reCAPTCHA options.
+                 */
+                BlazorFormManager.prototype.resetRecaptcha = function (formId, options) {
+                    ConsoleLogger_7.logDebug(formId, 'resetting reCAPTCHA', options);
+                    var recap = this.reCaptcha;
+                    recap && recap.reset(formId, options);
                 };
                 /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
                 BlazorFormManager.supportsAjaxUploadWithProgress = function () {

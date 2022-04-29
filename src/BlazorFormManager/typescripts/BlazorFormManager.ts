@@ -595,6 +595,17 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         return _resolvedPromise;
     }
 
+    /**
+     * Reset previously created reCAPTCHA widgets for the specfified form.
+     * @param formId The form identifier.
+     * @param options The reCAPTCHA options.
+     */
+    resetRecaptcha(formId: string, options: ReCaptchaOptions) {
+        logDebug(formId, 'resetting reCAPTCHA', options);
+        const recap = this.reCaptcha;
+        recap && recap.reset(formId, options);
+    }
+
     /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
     static supportsAjaxUploadWithProgress() {
         return supportsFileAPI() &&

@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -465,7 +466,7 @@ namespace BlazorFormManager.Components.Forms
                     _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
                     var hasProgressBar = EnableProgressBar;
 
-                    if (Culture != null && ReCaptcha != null && ReCaptcha.LanguageCode.IsBlank())
+                    if (Culture != null && ReCaptcha != null && (ReCaptcha.LanguageCode.IsBlank() || ReCaptcha.LanguageCode.EqualsIgnoreCase(ReCaptcha.LanguageCode = Culture.Name)))
                     {
                         ReCaptcha.LanguageCode = Culture.Name;
                     }
@@ -515,6 +516,10 @@ namespace BlazorFormManager.Components.Forms
                 }
 
             }
+            else if (_scriptInitialized && ReCaptcha != null)
+            {
+                await ResetReCaptchaAsync();
+            }
 
             await base.OnAfterRenderAsync(firstRender);
         }
@@ -531,6 +536,27 @@ namespace BlazorFormManager.Components.Forms
         protected virtual async Task SafeInteropInitAsync(object options, int maxAttempts = 10, int millisecondsDelay = 500)
         {
             _scriptInitialized = await JS!.SafeInvokeAsync<bool>(maxAttempts, millisecondsDelay, $"{BlazorFormManagerNS}.init", options);
+        }
+
+        /// <summary>
+        /// Resets previously created reCAPTCHA widgets for the current form.
+        /// </summary>
+        /// <param name="culture">The culture info to use. Can be null.</param>
+        /// <returns></returns>
+        public virtual async Task ResetReCaptchaAsync(CultureInfo? culture = null)
+        {
+            if (ReCaptcha != null)
+            {
+                if (culture is null)
+                {
+                    culture = Culture ?? CultureInfo.CurrentCulture;
+                }
+                if (!ReCaptcha.LanguageCode.EqualsIgnoreCase(culture.Name))
+                {
+                    ReCaptcha.LanguageCode = culture.Name;
+                    await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.resetRecaptcha", FormId, ReCaptcha);
+                }
+            }
         }
 
         #endregion

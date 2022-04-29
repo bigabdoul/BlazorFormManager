@@ -272,6 +272,7 @@ interface IBlazorFormManager {
     addEventListener: (targetId: string, eventType: string, callback: string) => boolean;
     removeEventListener: (targetId: string, eventType: string) => boolean;
     getForms: () => IDictionary<FormManagerOptions>;
+    resetRecaptcha: (formId: string, options: ReCaptchaOptions) => void;
 }
 
 interface IQuillEditor {

@@ -94,10 +94,9 @@ export class ReCAPTCHA {
                 }
             }
 
-            if (ver === 'v3') url += siteKey;
-
             if (!(scripts.inserted || scripts.inserting)) {
                 scripts.inserting = true;
+                if (ver === 'v3') url += siteKey;
                 logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
 
                 const s = document.createElement('script');
@@ -141,11 +140,17 @@ export class ReCAPTCHA {
      * @param reCaptcha The configuration options.
      */
     reset(formId: string, reCaptcha: ReCaptchaOptions) {
-        if (!reCaptcha) return;
+        if (!reCaptcha) {
+            logError(formId, 'reCAPTCHA argument to reset is not defined!');
+            return;
+        }
 
         const grecaptcha = globalThis['grecaptcha'];
 
-        if (!grecaptcha) return;
+        if (!grecaptcha) {
+            logError(formId, 'Google reCAPTCHA not loaded!');
+            return;
+        }
 
         const { version } = reCaptcha;
         const ver = version.toLowerCase();
@@ -165,6 +170,8 @@ export class ReCAPTCHA {
             logDebug(formId, message);
 
             this.reportActivity(formId, { formId, message, type: 'warning' });
+        } else {
+            logDebug(formId, 'No reCAPTCHA widgets found to reset!');
         }
     }
 
