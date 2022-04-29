@@ -84,10 +84,12 @@ In your `{APP NAMESPACE}.Client` project, open the `index.html` file located und
 
 1.  At the top, right before the closing `</head>` tag:
     - `<link href="_content/BlazorFormManager/css/styles.css" rel="stylesheet" />`,
+    - `<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />`,
       and optionally
     - `<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" />`
 2.  At the bottom, right before the closing `</body>` tag:
-    - `<script src="_content/BlazorFormManager/js/BlazorFormManager.js"></script>`, and optionally
+    - `<script src="_content/BlazorFormManager/js/BlazorFormManager.js"></script>`, 
+    - `<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>`, and optionally
     - `<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/js/all.min.js"></script>`
 
 ## Step 6: Creating a user registration component
@@ -414,48 +416,6 @@ _File: {APP NAMESPACE}.Client/Pages/Shared/UserModelInputs.razor_
     [Parameter] public string PasswordText { get; set; } = "New password";
     [Parameter] public string ConfirmPasswordText { get; set; } = "Confirm your new password";
     [Parameter] public string ChoosePhotoText { get; set; } = "Choose a photo";
-}
-```
-
-### SubmitButton.razor component:
-
-This component, as its name suggests, allows submission of the form. It is passed a
-parameter that holds a reference to an instance of the FormManagerBase class. This
-makes it possible to get notified about running state changes and disable/enable
-the button accordingly.
-
-The `@onclick` event handler, in tandem with the `ForceSubmit` flag, decide whether
-the FormManagerBase should submit the form or whether the browser should do it. In
-some situations, as of this writing and for an unknown reason, Blazor won't allow
-the browser to submit the form even though all validation checks successfully pass.
-We are then required to "force" the form submission using the `BlazorFormManager.js`
-script working behind the scenes.
-
-_File: {APP NAMESPACE}.Client/Pages/Shared/SubmitButton.razor_
-
-```HTML
- @if (Manager != null)
- {
-   <div class="form-group">
-     <button type="@ButtonType" class="btn btn-primary" @onclick="HandleClick" disabled="@Manager.IsRunning">
-         <span><i class="fa fa-save"></i>&nbsp;@Text</span>
-     </button>
-   </div>
- }
-```
-
-```C#
-@code {
-   [Parameter] public FormManagerBase Manager { get; set; }
-   [Parameter] public string Text { get; set; }
-   [Parameter] public bool ForceSubmit { get; set; }
-
-   private string ButtonType => ForceSubmit ? "button" : "submit";
-
-   private async Task HandleClick()
-   {
-       if (ForceSubmit) await Manager.SubmitFormAsync();
-   }
 }
 ```
 
