@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
-		<RazorLangVersion>3.0</RazorLangVersion>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress. It supports automatic form (UI) generation from metadata-decorated .NET object models. It also supports easy integration of Google's reCAPTCHA technology and the Quill Rich Text Editor (https://quilljs.com).</Description>
@@ -16,21 +15,37 @@
 		<RepositoryType>Git</RepositoryType>
 		<PackageTags>c#, .net, razor, class, library, blazor, blazorformmanager, form, form-manager, forms, javascript, interop, xmlhttprequest, client, server, reCAPTCHA, quilljs, rich, text, editor</PackageTags>
 		<PackageProjectUrl>https://github.com/bigabdoul/BlazorFormManager</PackageProjectUrl>
-		<PackageReleaseNotes>Issues addressed in release 3.1.1
+		<PackageReleaseNotes>Issues addressed in release 3.1.2
+
+- Warning NU5118 packaging RCL with static contents and multi-target (https://github.com/NuGet/Home/issues/10253)
+
+Issues addressed in release 3.1.1
 
 - Added support for safe JavaScript interop script invocations, which allow re-execution of functions that weren't available when a component is rendered the first time. See "Blazor ensure javascript dependencies are loaded before rendering component" (https://github.com/dotnet/aspnetcore/issues/22643) for this common issue.
 
 For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master/README.md.		</PackageReleaseNotes>
-		<Version>3.1.1</Version>
+		<Version>3.1.2</Version>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<RazorLangVersion>3.0</RazorLangVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
+		<RazorLangVersion>5.0</RazorLangVersion>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<RazorLangVersion>6.0</RazorLangVersion>
+	</PropertyGroup>
+	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DocumentationFile>$(ProjectDir)\src\BlazorFormManager\bin\Debug\$(TargetFramework)\BlazorFormManager.xml</DocumentationFile>
 		<DefineConstants>TRACE</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.6.4">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.8.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -57,5 +72,5 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
 		<ProjectReference Include="..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />
 	</ItemGroup>
-
+	
 </Project>
