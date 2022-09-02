@@ -241,27 +241,40 @@ class Utils {
     }
 
     /**
-     * Insert one or more stylesheets into the DOM.
+     * Uniquely insert one or more stylesheets into the DOM.
      * @param sources A URL or array of URL of the stylesheets to load.
      * @param onload The event handler to fire when the browser loads a stylesheet.
+     * @param formId The form identifier.
      */
-    static insertStyles(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any) {
+    static insertStyles(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string) {
         if (!(sources instanceof Array))
             sources = [sources];
 
         const head = Utils.getOrCreateHead();
 
-        for (var i = 0; i < sources.length; i++) {
-            var s = document.createElement("link");
+        for (let i = 0; i < sources.length; i++) {
+            const src = sources[i];
+            const link = document.querySelector(`link[href="${src}"]`);
+            const exists = !!link;
+
+            if (exists) {
+                const rel = link.attributes["rel"];
+                if (!rel || rel.value === "stylesheet") {
+                    logDebug(formId, `The CSS style ${src} is already in the DOM.`)
+                    continue;
+                }
+            }
+
+            let s = document.createElement("link");
             if (onload) s.onload = onload;
-            s.href = sources[i];
+            s.href = src;
             s.rel = "stylesheet";
             head.appendChild(s);
         }
     }
 
     /**
-     * Insert one or more scripts into the DOM.
+     * Uniquely insert one or more scripts into the DOM.
      * @param sources A URL or array of URL of the scripts to load.
      * @param onload The event handler to fire when the browser loads a script.
      * @param formId The form identifier.
