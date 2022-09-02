@@ -5,7 +5,7 @@ import { FileReaderManager } from "./FileReaderManager";
 import { ReCAPTCHA } from "./ReCAPTCHA";
 import { QuillEditor } from "./QuillEditor";
 import { AssemblyName, Forms } from "./Shared";
-import { containsFiles, formDataKeys, formDataMerge, populateDictionary, removeFileList, _isDictionary, _isFunction, _isObject, _isString } from "./Utils";
+import { containsFiles, formDataKeys, formDataMerge, populateDictionary, removeFileList, _isDictionary, _isFunction, _isObject, _isString, insertScripts, insertStyles } from "./Utils";
 import { SimpleEvent } from "./SimpleEvent";
 
 const global = globalThis;
@@ -604,6 +604,24 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         logDebug(formId, 'resetting reCAPTCHA', options);
         const recap = this.reCaptcha;
         recap && recap.reset(formId, options);
+    }
+
+    /**
+     * Uniquely insert one or more CSS styles into the DOM.
+     * @param formId The form identifier.
+     * @param styles A string or array of styles to insert.
+     */
+    insertDomStyles(formId: string, styles: string | string[]) {
+        insertStyles(styles, null, formId);
+    }
+
+    /**
+     * Uniquely insert one or more scripts into the DOM.
+     * @param formId The form identifier.
+     * @param scripts A string or array of scripts to insert.
+     */
+    insertDomScripts(formId: string, scripts: string | string[]) {
+        insertScripts(scripts, null, formId);
     }
 
     /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */

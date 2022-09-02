@@ -547,16 +547,45 @@ namespace BlazorFormManager.Components.Forms
         {
             if (ReCaptcha != null)
             {
-                if (culture is null)
-                {
-                    culture = Culture ?? CultureInfo.CurrentCulture;
-                }
+                culture ??= Culture ?? CultureInfo.CurrentCulture;
                 if (!ReCaptcha.LanguageCode.EqualsIgnoreCase(culture.Name))
                 {
                     ReCaptcha.LanguageCode = culture.Name;
                     await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.resetRecaptcha", FormId, ReCaptcha);
                 }
             }
+        }
+
+        /// <summary>
+        /// Uniquely inserts one or more scripts into the DOM. This method 
+        /// should only be called after BlazorFormManager initialization.
+        /// The best moment is <see cref="OnAfterScriptInitialized"/>.
+        /// </summary>
+        /// <param name="scripts">The scripts to insert.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">BlazorFormManager has not been initialized yet.</exception>
+        public virtual async Task InsertDomScriptsAsync(params string[] scripts)
+        {
+            if (!_scriptInitialized) 
+                throw new InvalidOperationException($"{BlazorFormManagerNS} has not been initialized yet.");
+
+            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomScripts", FormId, scripts);
+
+
+        /// <summary>
+        /// Uniquely inserts one or more CSS styles into the DOM. This method 
+        /// should only be called after BlazorFormManager initialization.
+        /// The best moment is <see cref="OnAfterScriptInitialized"/>.
+        /// </summary>
+        /// <param name="styles">The CSS styles to insert.</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">BlazorFormManager has not been initialized yet.</exception>
+        public virtual async Task InsertDomStylesAsync(params string[] styles)
+        {
+            if (!_scriptInitialized)
+                throw new InvalidOperationException($"{BlazorFormManagerNS} has not been initialized yet.");
+
+            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomStyles", FormId, styles);
         }
 
         #endregion
