@@ -504,7 +504,7 @@ namespace BlazorFormManager.Components.Forms
 
                     AjaxUploadNotSupported = null;
 
-                    if (_scriptInitialized && OnAfterScriptInitialized.HasDelegate)
+                    if (firstRender && _scriptInitialized && OnAfterScriptInitialized.HasDelegate)
                         await OnAfterScriptInitialized.InvokeAsync(this);
 
                     _initializingScript = false;
