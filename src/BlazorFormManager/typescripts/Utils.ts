@@ -271,10 +271,18 @@ class Utils {
 
         const head = Utils.getOrCreateHead();
 
-        for (var i = 0; i < sources.length; i++) {
-            var s = document.createElement("script");
+        for (let i = 0; i < sources.length; i++) {
+            const src = sources[i];
+            const exists = !!document.querySelector(`script[src="${src}"]`);
+
+            if (exists) {
+                logDebug(null, `The script ${src} is already in the DOM.`)
+                continue;
+            }
+
+            const s = document.createElement("script");
             if (onload) s.onload = onload;
-            s.src = sources[i];
+            s.src = src;
             s.async = true;
             s.defer = true;
             head.appendChild(s);
