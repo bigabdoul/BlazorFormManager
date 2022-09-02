@@ -566,11 +566,11 @@ namespace BlazorFormManager.Components.Forms
         /// <exception cref="InvalidOperationException">BlazorFormManager has not been initialized yet.</exception>
         public virtual async Task InsertDomScriptsAsync(params string[] scripts)
         {
-            if (!_scriptInitialized) 
+            if (!_scriptInitialized)
                 throw new InvalidOperationException($"{BlazorFormManagerNS} has not been initialized yet.");
 
             await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomScripts", FormId, scripts);
-
+        }
 
         /// <summary>
         /// Uniquely inserts one or more CSS styles into the DOM. This method 
