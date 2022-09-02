@@ -264,8 +264,9 @@ class Utils {
      * Insert one or more scripts into the DOM.
      * @param sources A URL or array of URL of the scripts to load.
      * @param onload The event handler to fire when the browser loads a script.
+     * @param formId The form identifier.
      */
-    static insertScripts(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any) {
+    static insertScripts(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string) {
         if (!(sources instanceof Array))
             sources = [sources];
 
@@ -276,7 +277,7 @@ class Utils {
             const exists = !!document.querySelector(`script[src="${src}"]`);
 
             if (exists) {
-                logDebug(null, `The script ${src} is already in the DOM.`)
+                logDebug(formId, `The script ${src} is already in the DOM.`)
                 continue;
             }
 
