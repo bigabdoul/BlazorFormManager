@@ -47,9 +47,7 @@ namespace Carfamsoft.Model2View.Annotations
         {
             if (min > max)
             {
-                var temp = max;
-                max = min;
-                min = temp;
+                (min, max) = (max, min);
             }
 
             yield return new SelectOption { Id = $"{min}", Value = $"{min}" };
