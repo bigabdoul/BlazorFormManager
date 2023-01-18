@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress. It supports automatic form (UI) generation from metadata-decorated .NET object models. It also supports easy integration of Google's reCAPTCHA technology and the Quill Rich Text Editor (https://quilljs.com).</Description>
@@ -30,13 +30,13 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 		<RazorLangVersion>3.0</RazorLangVersion>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net5.0'">
-		<RazorLangVersion>5.0</RazorLangVersion>
-	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<RazorLangVersion>6.0</RazorLangVersion>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<RazorLangVersion>7.0</RazorLangVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -61,10 +61,15 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
 	</ItemGroup>
-	
+
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

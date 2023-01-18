@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net5.0;net6.0</TargetFrameworks>
+	  <TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;net6.0</TargetFrameworks>
     <AssemblyName>Carfamsoft.Model2View</AssemblyName>
     <Description>Generates HTML form elements from a view model which can be used to create auto-generated, editable forms and other useful applications.</Description>
     <Copyright>Copyright © 2021 - Karfamsoft</Copyright>
@@ -23,11 +23,11 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Carfamsoft.Model2View.xml</DocumentationFile>
   </PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net5.0' or '$(TargetFramework)' == 'net6.0'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net6.0'">
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and '$(TargetFramework)' != 'net5.0' and '$(TargetFramework)' != 'net6.0'">
+	<ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' and '$(TargetFramework)' != 'net6.0'">
 		<Reference Include="System.ComponentModel.DataAnnotations" />
 	</ItemGroup>
 
