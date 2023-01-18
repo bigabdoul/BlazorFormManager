@@ -2,24 +2,24 @@
 
 ## Introduction
 
-This walkthrough requires some familarity with the latest version of `Visual Studio 2019`
-or higher. You can also use `Visual Studio Code` or any other code editor that supports
-the `dotnet CLI` but they don't apply to this document.
+This walkthrough requires familiarity with the latest Visual Studio 2019 or higher.
+You can also use Visual Studio Code or any other code editor that supports the 
+dotnet CLI, but they don't apply to this document.
 
-You can download and install for free the latest version of `Visual Studio 2019 Community`
-here: https://visualstudio.microsoft.com/downloads
+You can download and install (for free) the latest Visual Studio 2019 Community here: 
+https://visualstudio.microsoft.com/downloads.
 
-To integrate BlazorFormManager into your own project, follow the steps below. Feel free
-to skip Step 1 if you already have an existing project whose layout corresponds to the
-`Blazor WebAssembly App` project template created with the latest version of Visual
+To integrate BlazorFormManager into your project, follow the steps below. Feel free 
+to skip Step 1 if you already have an existing project whose layout corresponds to 
+the Blazor WebAssembly App project template created with the latest version of Visual 
 Studio 2019 or higher.
 
-The instructions guide you through building step by step a set of projects similar to the
-demo projects found in this repository. If you aren't fimiliar with Blazor, you can learn
-more about it here: https://blazor.net.
+The instructions guide you through building step by step a set of projects similar 
+to the demo projects found in this repository. If you aren't familiar with Blazor, 
+you can learn more about it here: https://blazor.net.
 
-Note: Developement was done on Windows so instructions like keyboard combinations are
-specific to that environment.
+Note: The development environment is Windows, so instructions like keyboard combinations 
+are specific to that environment.
 
 _Warning: This document is a work in progress! Expect it to be frequently updated._
 
@@ -29,7 +29,7 @@ _Warning: This document is a work in progress! Expect it to be frequently update
 - How to update all the packages in the new Solution
 - How to build the Solution
 - How to reference the BlazorFormManager Razor Class Library package
-- How to integrate the BlazorFormManager package into your own project
+- How to integrate the BlazorFormManager package into your project
 - How to create a user registration component with BlazorFormManager
 - How to create domain models for the user registration component
 - How to create modular, reusable Razor Components
@@ -44,26 +44,26 @@ _Warning: This document is a work in progress! Expect it to be frequently update
 Create an `ASP.NET Core hosted Blazor WebAssembly App` with authentication using
 individual user accounts named `{APP NAMESPACE}`. {APP NAMESPACE} is a placeholder
 that you should replace with the name (without whitespaces) of your project
-(e.g. _BlazorFormManagerWalkthrough_).
+(i.e. _BlazorFormManagerWalkthrough_).
 
 The directory structure should be similar to this:
 
 ## Step 2: Updating the Solution
 
-As a best-practice, in Visual Studio 2019 Community (or higher), update the Solution
-using the `Manage NuGet Packages for Solution...` context menu option: right-click on
-the Solution file item. In the `NuGet - Solution` window, click the `Updates` tab,
-wait until Visual Studio is done refreshing all projects to be updated. Check the
-`Select all packages` option and click the `Update` button on the same line. If
-prompted, read and accept the `License Acceptance` in the dialog. To install and manage
-packages using the dotnet CLI (outside Visual Studio), please visit
-https://docs.microsoft.com/en-us/nuget/consume-packages/install-use-packages-dotnet-cli
+As a best practice, in Visual Studio 2019 Community (or higher), update the Solution 
+using the Manage NuGet Packages for Solution... context menu option: right-click on 
+the Solution file item. In the NuGet - Solution window, click the Updates tab and 
+wait until Visual Studio finishes refreshing all projects to be updated. Check the 
+Select all packages option and click the Update button on the same line. If prompted, 
+read and accept the License Acceptance in the dialog. Please visit 
+https://docs.microsoft.com/en-us/nuget/consume-packages/install-use-packages-dotnet-cli 
+to install and manage packages using the dotnet CLI (outside Visual Studio).
 
 ## Step 3: Building the Solution
 
-After all packages have been restored to their respective latest version, make sure
-that the Solution builds without errors: Ctrl+Shift+B, or `dotnet build` from the
-Solution's root directory using the `dotnet CLI`.
+After restoring all packages to their latest versions, make sure that the Solution 
+builds without errors: "Ctrl+Shift+B" or `dotnet build` from the Solution's root 
+directory using the dotnet CLI.
 
 ## Step 4: Referencing the BlazorFormManager Razor Class Library (RCL)
 
@@ -118,34 +118,32 @@ followed by this HTML-like markup:
 </FormManager>
 ```
 
-The `@page` C# directive configures routing for the component: it allows navigation to
-the component using the relative `/account/register` URL.
+The `@page` C# directive configures routing for the component: it allows navigation
+using the relative /account/register URL.
 
-`<FormManager />` is a Razor component defined in the `BlazorFormManager` package that we
-referenced earlier. We are using composition instead of inheritance to build this
-registration component by embedding `<FormManager />` into another component. The form
-will be submitted to the `api/account/register` API endpoint as indicated by the
-`FormAction` attribute.
+`<FormManager />` is a Razor component defined in the `BlazorFormManager` package we
+referenced earlier. We use composition instead of inheritance to build this registration
+component by embedding `<FormManager />` into another one. The form will be submitted
+to the `api/account/register` API endpoint as indicated by the `FormAction` attribute.
 
-The code seems pretty simple and self-explanatory somehow due the expressive nature of
-Razor components.
+The code seems simple and self-explanatory due to the expressive nature of Razor components.
 
-The `<DataAnnotationsValidator />` component ensures client-side validation rules are
-enforced thanks to the data annotation attributes `[Required], [StringLength]` and so
-on. We'll see them soon when defining the domain models.
+The `<DataAnnotationsValidator />` component ensures the enforcement of client-side 
+validation rules thanks to the data annotation attributes `[Required], [StringLength]`, 
+and so on. We'll see them soon when defining the domain models.
 
 The `EnableProgressBar` attribute allows a progress bar to show up during form submissions
 when there is at least one file to upload.
 
-The `@ref` attribute acquires a reference to the rendered DOM element and stores it
-into the `manager` member variable below.
+The `@ref` attribute acquires a reference to the rendered DOM element and stores it in the 
+manager member variable below.
 
-The other components such as `<DemoHeader/>`, `<UserModelInputs/>`, and `<SubmitButton/>`
+The other components, such as `<DemoHeader/>`, `<UserModelInputs/>`, and `<SubmitButton/>`,
 will be explained in more detail a bit later when we create them.
 
-Usually, when the code starts to get too long it's a good idea to separate it from the UI
-elements by placing it in a "code-behind" class file. But for the sake of simplicity,
-copy and paste the following C# code block below the above markup:
+Usually, when the code becomes too long, it's a good idea to separate it from the UI elements
+by placing it in a "code-behind" class file. But for the sake of simplicity, copy and paste 
+the following C# code block below the above markup:
 
 _File: {APP NAMESPACE}.Client/Pages/Register.razor_
 
