@@ -60,7 +60,7 @@ namespace Carfamsoft.Model2View.Annotations
                 {
                     // only custom attributes descending from FormAttributeBase are discovered
                     var attributes = pi.GetCustomAttributes<FormAttributeBase>(true).ToList();
-                    var hasAttributes = attributes.Any();
+                    var hasAttributes = attributes.Count != 0;
 
                     if (!hasAttributes && ignoreUndecorated) continue;
 

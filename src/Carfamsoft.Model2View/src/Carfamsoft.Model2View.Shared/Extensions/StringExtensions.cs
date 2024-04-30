@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
@@ -19,7 +20,11 @@ namespace Carfamsoft.Model2View.Shared.Extensions
         /// </summary>
         /// <param name="instance">The string to check.</param>
         /// <returns></returns>
-        public static bool IsNotBlank(this string instance)
+        public static bool IsNotBlank(
+#if NET6_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+        this string instance)
         {
             return !string.IsNullOrWhiteSpace(instance);
         }
@@ -30,9 +35,25 @@ namespace Carfamsoft.Model2View.Shared.Extensions
         /// </summary>
         /// <param name="instance">The string to check.</param>
         /// <returns></returns>
-        public static bool IsBlank(this string instance)
+        public static bool IsBlank(
+#if NET6_0_OR_GREATER
+            [MaybeNullWhen(true)]
+#endif
+            this string instance)
         {
             return string.IsNullOrWhiteSpace(instance);
+        }
+
+        /// <summary>
+        /// Returns <paramref name="replacement"/> if the specified string is null or white space;
+        /// otherwise, returns the specified string <paramref name="instance"/>.
+        /// </summary>
+        /// <param name="instance">The string to check.</param>
+        /// <param name="replacement">The replacement object if <paramref name="instance"/> is null or white space.</param>
+        /// <returns></returns>
+        public static string EnsureNotBlank(this string instance, object replacement)
+        {
+            return string.IsNullOrWhiteSpace(instance) ? $"{replacement}" : instance;
         }
 
         /// <summary>
@@ -52,7 +73,7 @@ namespace Carfamsoft.Model2View.Shared.Extensions
             // pattern to remove anything that is NOT in the following specified set of characters:
             //      alpha-numeric (a-zA-Z_), dash (-), and period (.)
             string pattern = @"[^\w-\.]";
-            Regex r = new Regex(pattern, RegexOptions.IgnoreCase);
+            Regex r = new(pattern, RegexOptions.IgnoreCase);
             string tempName = r.Replace(value, " ");
             return string.Join(replacement, tempName.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries));
         }
@@ -178,7 +199,7 @@ namespace Carfamsoft.Model2View.Shared.Extensions
             {
                 return string.Empty;
             }
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             var textArray = text.Split(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in textArray.ToList())
             {
@@ -300,23 +321,22 @@ namespace Carfamsoft.Model2View.Shared.Extensions
         private static byte[] HashCore(string value, string hashFormat, Encoding enc = null)
         {
             if (value == null)
-            {
                 return null;
-            }
 
-            if (enc == null)
+            // hashFormat: SHA, SHA1, MD5, SHA256, SHA-256, SHA384, SHA-384, SHA512, SHA-512
+            using HashAlgorithm algorithm = hashFormat.ToUpperInvariant() switch
             {
-                enc = Encoding.UTF8;
-            }
+                "SHA" or "SHA1" => SHA1.Create(),
+                "SHA256" or "SHA-256" => SHA256.Create(),
+                "SHA384" or "SHA-384" => SHA384.Create(),
+                "SHA512" or "SHA-512" => SHA512.Create(),
+                "MD5" => MD5.Create(),
+                _ => throw new NotSupportedException($"{hashFormat}: Unsupported cryptographic algorithm."),
+            };
 
-            var algo = HashAlgorithm.Create(hashFormat);
-            if (algo == null) throw new ArgumentException(nameof(hashFormat));
-
-            using (algo)
-            {
-                byte[] buffer = enc.GetBytes(value);
-                return algo.ComputeHash(buffer);
-            }
+            enc ??= Encoding.UTF8;
+            byte[] buffer = enc.GetBytes(value);
+            return algorithm.ComputeHash(buffer);
         }
     }
 }

@@ -23,10 +23,5 @@ namespace BlazorFormManager.Extensions.Configuration
         public ReCaptchaConfigurationException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        /// <inheritdoc />
-        protected ReCaptchaConfigurationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

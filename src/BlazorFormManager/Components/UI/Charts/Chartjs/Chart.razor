@@ -1,0 +1,73 @@
+﻿@using Carfamsoft.JSInterop.Extensions;
+@inject Microsoft.JSInterop.IJSRuntime jsRunTime
+
+<canvas id="@ChartId"></canvas>
+
+@code{
+    /// <summary>
+    /// Gets or sets the chart configuration object.
+    /// </summary>
+    [Parameter] public ChartConfig Config { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the DOM element query selector.
+    /// </summary>
+    [Parameter] public string? Selector { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Chartjs script source.
+    /// </summary>
+    [Parameter] public string? Script { get; set; }
+
+    /// <summary>
+    /// Renders the child content.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Event callback invoked when the <see cref="Script"/> has been successfully loaded.
+    /// </summary>
+    [Parameter] public EventCallback OnScriptInstalled { get; set; }
+
+    private bool renderedOneTime;
+    private readonly string ChartId = $"{typeof(Chart).Name}_{Guid.NewGuid().GetHashCode():x}";
+
+    /// <inheritdoc/>
+    protected override async Task OnParametersSetAsync()
+    {
+        if (renderedOneTime)
+        {
+            Console.WriteLine($"{nameof(Chartjs)}: Rendering after setting parameters.");
+            await CreateChartAsync();
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (!string.IsNullOrWhiteSpace(Script))
+            {
+                var success = await jsRunTime.SafeInvokeAsync<bool>(10, 500, "BlazorFormManager.ChartjsHelper.install", Script);
+
+                if (success && OnScriptInstalled.HasDelegate)
+                    await OnScriptInstalled.InvokeAsync(this);
+            }
+
+            renderedOneTime = true;
+            await CreateChartAsync();
+        }
+    }
+
+    /// <summary>
+    /// Creates a Chartjs chart.
+    /// </summary>
+    /// <returns></returns>
+    public virtual Task CreateChartAsync()
+    {
+        return jsRunTime.SafeInvokeVoidAsync(10, 500, "BlazorFormManager.ChartjsHelper.createChart",
+            $"#{ChartId}", // selector
+            Config);
+    }
+}

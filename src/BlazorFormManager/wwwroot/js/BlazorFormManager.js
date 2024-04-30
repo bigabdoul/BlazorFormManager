@@ -1,6 +1,6 @@
 ﻿/*
  Name:          BlazorFormManager Module Loader
- Version:       1.0.0
+ Version:       1.3.0
  Author:        Abdourahamane Kaba
  Description:   Safely inserts the systemjs module loaders, and then initializes 
                 the BlazorFormManager modules and their dependencies.
@@ -36,10 +36,12 @@
             if (!(srcs instanceof Array)) srcs = [srcs];
             var count = srcs.length;
             for (var i = 0; i < srcs.length; i++) {
+                var src = srcs[i].trim();
+                if (src.length === 0) { count--; continue; }
                 var s = d.createElement("script");
-                s.onload = function () { if (--count === 0) resolve(); };
+                s.onload = function () { if (--count <= 0) resolve(); };
                 s.onerror = function () { reject(new Error("Error while loading systemjs script!")); };
-                s.src = srcs[i];
+                s.src = src;
                 s.async = false;
                 head.appendChild(s);
             }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48</TargetFrameworks>
+	<TargetFrameworks>netstandard2.0;net461;net472;net48</TargetFrameworks>
     <AssemblyName>Carfamsoft.Model2View.Mvc</AssemblyName>
     <RootNamespace>Carfamsoft.Model2View.Mvc</RootNamespace>
 	<MvcBuildViews>true</MvcBuildViews>

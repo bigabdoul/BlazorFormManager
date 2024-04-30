@@ -1,0 +1,81 @@
+﻿@inherits AutoFormEntryBase
+
+@if (Metadata != null)
+{
+    var metadata = Metadata;
+    var attr = metadata.Attribute;
+    var culture = Form?.Culture;
+    var descr = metadata.GetDisplayString(attr.Description, culture);
+    var placeholder = metadata.GetDisplayString(attr.Placeholder, culture);
+    var displayName = placeholder ?? metadata.GetDisplayName(culture);
+
+    var attrs = GetAttributes
+    (
+        ("id", Id),
+        ("name", Name),
+        ("class", attr.InputCssClass),
+        ("placeholder", placeholder),
+        ("title", descr),
+        ("accept", attr.FileAttribute?.Accept),
+        ("multiple", attr.FileAttribute?.Multiple),
+        ("value", Value)
+    );
+    
+    var isImage = attr.Tag.EqualsIgnoreCase("img");
+
+    if (isImage)
+    {
+        var attrImg = GetAttributes
+        (
+            ("src", Value),
+            ("alt", displayName),
+            ("class", "me-3 rounded-circle img-fluid dynamic-view-image")
+        );
+        <InputFileImage AdditionalAttributes="attrs" ImageAttributes="attrImg" 
+            Metadata="metadata" Model=Model Id="@Id" Name="@Name" PropertyNavigationPath="@PropertyNavigationPath"
+            DisplayName="@displayName" Description="@descr" OnFileChange="HandleInputFileChange" />
+    }
+    else
+    {
+        var marginbottom = descr.IsNotBlank() ? "mb-1" : "mb-3";
+#if !NETSTANDARD2_0
+        <div class="input-group auto-input-file @marginbottom">
+            <HiddenFileInput AdditionalAttributes="attrs" Text="@descr" />
+            <label class="input-group-text" for="@Id">
+                <ContentIconText Icon="@attr.Icon" Text="@displayName" />
+            </label>
+            <InputFile OnChange="HandleInputFileChange" AdditionalAttributes="attrs" />
+        </div>
+        <HelpText Description="@descr" />
+#else
+        <div class="input-group auto-input-file @marginbottom">
+            <label class="input-group-text" for="@Id">
+                @if (attr.Icon.IsNotBlank())
+                {
+                    <text><i class="@attr.Icon"></i>&nbsp;</text>
+                }
+                @displayName
+            </label>
+            <input type="file" @onchange="e => Value = e.Value" @attributes="attrs">
+        </div>
+        <HelpText Description="@descr" />
+#endif
+    }
+}
+
+@code {
+#if !NETSTANDARD2_0
+    private void HandleInputFileChange(InputFileChangeEventArgs e)
+    {
+        List<IBrowserFile>? browserFiles = null;
+        var fileList = e.GetMultipleFiles();
+
+        if (fileList.Count != 0)
+            browserFiles = new(fileList);
+        else if (e.File is not null)
+            browserFiles = new() { e.File };
+
+        Value = browserFiles;
+    }
+#endif
+}

@@ -20,6 +20,8 @@ namespace Carfamsoft.Model2View.Annotations
         private readonly ResourceManager _resourceManager;
         private RequiredAttribute _requiredAttr;
         private bool _requiredVisited;
+        private StringLengthAttribute _stringLengthAttr;
+        private bool _stringLengthVisited;
         private readonly bool _isEmpty;
 
         #endregion
@@ -92,9 +94,30 @@ namespace Carfamsoft.Model2View.Annotations
         }
 
         /// <summary>
+        /// Gets the <see cref="StringLengthAttribute"/> custom attribute associated with this metadata.
+        /// </summary>
+        public StringLengthAttribute StringLength
+        {
+            get
+            {
+                if (!_stringLengthVisited && _stringLengthAttr == null)
+                {
+                    _stringLengthAttr = EnsureNotEmpty(PropertyInfo.GetCustomAttribute<StringLengthAttribute>(true));
+                    _stringLengthVisited = true;
+                }
+                return _stringLengthAttr;
+            }
+        }
+
+        /// <summary>
         /// Determines whether a value is required for the property associated with this metadata.
         /// </summary>
         public bool IsRequired => Required != null;
+
+        /// <summary>
+        /// Determines whether the associated property has a <see cref="StringLengthAttribute"/> attribute.
+        /// </summary>
+        public bool HasStringLength => StringLength != null;
 
         /// <summary>
         /// Indicates whether the input should be of type checkbox.

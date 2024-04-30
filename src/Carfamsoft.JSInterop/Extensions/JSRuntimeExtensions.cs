@@ -19,7 +19,7 @@ namespace Carfamsoft.JSInterop.Extensions
         /// <param name="identifier">An identifier for the function to invoke.</param>
         /// <param name="args">JSON-serializable arguments.</param>
         /// <returns>A task that represents the the asynchronous invocation operation.</returns>
-        public static async Task SafeInvokeVoidAsync(this IJSRuntime jSRuntime, int maxAttempts, int millisecondsDelay, string identifier, params object[] args)
+        public static async Task SafeInvokeVoidAsync(this IJSRuntime jSRuntime, int maxAttempts, int millisecondsDelay, string identifier, params object?[]? args)
         {
             var initCount = 0;
             while (true)
@@ -52,7 +52,7 @@ namespace Carfamsoft.JSInterop.Extensions
         /// <param name="identifier">An identifier for the function to invoke.</param>
         /// <param name="args">JSON-serializable arguments.</param>
         /// <returns></returns>
-        public static async ValueTask<TValue> SafeInvokeAsync<TValue>(this IJSRuntime jSRuntime, int maxAttempts, int millisecondsDelay, string identifier, params object[] args)
+        public static async ValueTask<TValue> SafeInvokeAsync<TValue>(this IJSRuntime jSRuntime, int maxAttempts, int millisecondsDelay, string identifier, params object?[]? args)
         {
             TValue result;
             var initCount = 0;

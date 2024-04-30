@@ -1,9 +1,11 @@
-﻿namespace Carfamsoft.Model2View.Shared
+﻿using System;
+
+namespace Carfamsoft.Model2View.Shared
 {
     /// <summary>
     /// Represents an HTML select element option.
     /// </summary>
-    public class SelectOption
+    public class SelectOption : IEquatable<SelectOption>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectOption"/> class.
@@ -40,6 +42,22 @@
         /// Gets or sets a value that indicates whether the option is the default.
         /// </summary>
         public bool IsPrompt { get; set; }
+
+        /// <inheritdoc/>
+        public bool Equals(SelectOption other) => string.Equals(Id, other?.Id);
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj is SelectOption option)
+            {
+                return Equals(option);
+            }
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => $"{Id}".GetHashCode();
 
         /// <inheritdoc/>
         public override string ToString() => Value;

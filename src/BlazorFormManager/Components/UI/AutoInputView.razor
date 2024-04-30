@@ -1,0 +1,206 @@
+﻿@if (IsVisible)
+{
+    string? type = null;
+    object? min = null;
+    object? max = null;
+    int? maxlength = null;
+    var typeCode = GetTypeCode();
+    var metadata = Metadata!;
+    var name = metadata.PropertyInfo.Name;
+    var value = metadata.GetValue(Model);
+    string? formValue = $"{value}";
+    object? currentValue = value;
+    value = formValue;
+
+    switch (typeCode)
+    {
+        case TypeCode.Boolean:
+            type = "checkbox";
+            value = bool.TryParse(formValue, out var b) && b;
+            break;
+        case TypeCode.Char:
+            type = "text"; maxlength = 1;
+            break;
+        case TypeCode.SByte:
+            type = "number"; min = sbyte.MinValue; max = sbyte.MaxValue;
+            {
+                if (sbyte.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Byte:
+            type = "number"; min = 0; max = byte.MaxValue;
+            {
+                if (byte.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Int16:
+            type = "number"; max = short.MaxValue;
+            {
+                if (short.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.UInt16:
+            type = "number"; min = 0; max = ushort.MaxValue;
+            {
+                if (ushort.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Int32:
+            type = "number"; max = int.MaxValue;
+            {
+                if (int.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.UInt32:
+            type = "number"; min = 0; max = uint.MaxValue;
+            {
+                if (uint.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Int64:
+            type = "number"; max = long.MaxValue;
+            {
+                if (long.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.UInt64:
+            type = "number"; min = 0; max = ulong.MaxValue;
+            {
+                if (ulong.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Single:
+            type = "number"; max = float.MaxValue;
+            {
+                if (float.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Double:
+            type = "number"; max = double.MaxValue;
+            {
+                if (double.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.Decimal:
+            type = "number"; max = decimal.MaxValue;
+            {
+                if (decimal.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.DateTime:
+            type = "date";
+            {
+                if (DateTime.TryParse(formValue, out var v))
+                {
+                    value = $"{v:dd/MM/yyyy}";
+                }
+            }
+            break;
+        case TypeCode.String:
+            type = "text"; maxlength = metadata.HasStringLength ? metadata.StringLength.MaximumLength : null;
+            break;
+        case TypeCode.Object:
+            if (IsGuid())
+            {
+                type = "text";
+                if (Guid.TryParse(formValue, out var v))
+                    value = v;
+            }
+            break;
+        case TypeCode.DBNull:
+        case TypeCode.Empty:
+        default:
+            break;
+    }
+
+    if (type != null)
+    {
+        var attr = metadata.Attribute;
+        type = attr.Type ?? type;
+        var placeh = metadata.GetDisplayString(attr.Placeholder, Form?.Culture);
+        var placeholder = placeh ?? metadata.GetDisplayString(attr.Description, Form?.Culture);
+        var displayName = metadata.GetDisplayName(Form?.Culture);
+        displayName = displayName.IsNotBlank() ? displayName : name.AsTitleCaseWords();
+        var icon = metadata.Attribute.Icon;
+        var attrs2 = GetAttributes(("class", CssClass));
+
+        if (placeholder.IsBlank()) placeholder = displayName;
+        
+        <div @attributes="attrs2">
+            @if (metadata.Attribute.IsInputFile)
+            {
+                // let's suppose the file is an image;
+                var attrs = GetAttributes
+                (
+                    ("src", formValue),
+                    ("alt", displayName),
+                    ("class", "me-3 rounded-circle img-fluid dynamic-view-image")
+                );
+                if (Form.TryGetImageUrl("src", out var src, attrs, setOnErrorHandler: false))
+                {
+                    attrs["src"] = src;
+                    <FormLabel Icon="@icon" Text="@placeholder" Block>
+                        <img @attributes="attrs" />
+                    </FormLabel>
+                }
+                else
+                {
+                    <FormLabel Icon="@icon" Text="@placeholder">
+                        <span class="dynamic-view-value">@value</span>
+                    </FormLabel>
+                }
+            }
+            else
+            {
+                var isTextArea = metadata.Attribute.Tag.EqualsIgnoreCase("textarea");
+                if (isTextArea)
+                {
+                    <FormLabel Icon="@icon" Text="@placeholder" Block>
+                        <div class="dynamic-view-value">@(new MarkupString(string.Join("<br/>", formValue.Split('\n'))))</div>
+                    </FormLabel>
+                }
+                else
+                {
+                    <FormLabel Icon="@icon" Text="@placeholder">
+                        <span class="dynamic-view-value">@value</span>
+                    </FormLabel>
+                }
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public string? CssClass { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the model for which the component is being rendered.
+    /// </summary>
+    [Parameter] public object? Model { get; set; }
+
+    /// <summary>
+    /// Gets or  sets the metadata information for the auto-generated component.
+    /// </summary>
+    [Parameter] public AutoInputMetadata? Metadata { get; set; }
+
+    /// <summary>
+    /// Gets the associated <see cref="FormManagerBase"/>.
+    /// </summary>
+    [CascadingParameter] protected FormManagerBase? Form { get; set; }
+
+    protected bool IsVisible => Metadata?.Attribute.Is("hidden") != true;
+
+    TypeCode GetTypeCode() => Enum.TryParse<TypeCode>(Metadata!.PropertyInfo.PropertyType.Name, out var result) ? result : default;
+    bool IsGuid() => ReferenceEquals(Metadata!.PropertyInfo.PropertyType, typeof(Guid));
+}

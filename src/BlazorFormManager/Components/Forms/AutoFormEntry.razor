@@ -5,42 +5,59 @@
     var meta = Metadata;
     var attr = meta.Attribute;
     var culture = Form?.Culture;
+    var mdb = Form?.MDBootstrap == true;
     var displayName = meta.GetDisplayName(culture);
     var descr = meta.GetDisplayString(attr.Description, culture);
     var required = meta.IsRequired;
     var element = attr.GetElement(out var elementType);
-    var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
-    var wrapperClass = $"{(editor ? "rich-text-editor mb-3" : "form-floating")} {element} {elementType}";
+    var editor = attr.RichText || (true == Form?.EnableRichText) && element.EqualsIgnoreCase("textarea");
+    var marginbottom = attr.Icon.IsNotBlank() ? string.Empty : descr.IsNotBlank() ? "mb-1" : "mb-3";
     var placeh = meta.GetDisplayString(attr.Placeholder, culture);
     var placeholder = editor ? null : placeh ?? meta.GetDisplayString(attr.Prompt, culture) ?? descr;
-    if (!editor && placeholder.IsBlank())
+    var wrapperClass = $"{(editor ? "rich-text-editor" : string.Empty)} {marginbottom} {element} {elementType}".Trim();
+    var isSelect = element.EqualsIgnoreCase("select");
+
+    if (!editor)
     {
-        placeholder = displayName;
+        wrapperClass += !mdb || isSelect ? " form-floating" : " form-outline";
+        if (placeholder.IsBlank()) placeholder = displayName;
     }
+
     var attributes = GetAttributes
     (
         ("class", attr.InputCssClass),
-        ("placeholder", placeholder),
+        ("placeholder", !mdb || isSelect ? placeholder : null),
+        //("data-mdb-select-init", mdb && isSelect ? true : null),
         ("title", descr)
     );
-    <div class="@wrapperClass">
+    <div @attributes=@GetAttributes(("class", wrapperClass), ("data-mdb-input-init", !mdb || isSelect ? null : true))>
         @if (editor)
         {
-            <QuillEditor Target="@("#" + Id)" />
+            <QuillEditor Target="@($"#{Id}")" Name="@meta.PropertyInfo.Name" OnChange="HandleQuillTextChange" />
             var labelAttr = GetAttributes(("class", meta.IsRequired ? "required" : null));
             <label @attributes="@labelAttr">@displayName</label>
         }
-        <AutoInputBase @ref="autoInputBaseRef" @bind-Value="Value" Id="@Id" Name="@Name" Metadata="meta" Model="Model" PropertyNavigationPath="@PropertyNavigationPath" @attributes="attributes">
+        <AutoInputBase @bind-Value="Value" Id="@Id" Name="@Name" Metadata="meta" Model="Model" PropertyNavigationPath="@PropertyNavigationPath" @attributes="attributes">
             @ChildContent
         </AutoInputBase>
         @if (!editor)
         {
             var labelAttr = GetAttributes
             (
-                ("for", editor ? null : autoInputBaseRef?.Id),
-                ("class", meta.IsRequired ? "required" : null)
+                ("for", Id),
+                ("class", "form-label" + (meta.IsRequired ? " required" : string.Empty))
             );
-            <label @attributes="@labelAttr">@(placeh ?? displayName)</label>
+            placeh ??= displayName;
+            <label @attributes="@labelAttr">
+                @if (Form?.FloatingIcon == true)
+                {
+                    <ContentIconText Icon="@attr.Icon" Text="@placeh" />
+                }
+                else
+                {
+                    @placeh
+                }
+            </label>
         }
         @if (editor)
         {
@@ -51,6 +68,18 @@
 }
 
 @code {
-    private AutoInputBase? autoInputBaseRef;
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    void HandleQuillTextChange(string? text)
+    {
+        if (Form is null) return;
+        if (Form.OnRichTextChanged.HasDelegate)
+        {
+            Form.RichTextChanged(PropertyNavigationPath, text);
+        }
+        else
+        {
+            //Form.SetModelValue(PropertyNavigationPath, text);
+        }
+    }
 }

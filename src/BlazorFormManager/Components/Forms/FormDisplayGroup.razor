@@ -21,6 +21,11 @@
     // first render all hidden inputs
     foreach (var data in items.Where(i => i.Attribute.Is("hidden")))
     {
+        var value = data.GetValue(Model);
+        
+        if (value is null || string.IsNullOrWhiteSpace(value.ToString()))
+            continue;
+
         var path = pathPrefix + data.PropertyInfo.Name;
         var (id, name) = data.GenerateIdAndName(Form?.RenderOptions, path, currentId, generateNameAttribute);
 
@@ -29,7 +34,7 @@
         else
             name = path;
 
-        var attrs = GetAttributes(("id", id), ("name", name), ("value", data.GetValue(Model)));
+        var attrs = GetAttributes(("id", id), ("name", name), ("value", value));
         <input type="hidden" @attributes="attrs" />
     }
 
@@ -51,6 +56,10 @@
                         <ContentIconText Icon="@group.Icon" Text="@group.Name" />
                     </h4>
                 }
+                @if (group.ShowDescription)
+                {
+                    <HelpText Description="@group.Description" Class="@Class"/>
+                }
                 <FormDisplayGroupBody Items="items" Model="Model" 
                     PropertyNavigationPath="@PropertyNavigationPath" CssClass="@group.CssClass" />
             </div>
@@ -64,6 +73,10 @@
                         <ContentIconText Icon="@group.Icon" Text="@group.Name" />
                     </legend>
                 }
+                @if (group.ShowDescription)
+                {
+                    <HelpText Description="@group.Description" Class="@Class" />
+                }
                 <FormDisplayGroupBody Items="items" Model="Model" 
                     PropertyNavigationPath="@PropertyNavigationPath" CssClass="@group.CssClass" />
             </fieldset>
@@ -76,4 +89,6 @@
     [Parameter] public object? Model { get; set; }
     [Parameter] public string? PropertyNavigationPath { get; set; }
     [CascadingParameter] protected FormManagerBase? Form { get; set; }
+
+    const string Class = "form-text text-muted d-block form-display-group-description";
 }

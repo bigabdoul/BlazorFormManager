@@ -23,7 +23,8 @@ namespace BlazorFormManager.Components.UI
     {
         #region fields
 
-        private static readonly ConcurrentDictionary<string, PropertyInfo> propertyCache = new();
+        //private static readonly ConcurrentDictionary<string, PropertyInfo> propertyCache = new();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> propertyCache = new();
 
         #endregion
         
@@ -172,15 +173,31 @@ namespace BlazorFormManager.Components.UI
         {
             if (GetCellData != null)
                 return GetCellData.Invoke(propertyName, item);
+            return GetCachedCellData(propertyName, item);
+        }
 
-            if (!propertyCache.TryGetValue(propertyName, out var property))
+        /// <summary>
+        /// Uses optimized reflection to retrieve the property's value.
+        /// </summary>
+        /// <param name="propertyName">The item's property name whose value to retrieve.</param>
+        /// <param name="item">The item for which to retrieve the specified property's value.</param>
+        /// <returns></returns>
+        public virtual object? GetCachedCellData(string propertyName, TItem item)
+        {
+            var type = item?.GetType() ?? typeof(TItem);
+            if (!propertyCache.TryGetValue(type, out var propDic))
             {
-                property = item?.GetType().GetProperty(propertyName);
-
-                if (property != null)
-                    propertyCache.TryAdd(propertyName, property);
+                propDic = new();
+                propertyCache.TryAdd(type, propDic);
             }
-
+            if (!propDic.TryGetValue(propertyName, out var property))
+            {
+                property = type.GetProperty(propertyName);
+                if (property != null)
+                {
+                    propDic.TryAdd(propertyName, property);
+                }
+            }
             return property?.GetValue(item, null);
         }
 
@@ -232,7 +249,7 @@ namespace BlazorFormManager.Components.UI
                         CreateHeaderClickEventHandlers();
 
                     if (TotalItemCount == 0)
-                        TotalItemCount = Items!.Count();
+                        TotalItemCount = Items!.Count;
 
                     StateHasChanged();
                 }
@@ -255,12 +272,15 @@ namespace BlazorFormManager.Components.UI
                         if (text.IsBlank())
                             text = autoInput.PropertyAsDisplayName();
 
+                        var property = attr.GetProperty();
+
                         var hdr = new TableCell
                         {
                             Icon = attr.Icon,
                             Text = text,
                             Description = attr.Description,
-                            Name = attr.GetProperty().Name,
+                            Name = property.Name,
+                            Type = (Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType).Name,
                         };
 
                         hdrs.Add(hdr);

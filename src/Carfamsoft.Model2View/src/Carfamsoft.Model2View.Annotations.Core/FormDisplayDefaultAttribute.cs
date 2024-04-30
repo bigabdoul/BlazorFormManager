@@ -48,6 +48,11 @@ namespace Carfamsoft.Model2View.Annotations
         public virtual bool ShowGroupName { get; set; }
 
         /// <summary>
+        /// Indicates whether to display the description of a group.
+        /// </summary>
+        public virtual bool ShowGroupDescription { get; set; }
+
+        /// <summary>
         /// Indicates whether rendering custom inputs is disabled, enabled or determined
         /// by the default value. The default is <see cref="CustomRenderMode.Enabled"/>.
         /// </summary>

@@ -1,4 +1,5 @@
-﻿import { insertScripts, insertStyles, _isString } from "./Utils";
+﻿import { logDebug } from "./ConsoleLogger";
+import { insertScripts, insertStyles, _isString } from "./Utils";
 
 const global: any = globalThis;
 
@@ -27,6 +28,19 @@ export class QuillEditor implements IQuillEditor {
      */
     constructor(private selector: string | HTMLElement, private options: QuillOptions, private installOptions?: QuillInstallOptions) {
         const { noinit, onready } = this.options = Object.assign({ theme: 'snow' }, options);
+        
+        if (!this.options.modules) {
+            logDebug(this.options.formId, 'Setting default Quill modules!');
+            this.options.modules = {
+                'toolbar': [[{ 'font': [] }, { 'size': [] }], ['bold', 'italic', 'underline', 'strike'], [{ 'color': [] }, { 'background': [] }], [{ 'script': 'super' }, { 'script': 'sub' }], [{ 'header': [false, 1, 2, 3, 4, 5, 6] }, 'blockquote', 'code-block'], [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }], ['direction', { 'align': [] }], ['link', 'image', 'video'], ['clean']]
+            }
+        }
+
+        // simple security token for invoking a method on the dotnet object reference
+        const changeToken = this.options['changeToken'];
+
+        // don't leave it in an easily accessible memory location
+        delete this.options['changeToken'];
 
         if (!this.installOptions)
             this.installOptions = Object.assign({}, this.options);
@@ -34,7 +48,7 @@ export class QuillEditor implements IQuillEditor {
         if (!noinit)
             this.init().then((success: boolean) => {
                 if (success) {
-                    this.setupChangeHandler();
+                    this.setupChangeHandler(changeToken);
                     if (onready) onready(this);
                 }
             });
@@ -124,7 +138,7 @@ export class QuillEditor implements IQuillEditor {
      * @param formats A dictionary specifying the formats of the text to insert.
      */
     insertText(index: number, text: string, format?: string, value?: any, formats?: { [key: string]: any }) {
-        if (format) 
+        if (format)
             return this.quill.insertText(index, text, format, value);
         return this.quill.insertText(index, text, value, formats);
     }
@@ -147,19 +161,40 @@ export class QuillEditor implements IQuillEditor {
     }
 
     /** This function is called when the editor's dependencies have been successfully loaded. */
-    private setupChangeHandler() {
+    private setupChangeHandler(changeToken: string) {
         const { selector } = this;
-        if (typeof selector === 'string' && selector.startsWith('#')) {
+        // the dotnet object reference used to report back edit changes
+        const dotnetObj = this.options['dotNetObjectReference'];
+
+        if (dotnetObj || (typeof selector === 'string' && selector.startsWith('#'))) {
             // the selector is an element identifier;
             // the C# class AutoInputBase adds a hidden input for
             // every rich text-enabled textarea; we'll use that
             // input to store the changes made through the editor; this
             // way, the value will be included during the form submission
-            const inputId = selector.substring(1) + '_hidden';
-            const hiddenInput = document.getElementById(inputId) as HTMLInputElement;
 
-            if (hiddenInput)
-                this.quill.on('text-change', () => hiddenInput.value = this.getInnerHTML());
+            let hiddenInput: HTMLInputElement;
+
+            if (typeof selector === 'string') {
+                const inputId = selector.substring(1) + '_hidden';
+                hiddenInput = document.getElementById(inputId) as HTMLInputElement;
+            }
+
+            if (hiddenInput || dotnetObj) {
+                // the dotnet method to invoke upon change detection
+                const onValueChanged = this.options['onValueChanged'] ?? 'OnValueChanged';
+
+                this.quill.on('text-change', async () => {
+                    const value = this.getInnerHTML();
+
+                    if (hiddenInput)
+                        hiddenInput.value = value;
+
+                    if (dotnetObj)
+                        // invoke the dotnet method with the changed value
+                        await dotnetObj.invokeMethodAsync(onValueChanged, value, changeToken);
+                });
+            }
         }
     }
 

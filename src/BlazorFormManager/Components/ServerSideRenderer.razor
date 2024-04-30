@@ -1,0 +1,9 @@
+﻿@inherits ServerSideRendererBase
+@if (IsNotPreRendering)
+{
+    @ChildContent
+}
+else if (PreRenderContent != null)
+{
+    @PreRenderContent
+}

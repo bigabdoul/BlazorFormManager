@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Carfamsoft.Model2View.Shared.Collections
 {
@@ -8,7 +9,8 @@ namespace Carfamsoft.Model2View.Shared.Collections
     public static class CollectionExtensions
     {
         /// <summary>
-        /// Merges the <paramref name="source"/> collection with the <paramref name="target"/> dictionary.
+        /// Merges the <paramref name="source"/> collection with the <paramref name="target"/> dictionary
+        /// and returns the target dictionary.
         /// </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="TValue">The type of the value.</typeparam>
@@ -73,6 +75,40 @@ namespace Carfamsoft.Model2View.Shared.Collections
                 mergedTarget[kv.Key] = kv.Value;
 
             return mergedTarget;
+        }
+
+        /// <summary>
+        /// Sets the values of this dictionary by converting values from the given dictionary.
+        /// </summary>
+        /// <typeparam name="TSourceKey"></typeparam>
+        /// <typeparam name="TTargetValue"></typeparam>
+        /// <typeparam name="TSourceValue"></typeparam>
+        /// <param name="target">The target dictionary.</param>
+        /// <param name="source">The dictionary to read values from.</param>
+        /// <param name="converter">
+        /// A function to convert each value contained in the source dictionary.
+        /// </param>
+        /// <param name="skipIf">
+        /// A function that returns true when a dictionary entry should be skipped.
+        /// </param>
+        /// <returns></returns>
+        public static IDictionary<TSourceKey, TTargetValue> ConvertMerge<TSourceKey, TTargetValue, TSourceValue>
+        (
+            this IDictionary<TSourceKey, TTargetValue> target,
+#nullable enable
+            IDictionary<TSourceKey, TSourceValue?> source, Func<TSourceKey, TSourceValue?, TTargetValue> converter, Func<TSourceKey, TSourceValue?, bool>? skipIf = null
+#nullable disable
+        )
+        {
+            foreach (var key in source.Keys)
+            {
+                var srcValue = source[key];
+
+                if (skipIf == null || !skipIf.Invoke(key, srcValue))
+                    target[key] = converter.Invoke(key, srcValue);
+            }
+
+            return target;
         }
 
         /// <summary>

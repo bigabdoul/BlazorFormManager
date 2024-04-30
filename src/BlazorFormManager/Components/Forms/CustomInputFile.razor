@@ -1,14 +1,14 @@
 ﻿@if (Legacy)
 {
-<div class="form-group mb-3">
-    <div class="custom-file mt-3 mb-3">
-        <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
-        @if (Text.IsNotBlank())
-        {
-            <label for="@id" class="form-label">@Text</label>
-        }
+    <div class="form-group mb-3">
+        <div class="custom-file mt-3 mb-3">
+            <input type="file" class="custom-file-input" id="@id" name="@(Name ?? id)" title="@Text">
+            @if (Text.IsNotBlank())
+            {
+                <label for="@id" class="form-label">@Text</label>
+            }
+        </div>
     </div>
-</div>
 }
 else
 {

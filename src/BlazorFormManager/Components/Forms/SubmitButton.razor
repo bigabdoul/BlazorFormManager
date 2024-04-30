@@ -1,8 +1,9 @@
 ﻿@if (!IsHidden)
 {
     var ico = ButtonIcon;
+    var cls = string.Join(" ", $"{Class} {Options?.Class} {ButtonCssClass}".Trim().Split(' ').Distinct());
 
-    <button type="@ButtonType" class="@ButtonCssClass" @onclick="HandleClick" 
+    <button type="@ButtonType" class="@cls" @onclick="HandleClick" 
         disabled="@CheckIsDisabled" @attributes="AdditionalAttributes">
         @if (CheckIsBusy)
         {
@@ -26,11 +27,13 @@
     [Parameter] public string? Text { get; set; }
     [Parameter] public string? Type { get; set; }
     [Parameter] public string? Icon { get; set; } = "fas fa-save";
+    [Parameter] public string? Class { get; set; }
     [Parameter] public bool ForceSubmit { get; set; }
     [Parameter] public bool IsDisabled { get; set; }
     [Parameter] public bool IsBusy { get; set; }
     [Parameter] public bool IsHidden { get; set; }
     [Parameter] public bool CenterText { get; set; }
+    //[Parameter] public bool JustifyContentCenter { get; set; } = true;
     [Parameter] public SubmitButtonOptions? Options { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> Clicked { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object>? AdditionalAttributes{ get; set; }
@@ -59,20 +62,19 @@
         get
         {
             if (IsBusy) return true;
-            
-            if (Manager is not null)
-                return Manager.IsUploadingFiles && Manager.IsLongRunning;
-            
-            if (Form is not null)
-                return Form.IsUploadingFiles && Form.IsLongRunning;
+
+            var f = Manager ?? Form;
+
+            if (f is not null)
+                return f.IsUploadingFiles && f.IsLongRunning;
             
             return false;
         }
     }
 
-    private string TextCssClass => IsTextCentered ? "justify-content-center w-100" : "";
+    private string TextCssClass => IsTextCentered ? "align-items-center w-100" : "";
 
-    private string ButtonCssClass => "btn btn-primary my-3" + (IsTextCentered ? " w-100 align-items-center d-flex" : "");
+    private string ButtonCssClass => "btn btn-primary my-3 align-items-center" + (IsTextCentered ? " w-100 d-flex" : "");
 
     private async Task HandleClick(MouseEventArgs e)
     {

@@ -1,0 +1,21 @@
+﻿@{
+    var attrs = AdditionalAttributes;
+    if (attrs is not null)
+    {
+        _ = attrs.TryGetValue("name", out var name);
+        _ = attrs.TryGetValue("value", out var value);
+
+        attrs.Remove("value");
+        attrs.Remove("title");
+        attrs.Remove("required");
+
+        attrs["aria-label"] = Text;
+
+        <input type="hidden" name="@name" value="@value" />
+    }
+}
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public IDictionary<string, object?>? AdditionalAttributes { get; set; }
+}

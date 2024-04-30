@@ -1,0 +1,79 @@
+﻿@using Carfamsoft.JSInterop.Extensions;
+@inherits FormManagerBase
+@implements IAsyncDisposable
+
+@if (!PreloadScript)
+{
+    <div id="@ElmId" class="qrcode-generator"></div>
+}
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public bool PreloadScript { get; set; }
+    [Parameter] public bool SkipScriptLoading { get; set; }
+    [Parameter] public string ScriptSource { get; set; } = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+
+    private bool isbusy;
+    private bool scriptsInserted;
+    private string? lastValue;
+    private string ElmId = typeof(QrCodeGenerator).Name.GenerateId(camelCase: true);
+
+    public override object? GetModel() => null;
+
+    private async Task GenerateCodeAsync()
+    {
+        if (!PreloadScript && scriptsInserted && Text.IsNotBlank())
+        {
+            await GenerateCodeAsync(Text);
+        }
+    }
+
+    public async Task<bool> GenerateCodeAsync(string? value)
+    {
+        if (scriptsInserted && value != lastValue)
+        {
+            var success = await JS.SafeInvokeAsync<bool>(2, 500, $"{BlazorFormManagerNS}.generateQRCode", FormId, $"#{ElmId}", value!);
+            if (success)
+                lastValue = value;
+            return success;
+        }
+        return false;
+    }
+
+    protected override Task OnParametersSetAsync() => GenerateCodeAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (SkipScriptLoading)
+        {
+            scriptsInserted = true;
+            await GenerateCodeAsync();
+            return;
+        }
+
+        if (!scriptsInserted && !isbusy)
+        {
+            isbusy = true;
+            await JS.SafeInvokeVoidAsync(5, 1000, $"{BlazorFormManagerNS}.initQRCode", FormId, ScriptSource);
+            scriptsInserted = true;
+
+            if (!PreloadScript)
+                await GenerateCodeAsync();
+
+            isbusy = false;
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        try
+        {
+            await JS.SafeInvokeVoidAsync(4, 250, $"{BlazorFormManagerNS}.destroyQrCode", FormId);
+        }
+        catch (Exception)
+        {
+        }
+    }
+}

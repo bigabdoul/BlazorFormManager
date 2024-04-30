@@ -26,6 +26,11 @@
         /// Indicates whether the input is disabled.
         /// </summary>
         public virtual bool Disabled { get; set; }
+        
+        /// <summary>
+        /// Indicates whether the input is read-only.
+        /// </summary>
+        public virtual bool Readonly { get; set; }
 
         /// <summary>
         /// Indicates whether this custom attribute should be ignored during rendering.

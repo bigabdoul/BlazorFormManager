@@ -4,6 +4,7 @@ import { DragDropManager } from "./DragDropManager";
 import { FileReaderManager } from "./FileReaderManager";
 import { ReCAPTCHA } from "./ReCAPTCHA";
 import { QuillEditor } from "./QuillEditor";
+import { ChartjsHelper } from "./ChartjsHelper";
 import { AssemblyName, Forms } from "./Shared";
 import { containsFiles, formDataKeys, formDataMerge, populateDictionary, removeFileList, _isDictionary, _isFunction, _isObject, _isString, insertScripts, insertStyles } from "./Utils";
 import { SimpleEvent } from "./SimpleEvent";
@@ -23,6 +24,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     private static _supportsAJAXwithUpload = BlazorFormManager.supportsAjaxUploadWithProgress();
     private processedFileStorage: IDictionary<ProcessedFileConfig> = {};
     private formEvents: SimpleEvent<string>;
+    private _enhancedLoadEventEnabled = false;
 
     /** Construct a new instance of the form manager class. */
     constructor() {
@@ -51,7 +53,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         }
 
         if (this.registerSubmitHandler(options)) {
-            logInfo(formId, "Initialized successfully!");
+            logInfo(formId, "BlazorFormManager initialized successfully!");
             return true;
         }
         return false;
@@ -101,7 +103,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      * Submit the form identified by the given parameter.
      * @param formId The identifier of the form to submit.
      */
-    submitForm (formId: string) {
+    submitForm(formId: string) {
         logDebug(formId, "Form submit requested.", formId);
 
         const form = document.getElementById(formId) as HTMLFormElement;
@@ -122,12 +124,97 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     }
 
     /**
+     * Dynamically initialize MDBootstrap 5 inputs matching the specified CSS query selector.
+     * @param options Initialization options.
+     */
+    initMdbInput(options: MDBootstrapOptions) {
+        const { formId, selector: inputSelector, scoped } = options;
+        let selector = inputSelector || '.form-outline';
+        if (scoped) selector = `#${formId} ${selector}`;
+
+        logDebug(formId, `Initializing "MDBootstrap 5" inputs with query selector '${selector}'...`);
+
+        let query = document.querySelectorAll(selector);
+
+        if (query.length) {
+            const win = window as any;
+            if (win.mdb && win.mdb.Input) {
+                logDebug(formId, `"MDBootstrap 5" UMD module: ${query.length} input.s found.`);
+                query.forEach(formOutline => {
+                    if (!formOutline.classList.contains('select')) {
+                        new win.mdb.Input(formOutline).init();
+                    } else {
+                        //new win.mdb.Dropdown(formOutline, {});
+                    }
+                });
+            } else if (win.Input) {
+                logDebug(formId, `"MDBootstrap 5" ES module: ${query.length} input.s found.`);
+                query.forEach(formOutline => {
+                    if (!formOutline.classList.contains('select')) {
+                        new win.Input(formOutline).init();
+                    } else {
+                    }
+                });
+            } else {
+                logDebug(formId, `No "MDBootstrap 5" module: ${query.length} input.s found.`);
+            }
+        } else {
+            logDebug(formId, "No input found matching the specified CSS query selector.");
+        }
+
+        selector = scoped ? `#${formId} .form-floating>label` : '.form-floating>label';
+        query = document.querySelectorAll(selector);
+
+        if (query.length) {
+            logDebug(formId, `Found ${query.length} input.s with query selector '${selector}'.`);
+
+            /** Mimick form-outline effect for 'select' elements. */
+            const maybeSetActive = (select: HTMLSelectElement, label: HTMLLabelElement, focused = false) => {
+                const selectIsNumber = label.parentElement.classList.contains('number');
+                let active = focused;
+                if (!focused) {
+                    const invalid =
+                        selectIsNumber && (select.value === '0' || select.value === '') ||
+                        (!selectIsNumber && select.value === '');
+                    active = !invalid;
+                }
+                active ? select.classList.add('active') : select.classList.remove('active');
+            };
+
+            query.forEach((label: HTMLLabelElement) => {
+                const { previousElementSibling: select } = label;
+                if (select instanceof HTMLSelectElement) {
+                    const { border: initialBorder, color: initialColor } = select.style;
+
+                    // the free version of MDBootstrap 5 doesn't allow specifying 
+                    // '.form-outline' on a 'select' element when initializing inputs
+                    label.parentElement.classList.replace('form-floating', 'form-outline');
+
+                    maybeSetActive(select, label);
+
+                    select.addEventListener('focus', () => {
+                        maybeSetActive(select, label, true);
+                        label.style.color = 'var(--mdb-picker-header-bg)';
+                        select.style.border = '2px solid var(--mdb-picker-header-bg)';
+                    });
+
+                    select.addEventListener('blur', () => {
+                        maybeSetActive(select, label);
+                        label.style.color = initialColor;
+                        select.style.border = initialBorder;
+                    });
+                }
+            });
+        }
+    }
+
+    /**
      * Sets the value of the pair identified by key to value, creating 
      * a new key/value pair if none existed for key previously.
      * @param key The key of the value to set.
      * @param value The value to set.
      */
-    localStorageSetItem (key: string, value: string) {
+    localStorageSetItem(key: string, value: string) {
         localStorage.setItem(key, value);
     }
 
@@ -136,7 +223,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      * with the object, if a key/value pair with the given key exists.
      * @param key The key of the value to remove.
      */
-    localStorageRemoveItem (key: string) {
+    localStorageRemoveItem(key: string) {
         localStorage.removeItem(key);
     }
 
@@ -145,7 +232,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      * the given key does not exist in the list associated with the object.
      * @param key The key of the value to retrieve.
      */
-    localStorageGetItem (key: string) {
+    localStorageGetItem(key: string) {
         return localStorage.getItem(key);
     }
 
@@ -163,11 +250,17 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             onSendSucceeded,
             onReCaptchaActivity,
             requireModel,
-            reCaptcha
+            reCaptcha,
+            enhancedLoad,
+            onEnhancedLoad,
         } = options;
 
         const _this = this;
         const recaptcha = _this.initReCaptcha(formId, reCaptcha, onReCaptchaActivity);
+
+        if (enhancedLoad && _isString(onEnhancedLoad)) {
+            this._enableEnhancedLoad(formId, true, onEnhancedLoad);
+        }
 
         return this.handleFormSubmission({
             formId,
@@ -186,7 +279,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                     if (requireModel) {
                         logError(formId, "A model is required.");
                     } else {
-                        logDebug(formId, "Model not defined. FormData will be collected by caller.");
+                        logDebug(formId, "Model not defined. Caller will collect FormData.");
                     }
                     return { hasFiles: false };
                 }
@@ -205,7 +298,11 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                     else
                         logDebug(formId, "Collecting form model data as JSON...");
                     // send as JSON
-                    return { json: JSON.stringify(model), hasFiles };
+                    const obj: any = Object;
+                    const json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
+                        .replace('"true"', 'true')
+                        .replace('"false"', 'false');
+                    return { json, hasFiles };
                 } else {
                     logDebug(formId, "Collecting form model data...");
 
@@ -357,8 +454,9 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
 
             const { beforeSend, done, fail, getFormData } = options;
             let { formData, hasFiles, json } = await getFormData();
+            const isJson = !!json;
 
-            if (!formData) {
+            if (!formData && !isJson) {
                 if (requireModel) {
                     logError(formId, "Form submission cancelled because a model is required to continue.");
                     return false;
@@ -368,7 +466,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                 }
             }
 
-            if (!json && this.clearFilesAppendProcessed(formId, formData))
+            if (!isJson && this.clearFilesAppendProcessed(formId, formData))
                 hasFiles = true;
 
             const xhr = new XMLHttpRequest();
@@ -421,16 +519,24 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             if (!headersSet && Forms[formId])
                 this.setRequestHeaders(formId, xhr, Forms[formId].requestHeaders);
 
-            if (json) {
+            if (isJson) {
                 this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
             }
 
-            this.adjustBadFormDataKeys(formData);
+            if (!isJson) {
+                logDebug(formId, "Adjusting bad form data keys.");
+                this.adjustBadFormDataKeys(formData);
+            }
+
+            const objData = isJson ? json : formData;
 
             if (this.reCaptcha) {
-                this.reCaptcha.submitForm(formId, xhr, formData, reCaptcha);
-            } else {
-                xhr.send(formData);
+                logDebug(formId, "Submitting form using reCAPTCHA.");
+                this.reCaptcha.submitForm(formId, xhr, objData, reCaptcha);
+            } else
+            {
+                logDebug(formId, "Submitting form using XMLHttpRequest.");
+                xhr.send(objData);
             }
 
             return false; // To avoid actual submission of the form
@@ -439,7 +545,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     }
 
 
-    deleteProcessedFileList (options: { formId: string; inputId: string; }) {
+    deleteProcessedFileList(options: { formId: string; inputId: string; }) {
         return this.fileManager.deleteProcessedFileList(options);
     }
 
@@ -447,7 +553,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         return this.dragdropManager.enable(options);
     }
 
-    dragDropDisable (options: DragDropTargetOptions) {
+    dragDropDisable(options: DragDropTargetOptions) {
         return this.dragdropManager.disable(options);
     }
 
@@ -582,7 +688,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      */
     invokeDotNet<T>(formId: string, method: string, arg?: any): Promise<T | boolean> {
         if (arg === undefined) arg = null;
-        const { dotNetObjectReference: obj } = Forms[formId];
+        const { dotNetObjectReference: obj } = Forms[formId] || {};
 
         if (obj) {
             //logDebug(formId, `Invoking .NET method "${method}" using object instance.`, arg);
@@ -600,10 +706,22 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      * @param formId The form identifier.
      * @param options The reCAPTCHA options.
      */
-    resetRecaptcha(formId: string, options: ReCaptchaOptions) {
+    resetRecaptcha(formId: string, options?: ReCaptchaOptions) {
         logDebug(formId, 'resetting reCAPTCHA', options);
         const recap = this.reCaptcha;
         recap && recap.reset(formId, options);
+    }
+
+    /**
+     * 
+     * Reconfigure the reCAPTCHA for the specified form identifier.
+     * @param formId The form identifier.
+     * @param options The configuration options.
+     */
+    reConfigureRecaptcha(formId: string, options?: ReCaptchaOptions) {
+        logDebug(formId, 'Reconfiguring reCAPTCHA', options);
+        const recap = this.reCaptcha;
+        recap && recap.configure(formId, options, true);
     }
 
     /**
@@ -612,16 +730,77 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
      * @param styles A string or array of styles to insert.
      */
     insertDomStyles(formId: string, styles: string | string[]) {
-        insertStyles(styles, null, formId);
+        return insertStyles(styles, null, formId);
     }
 
     /**
      * Uniquely insert one or more scripts into the DOM.
      * @param formId The form identifier.
      * @param scripts A string or array of scripts to insert.
+     * @param isAsync Sets the script's async property.
+     * @param isDeferred Sets the scripts defer property.
      */
-    insertDomScripts(formId: string, scripts: string | string[]) {
-        insertScripts(scripts, null, formId);
+    insertDomScripts(formId: string, scripts: string | string[], isAsync?: boolean, isDeferred?: boolean) {
+        return insertScripts(scripts, null, formId, isAsync, isDeferred);
+    }
+
+    initQRCode(formId: string, script?: string, onload?: (this: GlobalEventHandlers, ev: Event) => any) {
+        logDebug(formId, 'Loading QRCode script...', script);
+        script || (script = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
+        onload || (onload = () => logDebug(formId, 'Done.'));
+        return insertScripts(script, onload, formId);
+    }
+
+    async generateQRCode(formId: string, selector: string, value: string) {
+        let { qrCode } = Forms[formId] || (Forms[formId] = { formId });
+        if (qrCode) {
+            qrCode.delegate.clear();
+            logDebug(formId, 'QRCode cleared.');
+            if (value) {
+                qrCode.delegate.makeCode(value);
+                logDebug(formId, 'Generated new QRCode.');
+            }
+            return true;
+        } else if (value) {
+            const elm = document.querySelector(selector);
+            if (elm) {
+                let QRCode = window["QRCode"];
+                const loadQRCode = () => {
+                    qrCode = { delegate: new QRCode(elm, value), selector };
+                    Forms[formId].qrCode = qrCode;
+                    logDebug(formId, `QRCode generated successfully for text ${value}.`);
+                }
+                if (!QRCode) {
+                    logDebug(formId, 'QRCode not initialized, loading default script...');
+                    const success = await this.initQRCode(formId);
+                    if (success) {
+                        logDebug(formId, 'Done.');
+                        QRCode = window["QRCode"];
+                        loadQRCode();
+                    } else {
+                        logError(formId, 'Could not initialize the default QRCode script.');
+                    }
+                } else {
+                    loadQRCode();
+                }
+
+                return true;
+            }
+            else {
+                logError(formId, `generateQRCode: No DOM element matches the selector '${selector}'.`);
+            }
+        }
+        return false;
+    }
+
+    destroyQrCode(formId: string) {
+        const { qrCode } = Forms[formId];
+        if (qrCode) {
+            const { delegate, selector } = qrCode;
+            delegate.clear();
+            delete Forms[formId].qrCode;
+            logDebug(formId, `The QRCode identified by ${selector} has been destroyed!`);
+        }
     }
 
     /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
@@ -649,7 +828,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     private validateFormAttributes(formId: string) {
         const frm = document.getElementById(formId);
         if (!frm) {
-            logError(formId, `The form element identified by '${formId}' does not exist in the DOM.`);
+            logWarning(formId, `The form element identified by '${formId}' does not exist in the DOM.`);
             return false;
         }
         return true;
@@ -685,6 +864,10 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             requireModel: "boolean (optional): Gets or sets a value that indicates whether specifying a " +
                 "non-null reference model is required when the 'onGetModel' event is invoked. If this value is " +
                 "true and no valid model is provided after that event, the form submission will be cancelled.",
+
+            enhancedLoad: "boolean (optional): Gets or sets a value that indicates whether to react to a Blazor Server App's 'enhanceload' event. This parameter allows resetting up specific aspects of the form, such as reinitializing the reCaptcha options.",
+
+            onEnhancedLoad: optionalNameOfMethodWhen + "a Blazor Server App's 'enhancedLoad' event occurs.",
 
             assembly: "string (optional): The name of the .NET assembly on which " +
                 "to invoke static methods. Required if any of the 'onXXX' static " +
@@ -842,13 +1025,41 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                 this.collectModelData(model[key], formData, path ? `${path}[${key}]` : key);
             });
         } else {
-            const value = (model === null || model === undefined) ? '' : model;
-            formData.append(path, value);
+            const value = (model === null || model === undefined) ? null : model;
+            if (model !== null) formData.append(path, value);
         }
     }
 
     private raiseFormSubmitted(formId: string) {
         logWarning(formId, 'raiseFormSubmitted not implemented!');
+    }
+
+
+    private _enableEnhancedLoad(formId: string, enabled: boolean, dotnetMethodName: string) {
+        const Blazor: any = global['Blazor'];
+        if (Blazor && Blazor.addEventListener) {
+            if (enabled) {
+                if (!this._enhancedLoadEventEnabled) {
+                    Blazor.addEventListener('enhancedload', () => {
+                        // the method must be static
+                        // dotNet.invokeMethodAsync(AssemblyName, dotnetMethodName, window.location.href);
+                        setTimeout(() => {
+                            this.reCaptcha && this.reCaptcha.configure(formId, null, true);
+                        }, 1000);
+                    });
+                    this._enhancedLoadEventEnabled = true;
+                    logDebug(formId, 'Blazor enhancedload event enabled.');
+                }
+            } else {
+                if (Blazor.removeEventListener) {
+                    Blazor.removeEventListener('enhancedload');
+                    logDebug(formId, 'Blazor enhancedload event disabled.');
+                }
+                this._enhancedLoadEventEnabled = false;
+            }
+        } else {
+            logWarning(formId, '"enhanceload" event not supported: No global Blazor object found.');
+        }
     }
 }
 
@@ -871,4 +1082,10 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             return editor;
         }
     });
+    Object.defineProperty(blazorFormManager['Quill'], 'getInnerHTML', {
+        value: function (editor: QuillEditor) {
+            return editor.getInnerHTML();
+        }
+    });
+    Object.defineProperty(blazorFormManager, 'ChartjsHelper', { value: ChartjsHelper });
 })();

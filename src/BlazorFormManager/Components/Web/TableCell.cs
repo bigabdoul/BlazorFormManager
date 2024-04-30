@@ -6,10 +6,10 @@ using CollectionExtensions = Carfamsoft.Model2View.Shared.Collections.Collection
 
 namespace BlazorFormManager.Components.Web
 {
-	/// <summary>
-	/// Represents an object that encapsulates information about a table header or data cell.
-	/// </summary>
-	public class TableCell
+    /// <summary>
+    /// Represents an object that encapsulates information about a table header or data cell.
+    /// </summary>
+    public class TableCell
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableCell"/> class.
@@ -82,6 +82,11 @@ namespace BlazorFormManager.Components.Web
         public EventCallback<MouseEventArgs> OnClick { get; set; }
 
         /// <summary>
+        /// Gets or sets the table cell's data type.
+        /// </summary>
+        public string? Type { get; set; }
+
+        /// <summary>
         /// Returns a dictionary containing the 'class', 'colspan', and 'title' attributes
         /// if <paramref name="data"/> is an instance of the <see cref="TableCell"/> class;
         /// otherwise, it returns null.
@@ -105,7 +110,7 @@ namespace BlazorFormManager.Components.Web
                 onclick = cell.OnClick;
 
                 return CollectionExtensions.GetAttributes(
-                    ("class", cell.CssClass),
+                    ("class", cell.CssClass + (!string.IsNullOrWhiteSpace(cell.Type) ? " datatype-" + cell.Type!.ToLower() : null)),
                     ("colspan", cell.ColSpan),
                     ("rowspan", cell.RowSpan),
                     ("title", cell.Description));
@@ -114,7 +119,12 @@ namespace BlazorFormManager.Components.Web
             {
                 onclick = EventCallback<MouseEventArgs>.Empty;
                 value = data;
-                return null;
+                var dataType = value?.GetType().Name.ToLower();
+                if (!string.IsNullOrWhiteSpace(dataType))
+                    dataType = $"datatype-{dataType}";
+                return CollectionExtensions.GetAttributes(
+                    ("class", dataType)
+                );
             }
         }
     }

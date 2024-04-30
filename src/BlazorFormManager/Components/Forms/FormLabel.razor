@@ -1,0 +1,19 @@
+﻿@{
+    var attrs = GetAttributes
+    (
+        ("class", $"dynamic-label{(Block ? " d-block" : "")}")
+    );
+}
+<div class="mb-1">
+    <label @attributes=attrs>
+        <ContentIconText Icon="@Icon" Text="@Text" />
+    </label>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public bool Block { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

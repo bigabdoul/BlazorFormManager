@@ -1,10 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlazorFormManager.Demo.Server.Data;
+using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorFormManager.Demo.Server.Models
 {
     public class ApplicationUser : IdentityUser
     {
+        //public ApplicationUser()
+        //{
+        //    Orders = new HashSet<Order>();
+        //}
+
         [StringLength(100)]
         public string FirstName { get; set; }
 
@@ -19,5 +27,9 @@ namespace BlazorFormManager.Demo.Server.Models
 
         [StringLength(20)]
         public string FavouriteWorkingDay { get; set; }
+
+        public DateTime? BirthDay { get; set; }
+        public char Gender { get; set; }
+        //public ICollection<Order> Orders { get; set; }
     }
 }

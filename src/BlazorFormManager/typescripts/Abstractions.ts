@@ -20,7 +20,7 @@ interface ReCaptchaActivity {
 
 interface ReCaptchaCallback {
     xhr?: XMLHttpRequest;
-    formData?: FormData;
+    formData?: FormData | string;
     token?: string;
     setTokenCallback?: (token: string) => void;
     widgets?: number[];
@@ -34,7 +34,19 @@ interface ReCaptchaConfig {
         v3?: string;
         inserted: boolean;
         inserting: boolean;
-    }
+        element?: HTMLScriptElement;
+    };
+}
+
+interface QrCodeDelegate {
+    clear: () => void;
+    makeCode: (value: string) => void;
+}
+
+
+interface QrCodeOptions {
+    delegate: QrCodeDelegate;
+    selector: string;
 }
 
 interface DotNetObjectReference {
@@ -61,9 +73,12 @@ interface FormManagerBaseOptions {
 
 interface FormManagerOptions extends FormManagerBaseOptions {
     requireModel?: boolean;
+    enhancedLoad?: boolean;
+    onEnhancedLoad?: string;
     assembly?: string;
     requestHeaders?: IDictionary<string>;
     reCaptcha?: ReCaptchaOptions;
+    qrCode?: QrCodeOptions,
     onDragStart?: string;
     onDrop?: string;
     onGetModel?: string;
@@ -301,7 +316,7 @@ interface QuillOptions extends QuillBaseOptions {
         embeds?: "formula" | "image" | "video";
     };
     modules?: {
-        toolbar?: string | boolean;
+        toolbar?: string | boolean | Array<Array<any>>;
         history?: {
             delay?: number;
             userOnly?: boolean;
@@ -310,4 +325,14 @@ interface QuillOptions extends QuillBaseOptions {
     };
     placeholder?: string;
     readOnly?: boolean;
+}
+
+/** Material Design Bootstrap 5 options. */
+interface MDBootstrapOptions {
+    /** The form identifier. */
+    formId: string;
+    /** The CSS query selector for form-outline inputs. The default value is '.form-outline'. */
+    selector?: string;
+    /** true to limit selector to the identified form; otherwise, false. */
+    scoped?: boolean;
 }

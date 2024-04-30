@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>BlazorFormManager.Demo.Server-E20B8022-6777-4EFA-992C-D8BEDF6689FA</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Data\Migrations\20200819235548_CreateMorePersonalInfo.cs" />
     <Compile Remove="Data\Migrations\20200819235548_CreateMorePersonalInfo.Designer.cs" />
+    <Compile Remove="Data\Migrations\20221220172036_UserDetails.cs" />
+    <Compile Remove="Data\Migrations\20221220172036_UserDetails.Designer.cs" />
+    <Compile Remove="Data\Migrations\20221220172601_Order.cs" />
+    <Compile Remove="Data\Migrations\20221220172601_Order.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

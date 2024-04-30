@@ -10,8 +10,8 @@
 	var attributes = GetAttributes
 	(
 		("type", type),
-		("id", InputId),
-		("name", InputName),
+		("id", Id),
+		("name", Name),
 		("title", meta.GetDisplayString(attr.Description, culture)),
 		("class", attr.InputCssClass ?? "form-check-input")
 	);
@@ -30,7 +30,7 @@
 		@if (!attr.CheckNoLabel)
 		{
 			var cls = "form-check-label" + (meta.IsRequired ? " required" : string.Empty);
-			<label @attributes="@(GetAttributes(("class", cls), ("for", InputId)))">@meta.GetDisplayName(culture)</label>
+			<label @attributes="@(GetAttributes(("class", cls), ("for", Id)))">@meta.GetDisplayName(culture)</label>
 		}
 	</div>
 	<AutoValidationMessage Model="Model" Property="@meta.PropertyInfo.Name" />

@@ -1,36 +1,6 @@
-﻿@using Carfamsoft.JSInterop.Extensions
-@using Microsoft.JSInterop
-@using System.Text.Json
-@inject IJSRuntime JSRuntime
-
-@*<QuillToolbar Id="@ToolbarId"/>*@
-@if (Target.IsBlank())
+﻿@*<QuillToolbar Id="@ToolbarId"/>*@
+@if (Target.IsBlank() && OnChange.HasDelegate == false)
 {
-    <div id="@EditorId" class="QuillEditor rich-text-editor" />
-    <input type="hidden" id="@(EditorId)_hidden" @attributes="@(GetAttributes(("name", Name)))"/>
-}
-@code {
-    [Parameter] public string? Target { get; set; }
-    [Parameter] public string? Name { get; set; }
-    [Parameter] public string? Theme { get; set; } = "snow";
-
-    [CascadingParameter] private FormManagerBase? Form { get; set; }
-
-    private string EditorId = typeof(QuillEditor).Name.GenerateId(camelCase: true);
-    private string ToolbarId = typeof(QuillToolbar).Name.GenerateId(camelCase: true);
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var selector = Target.IsBlank() ? $"#{EditorId}" : Target!;
-            var options = new
-            {
-                Form?.FormId,
-                Theme,
-                //modules = new { toolbar = $"#{ToolbarId}" }
-            };
-            await JSRuntime.SafeInvokeVoidAsync(10, 500, "BlazorFormManager.Quill.create", selector, options);
-        }
-    }
+    <div id="@EditorId" class="QuillEditor quill-editor rich-text-editor" />
+    <input type="hidden" id="@(EditorId)_hidden" @attributes="@(GetAttributes(("name", Name)))" />
 }

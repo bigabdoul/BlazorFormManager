@@ -4,69 +4,44 @@
 @if (EditContext != null)
 {
 	<div class="auto-edit-form">
-		<EditForm EditContext="EditContext"
-			OnValidSubmit="HandleValidSubmit"
-			OnInvalidSubmit="HandleInvalidSubmit"
-			id="@FormId" action="@FormAction" method="@FormMethod" enctype="@EncodingType"
-			@attributes="AdditionalAttributes">
-			
-			<CascadingValue Value="this">
-				@* This issues a cascaded parameter to instances of the AutoInputBase component
-					so that it can access FormManagerBase-related members, such as OptionsGetter, etc.*@
-				@if (!ContentHidden)
-				{
-					if (FormHeader != null)
-					{
-						<div class="form-header">@FormHeader</div>
-					}
-					<div class="form-body">
-						<div class="form-display-group">
-							@if (BeforeDisplayGroups != null)
-							{
-								<div class="before-display-groups">@BeforeDisplayGroups</div>
-							}
-							@if (DisplayGroups?.Count > 0)
-							{
-								<div class="display-groups">
-									@foreach (FormDisplayGroupMetadata group in DisplayGroups)
-									{
-										<FormDisplayGroup Metadata="group" Model="Model" />
-									}
-								</div>
-							}
-							<ReCaptcha />
-							@if (AfterDisplayGroups != null)
-							{
-								<div class="after-display-groups">@AfterDisplayGroups</div>
-							}
-							@if (SubmitButton != null)
-							{
-								<SubmitButton Options="SubmitButton" />
-							}
-						</div>
-						@if (ChildContent != null)
-						{
-							<div class="child-content">
-								@ChildContent
-							</div>
-						}
-					</div>
-					if (FormFooter != null)
-					{
-						<div class="form-footer">@FormFooter</div>
-					}
-					if (AntiForgeryToken.IsNotBlank())
+		@if (Net8OrGreater)
+		{
+			<EditForm EditContext="EditContext"
+					  OnValidSubmit="HandleValidSubmit"
+					  OnInvalidSubmit="HandleInvalidSubmit"
+					  Enhance="Enhance"
+					  FormName="@(FormName ?? FormId)"
+					  id="@FormId" action="@FormAction" method="@FormMethod" enctype="@EncodingType"
+					  @attributes="AdditionalAttributes">
+                <CascadingValue Value="this">
+                    @* @if (EnableAntiforgeryToken)
+                    {
+						<Microsoft.AspNetCore.Components.Forms.AntiforgeryToken />
+                    } *@
+					@*
+						This issues a cascaded parameter to instances of the AutoInputBase component
+						so that it can access FormManagerBase-related members, such as OptionsGetter, etc.
+					*@
+					<AutoEditFormCascade TModel="TModel" DisplayGroups="DisplayGroups" />
+				</CascadingValue>
+			</EditForm>
+		}
+		else
+		{
+			<EditForm EditContext="EditContext"
+				OnValidSubmit="HandleValidSubmit"
+				OnInvalidSubmit="HandleInvalidSubmit"
+				id="@FormId" action="@FormAction" method="@FormMethod" enctype="@EncodingType"
+				@attributes="AdditionalAttributes">
+				<CascadingValue Value="this">
+					@if (EnableAntiforgeryToken && AntiForgeryToken.IsNotBlank())
 					{
 						@((MarkupString)AntiForgeryToken!)
 					}
-				}
-				else
-				{
-					@NotHiddenContent
-				}
-				<FormSubmitResultView />
-			</CascadingValue>
-		</EditForm>
+					<AutoEditFormCascade TModel="TModel" DisplayGroups="DisplayGroups" />
+				</CascadingValue>
+			</EditForm>
+		}
 		@if (EnableProgressBar && IsRunning)
 		{
 			<Html5ProgressBar Progress="(Progress ?? (BlazorFormManager.IO.ProgressChangedEventArgs?)ReadProgress)"

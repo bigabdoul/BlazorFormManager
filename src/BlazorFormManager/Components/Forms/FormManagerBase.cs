@@ -1,4 +1,5 @@
-﻿using BlazorFormManager.Components.UI;
+﻿using LoggingLevel = Microsoft.Extensions.Logging.LogLevel;
+using BlazorFormManager.Components.UI;
 using BlazorFormManager.Debugging;
 using BlazorFormManager.DOM;
 using BlazorFormManager.IO;
@@ -9,6 +10,7 @@ using Carfamsoft.Model2View.Shared;
 using Carfamsoft.Model2View.Shared.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,15 @@ using System.Timers;
 namespace BlazorFormManager.Components.Forms
 {
     /// <summary>
+    /// A delegate used to supply an alternative image when requested
+    /// during the rendering of the <see cref="InputFileImage"/> component.
+    /// </summary>
+    /// <param name="propertyName">The model's property name.</param>
+    /// <param name="currentImage">The current image, if any.</param>
+    /// <returns></returns>
+    public delegate string? ImageProviderDelegate(string propertyName, string? currentImage);
+
+    /// <summary>
     /// Provides core functionalities for handling AJAX form submissions
     /// with zero or more files, and report back data upload progress.
     /// </summary>
@@ -32,10 +43,12 @@ namespace BlazorFormManager.Components.Forms
 
         private bool _scriptInitialized;
         private bool _initializingScript;
+        private bool _mdb5InputsInitialized;
         private bool _disposed;
         private bool _parametersSet;
         private bool _isRunning;
         private object? _model;
+        private object? _lastOptions;
         private ConsoleLogLevel _logLevel;
         FormManagerSubmitResult? _submitResult;
         private EventCallback<DomDragEventArgs> _onDragStart;
@@ -43,9 +56,21 @@ namespace BlazorFormManager.Components.Forms
         private DotNetObjectReference<FormManagerBaseJSInvokable>? _thisObjRef;
         private readonly EventHandler<FieldChangedEventArgs> _fieldChangedHandler;
 
-        [Inject] private IJSRuntime? JS { get; set; }
+        /// <summary>
+        /// Gets or sets the injected <see cref="IJSRuntime"/>.
+        /// </summary>
+        [Inject] protected IJSRuntime JS { get; set; } = default!;
 
-        private const string BlazorFormManagerNS = "BlazorFormManager";
+        /// <summary>
+        /// Gets or sets thte injected <see cref="ILogger"/>.
+        /// </summary>
+        [Inject] protected ILogger<FormManagerBase> Logger { get; set; } = default!;
+
+        /// <summary>
+        /// The BlazorFormManager namespace name.
+        /// </summary>
+        protected const string BlazorFormManagerNS = "BlazorFormManager";
+
         private Timer? _stopWatchTimer;
         private readonly ElapsedEventHandler _stopWatchTimerElapsedHandler;
 
@@ -59,7 +84,7 @@ namespace BlazorFormManager.Components.Forms
         protected FormManagerBase()
         {
             _fieldChangedHandler = HandleFieldChanged;
-            _stopWatchTimerElapsedHandler = (s, e) => 
+            _stopWatchTimerElapsedHandler = (s, e) =>
                 InvokeAsync(StateHasChanged);
         }
 
@@ -72,6 +97,12 @@ namespace BlazorFormManager.Components.Forms
         /// and a response is received, regardless of the outcome.
         /// </summary>
         public event Action<FormManagerSubmitResult>? Submitted;
+
+        /// <summary>
+        /// Event handler invoked when a Blazor Server App's "enhancedload" event is triggered.
+        /// The string parameter represents the current navigation location's URL.
+        /// </summary>
+        public static event Func<string, Task>? OnEnhancedLoad;
 
         #endregion
 
@@ -140,7 +171,7 @@ namespace BlazorFormManager.Components.Forms
         /// Determines whether the content of the form should be hidden after a successful submission.
         /// </summary>
         [Parameter] public bool HideOnSuccess { get; set; }
-        
+
         /// <summary>
         /// Gets or sets custom HTML attributes to render.
         /// </summary>
@@ -182,6 +213,12 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         [Parameter]
         public EventCallback<FormManagerBase> OnAfterScriptInitialized { get; set; }
+
+        /// <summary>
+        /// Event handler invoked after the <see cref="FormManagerBase"/> component renders.
+        /// </summary>
+        [Parameter]
+        public EventCallback<bool> OnAfterFormRendered { get; set; }
 
         /// <summary>
         /// Event handler invoked before the form is submitted. If the form has validation errors
@@ -342,12 +379,33 @@ namespace BlazorFormManager.Components.Forms
         /// HTML form elements, such as input, select, textarea, etc.
         /// </summary>
         [Parameter] public bool GenerateInputNameAttribute { get; set; }
+#if NET7_0_OR_GREATER
+        = true;
+#endif
+
+        /// <summary>
+        /// Gets or sets a call back function invoked when an instance of 
+        /// the <see cref="InputFileImage"/> component requests an image.
+        /// You may use this delegate to provide an alternative size 
+        /// (such as a thumbnail) of the original image.
+        /// </summary>
+        [Parameter] public ImageProviderDelegate? OnImageRequested { get; set; }
+
+        /// <summary>
+        /// Gets or sets the base URI for images.
+        /// </summary>
+        [Parameter] public string? ImageBaseUri {  get; set; }
 
         /// <summary>
         /// Gets or sets a hidden input element (antiforgery token) 
         /// that will be validated when the form is submitted.
         /// </summary>
         [Parameter] public string? AntiForgeryToken { get; set; }
+
+        /// <summary>
+        /// Indicates whether the AntiforgeryToken component should be added to the form.
+        /// </summary>
+        [Parameter] public bool EnableAntiforgeryToken { get; set; } = true;
 
         /// <summary>
         /// If set, enables Google's reCAPTCHA technology.
@@ -361,18 +419,111 @@ namespace BlazorFormManager.Components.Forms
         [Parameter] public bool EnableRichText { get; set; }
 
         /// <summary>
+        /// Event raised when a rich text editor value changes.
+        /// </summary>
+        [Parameter] public EventCallback<RichTextChangedEventArgs> OnRichTextChanged { get; set; }
+
+        /// <summary>
         /// Gets or sets the culture for the current form.
         /// </summary>
-        [Parameter] public System.Globalization.CultureInfo? Culture { get; set; }
+        [Parameter] public CultureInfo? Culture { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Indicates whether the icon should be aligned on the label in floating form layout.
+        /// </summary>
+        [Parameter] public bool FloatingIcon { get; set; }
+        
+        /// <summary>
+        /// Indicates whether to generate MDBootstrap-compatible input elements.
+        /// </summary>
+        [Parameter] public bool MDBootstrap { get; set; }
+        
+        /// <summary>
+        /// Indicates whether to apply initializations to the current form or the entire document.
+        /// </summary>
+        [Parameter] public bool MDBootstrapScoped { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CSS query selector for form-outline inputs. The default value is '.form-outline'.
+        /// This property is used to dynamically initialize the inputs after the form is rendered.
+        /// <see cref="MDBootstrap"/> must be true for any initialization to happen.
+        /// </summary>
+        [Parameter] public string? MDBootstrapFormOutlineSelector { get; set; }
+
+        /// <summary>
+        /// If enabled, form submission is performed without fully reloading the page. This is
+        /// equivalent to adding <code>data-enhance</code> to the form.
+        ///
+        /// This flag is only relevant in server-side rendering (SSR) scenarios. For interactive
+        /// rendering, the flag has no effect since there is no full-page reload on submit anyway.
+        /// </summary>
+        [Parameter] public bool Enhance { get; set; }
+
+        /// <summary>
+        /// Determines whether to react to a Blazor Server App's "enhanceload" event.
+        /// This parameter allows resetting up specific aspects of the form, such as 
+        /// reinitializing the <see cref="ReCaptcha"/> options.
+        /// </summary>
+        [Parameter] public bool EnhancedLoad { get; set; } =
+#if NET8_0_OR_GREATER
+            true;
+#else
+			false;
+#endif
+
+        /// <summary>
+        /// Gets or sets the form handler name. This is required for posting it to a server-side endpoint.
+        /// It is not used during interactive rendering.
+        /// </summary>
+        [Parameter] public string? FormName { get; set; }
+#endregion
 
         #region read-only
 
         /// <summary>
-        /// Indicates whether the form currently has validation errors.
+        /// Indicates whether the supported framework is .NET 6 or greater.
         /// </summary>
-        public bool HasValidationErrors { get; protected set; }
+        public static readonly bool Net6OrGreater =
+#if NET6_0_OR_GREATER
+            true;
+#else
+            false;
+#endif
+
+        /// <summary>
+        /// Indicates whether the supported framework is .NET 7 or greater.
+        /// </summary>
+        public static readonly bool Net7OrGreater =
+#if NET7_0_OR_GREATER
+            true;
+#else
+            false;
+#endif
+
+        /// <summary>
+        /// Indicates whether the supported framework is .NET 8 or greater.
+        /// </summary>
+        public static readonly bool Net8OrGreater =
+#if NET8_0_OR_GREATER
+            true;
+#else
+			false;
+#endif
+
+        /// <summary>
+        /// Indicates whether the current configuration is DEBUG.
+        /// </summary>
+        public static readonly bool IsConfigDebug =
+#if DEBUG
+            true;
+#else
+            false;
+#endif
+
+		/// <summary>
+		/// Indicates whether the form currently has validation errors.
+		/// </summary>
+		public bool HasValidationErrors { get; protected set; }
 
         /// <summary>
         /// Gets the XMLHttpRequest properties from the last request.
@@ -394,7 +545,17 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         public ILocalStorage? LocalStorage { get; private set; }
 
-        #endregion
+        /// <summary>
+        /// Indicates whether the BlazorFormManager script has been initialized.
+        /// </summary>
+        public bool ScriptInitialized => _scriptInitialized;
+
+        /// <summary>
+        /// Indicates whether the <see cref="OnImageRequested"/> property has a delegate.
+        /// </summary>
+        public bool HasImageRequestedDelegate => OnImageRequested != null;
+
+#endregion
 
         /// <summary>
         /// Indicates whether the form has unsaved changes.
@@ -433,7 +594,7 @@ namespace BlazorFormManager.Components.Forms
             }
         }
 
-        #endregion
+#endregion
 
         #region initializations
 
@@ -442,7 +603,7 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         protected override void OnInitialized()
         {
-            LocalStorage = new LocalStorage(JS!)
+            LocalStorage = new LocalStorage(JS)
             {
                 ApplicationName = BlazorFormManagerNS,
             };
@@ -463,7 +624,7 @@ namespace BlazorFormManager.Components.Forms
                 _initializingScript = true;
                 try
                 {
-                    _thisObjRef = DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
+                    _thisObjRef ??= DotNetObjectReference.Create(new FormManagerBaseJSInvokable(this));
                     var hasProgressBar = EnableProgressBar;
 
                     if (Culture != null && ReCaptcha != null && (ReCaptcha.LanguageCode.IsBlank() || ReCaptcha.LanguageCode.EqualsIgnoreCase(ReCaptcha.LanguageCode = Culture.Name)))
@@ -478,28 +639,31 @@ namespace BlazorFormManager.Components.Forms
                         LogLevel,
                         RequireModel,
                         ReCaptcha,
+                        EnhancedLoad,
+                        OnEnhancedLoad = nameof(OnEnhancedLoadAsync),
                         // RequestHeaders, // can be done here but is currently set when BeforeSend(XhrResult) is invoked
-                        OnGetModel      = nameof(FormManagerBaseJSInvokable.OnGetModel),
-                        OnBeforeSubmit  = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
-                        OnBeforeSend    = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
-                        OnSendFailed    = nameof(FormManagerBaseJSInvokable.OnSendFailed),
+                        OnGetModel = nameof(FormManagerBaseJSInvokable.OnGetModel),
+                        OnBeforeSubmit = nameof(FormManagerBaseJSInvokable.OnBeforeSubmit),
+                        OnBeforeSend = nameof(FormManagerBaseJSInvokable.OnBeforeSend),
+                        OnSendFailed = nameof(FormManagerBaseJSInvokable.OnSendFailed),
                         OnSendSucceeded = nameof(FormManagerBaseJSInvokable.OnSendSucceeded),
                         OnReCaptchaActivity = nameof(FormManagerBaseJSInvokable.OnReCaptchaActivity),
                         OnUploadChanged = hasProgressBar ? nameof(FormManagerBaseJSInvokable.OnUploadChanged) : null,
 
                         // opt-in file reading event handlers
-                        OnReadFileList      = hasProgressBar || OnReadFileList.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnReadFileList) : null,
+                        OnReadFileList = hasProgressBar || OnReadFileList.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnReadFileList) : null,
                         OnFileReaderChanged = hasProgressBar || OnFileReaderProgressChanged.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnFileReaderChanged) : null,
-                        OnFileReaderResult  = OnFileReaderResult.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnFileReaderResult) : null,
+                        OnFileReaderResult = OnFileReaderResult.HasDelegate ? nameof(FormManagerBaseJSInvokable.OnFileReaderResult) : null,
 
                         OnDragStart = nameof(FormManagerBaseJSInvokable.OnDragStart),
-                        OnDrop      = nameof(FormManagerBaseJSInvokable.OnDrop),
+                        OnDrop = nameof(FormManagerBaseJSInvokable.OnDrop),
 
                         OnAjaxUploadWithProgressNotSupported = nameof(FormManagerBaseJSInvokable.OnAjaxUploadWithProgressNotSupported),
 
                         dotNetObjectReference = _thisObjRef
                     };
-
+                    
+                    _lastOptions = options;
                     await SafeInteropInitAsync(options);
 
                     AjaxUploadNotSupported = null;
@@ -521,7 +685,18 @@ namespace BlazorFormManager.Components.Forms
                 await ResetReCaptchaAsync();
             }
 
-            await base.OnAfterRenderAsync(firstRender);
+            if (OnAfterFormRendered.HasDelegate)
+            {
+                await OnAfterFormRendered.InvokeAsync(firstRender);
+            }
+
+            if (!_mdb5InputsInitialized && _scriptInitialized && MDBootstrap)
+            {
+                // make sure inputs are dynamically initialized
+                var options = new { FormId, Selector = MDBootstrapFormOutlineSelector, Scoped = MDBootstrapScoped };
+                await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.initMdbInput", options);
+                _mdb5InputsInitialized = true;
+            }
         }
 
         /// <summary>
@@ -535,7 +710,9 @@ namespace BlazorFormManager.Components.Forms
         /// <returns>A task that represents the initialization attempt.</returns>
         protected virtual async Task SafeInteropInitAsync(object options, int maxAttempts = 10, int millisecondsDelay = 500)
         {
-            _scriptInitialized = await JS!.SafeInvokeAsync<bool>(maxAttempts, millisecondsDelay, $"{BlazorFormManagerNS}.init", options);
+            options ??= _lastOptions!;
+            if (options is null) return;
+            _scriptInitialized = await JS.SafeInvokeAsync<bool>(maxAttempts, millisecondsDelay, $"{BlazorFormManagerNS}.init", options);
         }
 
         /// <summary>
@@ -551,8 +728,20 @@ namespace BlazorFormManager.Components.Forms
                 if (!ReCaptcha.LanguageCode.EqualsIgnoreCase(culture.Name))
                 {
                     ReCaptcha.LanguageCode = culture.Name;
-                    await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.resetRecaptcha", FormId, ReCaptcha);
+                    await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.resetRecaptcha", FormId, ReCaptcha);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Reconfigures the reCAPTCHA widgets.
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task ReConfigureReCaptchaAsync()
+        {
+            if (ReCaptcha != null)
+            {
+                await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.reConfigureRecaptcha", FormId, ReCaptcha);
             }
         }
 
@@ -569,7 +758,7 @@ namespace BlazorFormManager.Components.Forms
             if (!_scriptInitialized)
                 throw new InvalidOperationException($"{BlazorFormManagerNS} has not been initialized yet.");
 
-            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomScripts", FormId, scripts);
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomScripts", FormId, scripts);
         }
 
         /// <summary>
@@ -585,7 +774,7 @@ namespace BlazorFormManager.Components.Forms
             if (!_scriptInitialized)
                 throw new InvalidOperationException($"{BlazorFormManagerNS} has not been initialized yet.");
 
-            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomStyles", FormId, styles);
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.insertDomStyles", FormId, styles);
         }
 
         #endregion
@@ -616,12 +805,25 @@ namespace BlazorFormManager.Components.Forms
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                
+
                 if (throwOnError)
                     throw;
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Eventually fires the <see cref="OnRichTextChanged"/> event.
+        /// </summary>
+        /// <param name="navigationPath">The fully qualified property path that triggered the event.</param>
+        /// <param name="value">The value that changed.</param>
+        /// <returns></returns>
+        public Task RichTextChanged(string navigationPath, string? value)
+        {
+            if (OnRichTextChanged.HasDelegate)
+                return OnRichTextChanged.InvokeAsync(new(navigationPath, value));
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -696,7 +898,7 @@ namespace BlazorFormManager.Components.Forms
         public virtual async Task SubmitFormAsync()
         {
             EnsureScriptInitialized();
-            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.submitForm", FormId);
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.submitForm", FormId);
         }
 
         /// <summary>
@@ -706,6 +908,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         protected virtual async Task HandleValidSubmit(EditContext context)
         {
+            LogDebug($"Valid Submission. Current model: {Model}");
             SubmitResult = null;
             HasValidationErrors = false;
             StateHasChanged();
@@ -719,6 +922,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         protected virtual async Task HandleInvalidSubmit(EditContext context)
         {
+            LogDebug($"Invalid Submission. Current model: {Model}");
             SubmitResult = null;
             HasValidationErrors = true;
             StateHasChanged();
@@ -740,10 +944,10 @@ namespace BlazorFormManager.Components.Forms
                 _stopWatchTimer.Enabled = false;
 
             Progress = null;
-            
+
             if (success && HideOnSuccess)
                 ContentHidden = true;
-            
+
             if (_isRunning)
                 IsRunning = false;
             else
@@ -762,6 +966,42 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         public virtual Task NotifyStateChanged() => InvokeAsync(() => StateHasChanged());
 
+        /// <summary>
+        /// Sets the <see cref="OnFieldChanged"/> event callback.
+        /// </summary>
+        /// <param name="callback">The function to invoke when a field value changes.</param>
+        public void SetOnFieldChanged(EventCallback<FormFieldChangedEventArgs> callback)
+        {
+            EnableChangeTracking = true;
+            OnFieldChanged = callback;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="OnBeforeSubmit"/> event callback.
+        /// </summary>
+        /// <param name="callback">The function to invoke before the form is submitted.</param>
+        public void SetOnBeforeSubmit(EventCallback<CancelEventArgs> callback)
+        {
+            OnBeforeSubmit = callback;
+        }
+
+        /// <summary>
+        /// Invokes the <see cref="OnImageRequested"/> delegate, if any.
+        /// </summary>
+        /// <param name="propertyName">The model's property name for which an image is requested.</param>
+        /// <param name="image">The current image, if any.</param>
+        /// <returns></returns>
+        public string? RequestImage(string propertyName, string? image)
+        {
+            var imgFunc = OnImageRequested;
+            if (imgFunc != null)
+            {
+                var result = imgFunc.Invoke(propertyName, image);
+                return result;
+            }
+            return null;
+        }
+
         #region log level
 
         /// <summary>
@@ -779,7 +1019,7 @@ namespace BlazorFormManager.Components.Forms
         {
             if (_scriptInitialized)
             {
-                await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.setLogLevel", new { FormId, LogLevel = level });
+                await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.setLogLevel", new { FormId, LogLevel = level });
                 _logLevel = level;
                 return true;
             }
@@ -812,13 +1052,31 @@ namespace BlazorFormManager.Components.Forms
             IsRunning = true;
             AjaxUploadNotSupported = null;
 
+            var context = EditContext;
+
+            if (context != null && (OnValidSubmit.HasDelegate || OnInvalidSubmit.HasDelegate))
+            {
+                // OnValidSubmit/OnInvalidSubmit events are not triggered because
+                // the form submission is triggered programmatically via JavaScript;
+                if (context.Validate())
+                    await HandleValidSubmit(context);
+                else
+                    await HandleInvalidSubmit(context);
+            }
+
             if (OnBeforeSubmit.HasDelegate)
             {
                 var e = new CancelEventArgs(false);
                 await OnBeforeSubmit.InvokeAsync(e);
                 cancelled = e.Cancel;
             }
-            else cancelled = ValidateOnFieldChanged && HasValidationErrors;
+            else if (Net8OrGreater)
+                // if Enhance or FormName is specified in .NET 8
+                // and later, let's cancel the submission via XHR
+                // and let it be handled at a server-side endpoint;
+                cancelled = Enhance /*|| FormName.IsNotBlank()*/ || (ValidateOnFieldChanged && HasValidationErrors);
+            else
+                cancelled = ValidateOnFieldChanged && HasValidationErrors;
 
             IsRunning = !cancelled;
 
@@ -864,7 +1122,7 @@ namespace BlazorFormManager.Components.Forms
             if (RequestHeaders != null)
             {
                 xhr.RequestHeaders = RequestHeaders;
-                if (IsDebug) Console.WriteLine($"FormManager RequestHeaders set.");
+                LogDebug("FormManager RequestHeaders set.");
             }
             return Task.CompletedTask;
         }
@@ -946,6 +1204,21 @@ namespace BlazorFormManager.Components.Forms
         }
 
         /// <summary>
+        /// Event fired when a Blazor Server App's "enhancedload" event is triggered.
+        /// </summary>
+        /// <param name="locationUrl">The current navigation location's URL.</param>
+        /// <returns></returns>
+        [JSInvokable]
+        public static async Task OnEnhancedLoadAsync(string locationUrl)
+        {
+            var load = OnEnhancedLoad;
+            if (load != null)
+            {
+                await load.Invoke(locationUrl);
+            }
+        }
+
+        /// <summary>
         /// Invoked when the user's browser does not support AJAX upload 
         /// with progress report. Return false to continue form submission 
         /// using full-page refresh; otherwise, true to cancel the form submission.
@@ -978,7 +1251,7 @@ namespace BlazorFormManager.Components.Forms
         {
             EnsureScriptInitialized();
             Console.WriteLine($"Invoking {nameof(RaiseAjaxUploadWithProgressNotSupportedAsync)}...");
-            await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.raiseAjaxUploadWithProgressNotSupported", FormId);
+            await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.raiseAjaxUploadWithProgressNotSupported", FormId);
             StateHasChanged();
         }
 
@@ -1095,7 +1368,7 @@ namespace BlazorFormManager.Components.Forms
                 imagePreviewOptions,
             };
 
-            return JS!.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropEnable", options);
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropEnable", options);
         }
 
         /// <summary>
@@ -1107,7 +1380,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         public virtual ValueTask<FileReaderInvokeResult> UnregisterFileDragDropTargetAsync(string dropTargetId)
         {
-            return JS!.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropDisable", dropTargetId);
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropDisable", dropTargetId);
         }
 
         /// <summary>
@@ -1118,7 +1391,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         public virtual ValueTask<bool> DeleteDragDropFileListAsync(string targetId)
         {
-            return JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.dragDropRemoveFileList", new { FormId, targetId });
+            return JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.dragDropRemoveFileList", new { FormId, targetId });
         }
 
         /// <summary>
@@ -1129,7 +1402,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         public virtual ValueTask<bool> DeleteProcessedFileListAsync(string? inputId = null)
         {
-            return JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.deleteProcessedFileList", new { FormId, inputId });
+            return JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.deleteProcessedFileList", new { FormId, inputId });
         }
 
         /// <summary>
@@ -1156,7 +1429,7 @@ namespace BlazorFormManager.Components.Forms
                 Method = method,
             };
 
-            return JS!.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropInputFilesOnTarget", options);
+            return JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.dragDropInputFilesOnTarget", options);
         }
 
         /// <summary>
@@ -1205,7 +1478,7 @@ namespace BlazorFormManager.Components.Forms
         private bool _lastUploadHadFiles;
         private bool _fileListReading;
         private InputFileInfo? _currentFile;
-        
+
         #endregion
 
         #region properties
@@ -1272,7 +1545,7 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         public bool IsRunning
         {
-            get => _isRunning; 
+            get => _isRunning;
             private set
             {
                 if (value != _isRunning)
@@ -1403,8 +1676,7 @@ namespace BlazorFormManager.Components.Forms
         /// <summary>
         /// Event handler invoked when a change in the file read process occurs.
         /// </summary>
-        [Parameter]
-        public EventCallback<FileReaderProgressChangedEventArgs> OnFileReaderProgressChanged { get; set; }
+        [Parameter] public EventCallback<FileReaderProgressChangedEventArgs> OnFileReaderProgressChanged { get; set; }
 
         /// <summary>
         /// Event handler invoked when a JavaScript file reading operation is 
@@ -1472,7 +1744,7 @@ namespace BlazorFormManager.Components.Forms
                 Multiple = multiple,
                 ImagePreviewOptions = previewOptions,
             });
-            
+
             /* using anonymous type options
             
             if (method == FileReaderMethod.ReadAsDataURL)
@@ -1538,7 +1810,7 @@ namespace BlazorFormManager.Components.Forms
         public virtual async Task<FileReaderInvokeResult> ReadFileAsync<T>(T options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            return await JS!.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.readInputFiles", options);
+            return await JS.InvokeAsync<FileReaderInvokeResult>($"{BlazorFormManagerNS}.readInputFiles", options);
         }
 
         /// <summary>
@@ -1560,7 +1832,7 @@ namespace BlazorFormManager.Components.Forms
                     IsRunning = true;
                     AbortRequested = false;
                     ReadFileListStatus = $"File list reading started with {e.TotalFilesToRead} file(s).";
-                    
+
                     StartStopWatch();
                     StateHasChanged();
                     break;
@@ -1728,6 +2000,40 @@ namespace BlazorFormManager.Components.Forms
             if (EditContext == null) SetEditContext();
         }
 
+        #region Logging
+
+        /// <summary>
+        /// Formats and writes an information log message.
+        /// </summary>
+        /// <param name="message">Format string of the log message in message template format.</param>
+        protected void LogInformation(string? message)
+        {
+            if (LogLevel == ConsoleLogLevel.Information || Logger.IsEnabled(LoggingLevel.Information))
+                Logger.LogInformation("{InformationMessage}", message);
+        }
+
+        /// <summary>
+        /// Formats and writes a warning log message.
+        /// </summary>
+        /// <param name="message">Format string of the log message in message template format.</param>
+        protected void LogWarning(string? message)
+        {
+            if (LogLevel == ConsoleLogLevel.Warning || Logger.IsEnabled(LoggingLevel.Warning))
+                Logger.LogWarning("{WarningMessage}", message);
+        }
+
+        /// <summary>
+        /// Formats and writes a debug log message.
+        /// </summary>
+        /// <param name="message">Format string of the log message in message template format.</param>
+        protected void LogDebug(string? message)
+        {
+            if (IsDebug || Logger.IsEnabled(LoggingLevel.Debug))
+                Logger.LogDebug("{DebugMessage}", message);
+        }
+
+        #endregion
+
         #region helpers
 
         /// <summary>
@@ -1741,7 +2047,7 @@ namespace BlazorFormManager.Components.Forms
         protected async Task<bool> UpdateScriptOptionsAsync(object options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            var success = await JS!.InvokeAsync<bool>($"{BlazorFormManagerNS}.updateOptions", options);
+            var success = await JS.InvokeAsync<bool>($"{BlazorFormManagerNS}.updateOptions", options);
             return success;
         }
 
@@ -1812,9 +2118,9 @@ namespace BlazorFormManager.Components.Forms
         internal FileCapableAttributeBase? GetFileCapableAttributes(string propertyName, out ImagePreviewAttribute? imgAttr)
         {
             var attributes = GetAttributes(propertyName).ToArray();
-            var attr = attributes.OfType<DragDropAttribute>().FirstOrDefault() ?? 
+            var attr = attributes.OfType<DragDropAttribute>().FirstOrDefault() ??
                 attributes.OfType<FileCapableAttributeBase>().FirstOrDefault();
-            
+
             imgAttr = attributes.OfType<ImagePreviewAttribute>().FirstOrDefault();
             return attr;
         }
@@ -1842,7 +2148,7 @@ namespace BlazorFormManager.Components.Forms
             {
                 if (ValidateOnFieldChanged)
                     HasValidationErrors = true == EditContext?.Validate();
-                
+
                 EditContext?.NotifyFieldChanged(e.FieldIdentifier);
             }
 
@@ -1887,7 +2193,7 @@ namespace BlazorFormManager.Components.Forms
                     DetachFieldChangedListener();
 
                     _thisObjRef?.Dispose();
-                    
+
                     Stopwatch?.Stop();
 
                     if (_stopWatchTimer != null)
@@ -1910,7 +2216,7 @@ namespace BlazorFormManager.Components.Forms
             {
                 try
                 {
-                    await JS!.InvokeVoidAsync($"{BlazorFormManagerNS}.destroy", FormId);
+                    await JS.InvokeVoidAsync($"{BlazorFormManagerNS}.destroy", FormId);
                 }
                 catch
                 {
@@ -1919,5 +2225,32 @@ namespace BlazorFormManager.Components.Forms
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Contains event data for rich text editor value changes.
+    /// </summary>
+    public sealed class RichTextChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RichTextChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="navigationPath">The fully qualified property path that triggered the event.</param>
+        /// <param name="value">The value that changed.</param>
+        public RichTextChangedEventArgs(string navigationPath, string? value)
+        {
+            PropertyNavigationPath = navigationPath;
+            Value = value;
+        }
+
+        /// <summary>
+        /// Gets the fully qualified property path that triggered the event.
+        /// </summary>
+        public string PropertyNavigationPath { get; }
+
+        /// <summary>
+        /// Gets the value that changed.
+        /// </summary>
+        public string? Value { get; }
     }
 }

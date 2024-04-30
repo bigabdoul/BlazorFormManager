@@ -1,4 +1,6 @@
-﻿.form-floating {
+﻿/*
+
+.form-floating {
     position: relative;
 }
 
@@ -73,3 +75,35 @@
         width: 100%;
         font-weight: 600;
     }
+*/
+.form-floating > .form-control {
+    height: 45px;
+    min-height: 45px;
+}
+
+    .form-floating > .form-control:not(:placeholder-shown) {
+        padding-top: 1rem;
+    }
+
+        .form-floating > .form-control:not(:placeholder-shown) ~ label::after {
+            background-color: transparent;
+        }
+
+.form-floating .form-control ~ .form-label {
+    position: absolute;
+    top: 13px;
+    max-width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-top: .37rem;
+    pointer-events: none;
+    transform-origin: 0 0;
+    transition: all .2s ease-out;
+    color: var(--mdb-form-control-label-color);
+    margin-bottom: 0;
+}
+
+.form-floating .form-control:focus ~ .form-label, .form-floating .form-control.active ~ .form-label {
+    transform: translateY(-1rem) translateY(0.1rem) scale(0.8);
+}

@@ -1,6 +1,7 @@
 ﻿@{
-	var attrs = GetAttributes(
-		("id", Id),
+	var attrs = GetAttributes
+	(
+		("id", Id ?? $"{TargetId}-tab"),
 		("class", "nav-link" + (IsActive ? " active" : "")),
 		("aria-current", IsActive ? "page" : ""),
 		("aria-controls", TargetId),
@@ -10,12 +11,13 @@
 	);
 }
 <li class="nav-item" role="presentation">
-	<button @attributes="attrs" type="button" role="tab">@ChildContent</button>
+	<button @attributes="attrs" type="button" role="tab" @onclick="OnClick">@ChildContent</button>
 </li>
 
 @code {
 	[Parameter] public string? Id { get; set; }
 	[Parameter] public string? TargetId { get; set; }
 	[Parameter] public bool IsActive { get; set; }
+	[Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
 	[Parameter] public RenderFragment? ChildContent { get; set; }
 }

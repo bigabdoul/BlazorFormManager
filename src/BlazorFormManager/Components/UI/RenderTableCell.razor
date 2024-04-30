@@ -6,6 +6,8 @@
         <td @attributes="attrs" @onclick="onclick">
             @if (value is MarkupString ms)
                 @ms
+            else if (value is RenderFragment rf)
+                @rf
             else
                 @Data
         </td>
@@ -15,6 +17,8 @@
         <td @attributes="attrs">
             @if (value is MarkupString ms)
                 @ms
+            else if (value is RenderFragment rf)
+                @rf
             else
                 @Data
         </td>

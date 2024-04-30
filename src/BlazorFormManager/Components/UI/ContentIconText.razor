@@ -1,30 +1,49 @@
-﻿@if (ChildContent != null)
-{ 
-	@ChildContent
-}
-else
-{
+﻿@{
 	if (Icon.IsNotBlank())
 	{
 		if (IconSpan)
 		{
-			<text><span class="@Icon"></span>&nbsp;</text>
+			<span class="@Icon"></span>
 		}
 		else
 		{
-			<text><i class="@Icon"></i>&nbsp;</text>
+			<span><i class="@Icon"></i></span>
 		}
 	}
-	if (Text.IsNotBlank())
+	if (ChildContent is not null || Text.IsNotBlank())
 	{
-		<span @attributes="@(GetAttributes(("class", TextBlock ? "d-block" : null)))">@Text</span>
+		if (ChildContent is null)
+		{
+			var attrs = GetAttributes
+			(
+				("class", InlineBlock ? "d-inline-block mx-1" : (TextBlock ? "d-block mx-1" : "mx-1"))
+			);
+			<span @attributes="@attrs">@Text</span>
+		}
+		else
+		{
+			@ChildContent
+		}
+	}
+	if (IconEnd.IsNotBlank())
+	{
+		if (IconSpan)
+		{
+			<span class="@IconEnd"></span>
+		}
+		else
+		{
+			<span><i class="@IconEnd"></i></span>
+		}
 	}
 }
 
 @code {
 	[Parameter] public string? Text { get; set; }
 	[Parameter] public bool TextBlock { get; set; }
+	[Parameter] public bool InlineBlock { get; set; }
 	[Parameter] public string? Icon { get; set; }
+	[Parameter] public string? IconEnd { get; set; }
 	[Parameter] public bool IconSpan { get; set; }
 	[Parameter] public RenderFragment? ChildContent { get; set; }
 }

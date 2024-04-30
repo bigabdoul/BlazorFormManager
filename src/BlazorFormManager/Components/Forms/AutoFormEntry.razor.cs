@@ -1,6 +1,8 @@
 ﻿using Carfamsoft.Model2View.Annotations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using System.Collections.Generic;
+using System.IO;
 
 namespace BlazorFormManager.Components.Forms
 {
@@ -42,23 +44,29 @@ namespace BlazorFormManager.Components.Forms
         /// </summary>
         [CascadingParameter] protected FormManagerBase? Form { get; set; }
 
-        /// <summary>
-        /// Gets the input's identifier.
-        /// </summary>
-        protected string InputId { get; private set; } = string.Empty;
+        ///// <summary>
+        ///// Gets the input's identifier.
+        ///// </summary>
+        //protected string InputId { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// Gets the input's name.
-        /// </summary>
-        protected string InputName { get; private set;} = string.Empty;
+        ///// <summary>
+        ///// Gets the input's name.
+        ///// </summary>
+        //protected string InputName { get; private set;} = string.Empty;
+
+        /// <inheritdoc/>
+        protected override void OnInitialized()
+        {
+            var (id, name) = Metadata.GenerateIdAndName(Form?.RenderOptions, PropertyNavigationPath, Id);
+            if (string.IsNullOrWhiteSpace(Id)) Id = id;
+            if (string.IsNullOrWhiteSpace(Name)) Name = name;
+        }
 
         /// <inheritdoc/>
         protected override void OnParametersSet()
         {
             if (Metadata == null)
                 throw new System.ArgumentNullException(nameof(Metadata));
-
-            (InputId, InputName) = Metadata.GenerateIdAndName(Form?.RenderOptions, PropertyNavigationPath, Id);
 
             if (Model != null)
             {
@@ -76,7 +84,11 @@ namespace BlazorFormManager.Components.Forms
             {
                 if (HasValueChanged(value, out var changedEventArgs))
                 {
-                    Metadata!.SetValue(Model, value);
+                    if (value is string svalue && !string.IsNullOrEmpty(svalue))
+                    {
+                        svalue = Path.GetFileName(svalue);
+                        Metadata!.SetValue(Model, svalue);
+                    }
                     Form?.NotifyFieldChanged(changedEventArgs!);
                 }
             }
@@ -90,7 +102,7 @@ namespace BlazorFormManager.Components.Forms
         /// <returns></returns>
         protected bool HasValueChanged(object? value, out FormFieldChangedEventArgs? result)
         {
-            return AutoInputBase.GetNotifyFieldChangedArgs(out result, Value, value, Metadata, InputId, _fieldIdentifier);
+            return AutoInputBase.GetNotifyFieldChangedArgs(out result, Value, value, Metadata, Id, _fieldIdentifier);
         }
     }
 }

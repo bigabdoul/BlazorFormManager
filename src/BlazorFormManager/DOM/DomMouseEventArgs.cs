@@ -14,6 +14,7 @@ namespace BlazorFormManager.DOM
         {
         }
 
+#if NET6_0
         /// <summary>
         /// Indicates the X-movement coordinate.
         /// </summary>
@@ -23,6 +24,7 @@ namespace BlazorFormManager.DOM
         /// Indicates the Y-movement coordinate.
         /// </summary>
         public double MovementY { get; set; }
+#endif
 
 #if NETSTANDARD2_0
         /// <summary>

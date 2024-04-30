@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<Description>Provides core functionalities for handling AJAX form submissions with zero or more files, and report back data upload progress. It supports automatic form (UI) generation from metadata-decorated .NET object models. It also supports easy integration of Google's reCAPTCHA technology and the Quill Rich Text Editor (https://quilljs.com).</Description>
 		<Copyright>© 2020 Karfamsoft. All rights reserved.</Copyright>
 		<Authors>Abdourahamane Kaba</Authors>
 		<Company>Karfamsoft</Company>
+		<NoWarn>BL0007;RZ10012</NoWarn>
 		<PackageLicenseExpression>Apache-2.0+</PackageLicenseExpression>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -52,30 +53,31 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 	</ItemGroup>
 	
 	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.6" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.32" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.32" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.26" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.26" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.15" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
 		<ProjectReference Include="..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />
+		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Shared\Carfamsoft.Model2View.Shared.csproj" />
 	</ItemGroup>
 	
 </Project>

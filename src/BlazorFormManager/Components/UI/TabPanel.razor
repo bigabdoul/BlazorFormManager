@@ -1,11 +1,13 @@
 ﻿@{
-	var attrs = GetAttributes(
+	var attrs = AdditionalAttributes.Merge(GetAttributes
+	(
 		("id", Id),
+		("role", "tabpanel"),
 		("class", "tab-pane fade" + (IsActive ? " show active" : "")),
 		("aria-labelledby", $"{Id}-tab")
-	);
+	));
 }
-<div @attributes="attrs" role="tabpanel">
+<div @attributes="attrs">
 	@ChildContent
 </div>
 
@@ -13,4 +15,5 @@
 	[Parameter] public string? Id { get; set; }
 	[Parameter] public bool IsActive { get; set; }
 	[Parameter] public RenderFragment? ChildContent { get; set; }
+	[Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object?>? AdditionalAttributes{ get; set; }
 }

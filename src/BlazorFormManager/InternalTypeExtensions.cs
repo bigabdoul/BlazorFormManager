@@ -1,4 +1,5 @@
 ﻿using Carfamsoft.Model2View.Shared;
+using Carfamsoft.Model2View.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -66,7 +67,7 @@ namespace BlazorFormManager
 
         public static IEnumerable<SelectOption> OptionsFromDateRange(string min, string max, CultureInfo? convertCulture = null, double step = 1.0)
         {
-            if (convertCulture is null) convertCulture = CultureInfo.CurrentCulture;
+            convertCulture ??= CultureInfo.CurrentCulture;
 
             var dateMin = DateTime.Parse(min, convertCulture);
             var dateMax = DateTime.Parse(max, convertCulture);
@@ -143,12 +144,23 @@ namespace BlazorFormManager
 
         public static bool SupportsInputNumber(this Type? targetType)
         {
-            return targetType == typeof(int) ||
-                    targetType == typeof(long) ||
-                    targetType == typeof(short) ||
-                    targetType == typeof(float) ||
-                    targetType == typeof(double) ||
-                    targetType == typeof(decimal);
+            if (targetType is null) return false;
+            if (targetType.IsEnum)
+            {
+                targetType = Enum.GetUnderlyingType(targetType);
+            }
+            return 
+                targetType == typeof(byte) ||
+                targetType == typeof(sbyte) ||
+                targetType == typeof(short) ||
+                targetType == typeof(ushort) ||
+                targetType == typeof(int) ||
+                targetType == typeof(uint) ||
+                targetType == typeof(long) ||
+                targetType == typeof(ulong) ||
+                targetType == typeof(float) ||
+                targetType == typeof(double) ||
+                targetType == typeof(decimal);
         }
 
         public static bool IsString(this Type? t) => t == typeof(string);

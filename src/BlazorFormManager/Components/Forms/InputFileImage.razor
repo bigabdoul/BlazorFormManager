@@ -1,0 +1,42 @@
+﻿@inherits AutoFormEntryBase
+
+@{
+    var marginbottom = Description.IsNotBlank() ? "mb-1" : "mb-3";
+    var hasImage = Form.TryGetImageUrl("src", out var src, ImageAttributes) && src.IsNotBlank();
+    <div class="input-group auto-input-file input-file-image @marginbottom">
+        <HiddenFileInput AdditionalAttributes="AdditionalAttributes" Text="@Description" />
+        <div class="d-flex">
+            @if (hasImage)
+            {
+                // create a copy of the dictionary and modify the 'src' attribute
+                var attrs = ImageAttributes.Merge(new Dictionary<string, object?>());
+                attrs["src"] = src;
+                <img @attributes="attrs" />
+            }
+            <label class="input-group-text" for="@Id">
+                <ContentIconText Icon="@Metadata?.Attribute.Icon" Text="@DisplayName" />
+            </label>
+            @{
+#if !NETSTANDARD2_0
+            <InputFile OnChange="OnFileChange" AdditionalAttributes="AdditionalAttributes" />
+#else
+            <input type="file" @onchange="e => Value = e.Value" @attributes="AdditionalAttributes">
+#endif
+            }
+        </div>
+        @ChildContent
+    </div>
+    <HelpText Description="@Description" />
+}
+
+@code {
+    [Parameter] public string? DisplayName { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public IDictionary<string, object?>? ImageAttributes { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IDictionary<string, object?>? AdditionalAttributes { get; set; }
+    [Parameter] public RenderFragment? ChildContent{ get; set; }
+
+#if !NETSTANDARD2_0
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnFileChange { get; set; }
+#endif
+}

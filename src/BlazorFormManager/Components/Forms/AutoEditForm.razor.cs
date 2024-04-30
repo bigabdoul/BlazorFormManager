@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace BlazorFormManager.Components.Forms
 {
-    /// <summary>
-    /// Represents a form that automatically generates inputs based on declarative layout specifications.
-    /// </summary>
-    /// <typeparam name="TModel">The type of the model.</typeparam>
-    public abstract class AutoEditFormBase<TModel> : FormManagerBase<TModel>
+	/// <summary>
+	/// Represents a form that automatically generates inputs based on declarative layout specifications.
+	/// </summary>
+	/// <typeparam name="TModel">The type of the model.</typeparam>
+	public abstract class AutoEditFormBase<TModel> : FormManagerBase<TModel>
     {
-        /// <summary>
-        /// Gets the collection of <see cref="FormDisplayGroupMetadata"/> retrieved from
-        /// layout attributes of the associated model.
-        /// </summary>
-        protected IReadOnlyCollection<FormDisplayGroupMetadata>? DisplayGroups { get; private set; }
+		/// <summary>
+		/// Gets the collection of <see cref="FormDisplayGroupMetadata"/> retrieved from
+		/// layout attributes of the associated model.
+		/// </summary>
+		protected IReadOnlyCollection<FormDisplayGroupMetadata>? DisplayGroups { get; private set; }
 
         /// <summary>
         /// Gets or sets the form header render fragment.

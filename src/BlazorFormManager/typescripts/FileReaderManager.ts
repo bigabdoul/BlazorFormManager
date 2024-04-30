@@ -478,12 +478,11 @@ export class FileReaderManager {
      * @param {{formId: string; inputId?: string}} options
      */
     deleteProcessedFileList(options: { formId: string; inputId?: string }) {
-        logDebug("Deleting processed files with options: ", options);
-
         const { formId, inputId } = options || {};
         const config = this._processedFileStorage[formId];
 
         if (config) {
+            logDebug("Deleting processed files with options: ", options);
             const inputs = config.inputs;
 
             if (inputId && inputs) {
@@ -500,7 +499,7 @@ export class FileReaderManager {
             logDebug("Deleted processed file storage for form #" + formId);
             return true;
         } else {
-            logDebug("No processed files associated with form #" + formId);
+            //logDebug("No processed files associated with form #" + formId);
         }
 
         return false;

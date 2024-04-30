@@ -67,15 +67,19 @@
 	}
 
 	/// <inheritdoc />
+	protected override void OnInitialized()
+	{
+		if (Form is not null)
+			Form.Submitted += HandleSubmitDone;
+	}
+
+	/// <inheritdoc />
 	protected override void OnParametersSet()
 	{
 		if (Form is null) 
 			throw new InvalidOperationException(
 			$"The {nameof(FormRedirect)} component must be a child of an instance " +
 			$"of the {nameof(FormManagerBase)} component.");
-
-		Form.Submitted += HandleSubmitDone;
-
 		base.OnParametersSet();
 	}
 

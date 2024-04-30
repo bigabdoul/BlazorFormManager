@@ -246,31 +246,43 @@ class Utils {
      * @param onload The event handler to fire when the browser loads a stylesheet.
      * @param formId The form identifier.
      */
-    static insertStyles(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string) {
-        if (!(sources instanceof Array))
-            sources = [sources];
+    static insertStyles(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string) : Promise<boolean> {
+        return new Promise((resolve, reject) => {
 
-        const head = Utils.getOrCreateHead();
+            if (!(sources instanceof Array))
+                sources = [sources];
 
-        for (let i = 0; i < sources.length; i++) {
-            const src = sources[i];
-            const link = document.querySelector(`link[href="${src}"]`);
-            const exists = !!link;
+            const head = Utils.getOrCreateHead();
+            let count = sources.length;
 
-            if (exists) {
-                const rel = link.attributes["rel"];
-                if (!rel || rel.value === "stylesheet") {
-                    logDebug(formId, `The CSS style ${src} is already in the DOM.`)
-                    continue;
+            for (let i = 0; i < sources.length; i++) {
+                const src = sources[i];
+                const link = document.querySelector(`link[href="${src}"]`);
+
+                if (link) {
+                    const rel = link.attributes["rel"];
+                    if (!rel || rel.value === "stylesheet") {
+                        count--;
+                        logDebug(formId, `The CSS style ${src} is already in the DOM.`)
+                        if (count <= 0) {
+                            resolve(true);
+                            return;
+                        }
+                        continue;
+                    }
                 }
-            }
 
-            let s = document.createElement("link");
-            if (onload) s.onload = onload;
-            s.href = src;
-            s.rel = "stylesheet";
-            head.appendChild(s);
-        }
+                const s = document.createElement("link");
+                s.onload = e => {
+                    if (onload) onload.call(s, e);
+                    if (--count <= 0) resolve(true);
+                }
+                s.onerror = e => reject(e);
+                s.href = src;
+                s.rel = "stylesheet";
+                head.appendChild(s);
+            }
+        });
     }
 
     /**
@@ -278,29 +290,53 @@ class Utils {
      * @param sources A URL or array of URL of the scripts to load.
      * @param onload The event handler to fire when the browser loads a script.
      * @param formId The form identifier.
+     * @param isAsync Sets the script's async property.
+     * @param isDeferred Sets the scripts defer property.
      */
-    static insertScripts(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string) {
-        if (!(sources instanceof Array))
-            sources = [sources];
+    static insertScripts(sources: string | Array<string>, onload?: (this: GlobalEventHandlers, ev: Event) => any, formId?: string, isAsync?: boolean, isDeferred?: boolean) : Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!(sources instanceof Array))
+                sources = [sources];
 
-        const head = Utils.getOrCreateHead();
+            const head = Utils.getOrCreateHead();
+            let count = sources.length;
 
-        for (let i = 0; i < sources.length; i++) {
-            const src = sources[i];
-            const exists = !!document.querySelector(`script[src="${src}"]`);
+            for (let i = 0; i < sources.length; i++) {
+                const src = (sources[i]||'').trim();
 
-            if (exists) {
-                logDebug(formId, `The script ${src} is already in the DOM.`)
-                continue;
+                if (!src || src.length === 0) {
+                    const msg = 'Cannot load an empty script source.';
+                    logDebug(formId, msg);
+                    reject(new Error(msg));
+                    return;
+                }
+
+                const existing = document.querySelector(`script[src="${src}"]`);
+
+                if (existing) {
+                    count--;
+                    //logDebug(formId, `The script ${src} has already been loaded into the DOM.`);
+                    if (onload) onload.call(existing, new Event('load'));
+                    if (count <= 0) {
+                        resolve(true);
+                        return;
+                    }
+                    continue;
+                }
+
+                const s = document.createElement("script");
+
+                s.onload = e => {
+                    if (onload) onload.call(s, e);
+                    if (--count <= 0) resolve(true);
+                }
+                s.onerror = e => reject(e);
+                s.src = src;
+                s.async = isAsync || false;
+                s.defer = isDeferred || false;
+                head.appendChild(s);
             }
-
-            const s = document.createElement("script");
-            if (onload) s.onload = onload;
-            s.src = src;
-            s.async = true;
-            s.defer = true;
-            head.appendChild(s);
-        }
+        });
     }
 
     /** Get, or create and insert, the 'head' DOM element. */

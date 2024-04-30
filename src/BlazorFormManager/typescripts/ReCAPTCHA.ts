@@ -5,9 +5,16 @@ import { SimpleEvent } from "./SimpleEvent";
 
 const global = globalThis;
 const RECAPTCHA_SCRIPT_BASE_URL = 'https://www.google.com/recaptcha/api.js';
+const OPTIONS: {[siteKey: string]: ReCaptchaOptions} = {};
 
 /** Seamlessly integrates Google's reCAPTCHA technology. */
 export class ReCAPTCHA {
+    /**
+     * Initialize a new instance of the ReCAPTCHA class.
+     */
+    constructor() {
+    }
+
     private _greCAPTCHA: ReCaptchaConfig = {
         callbacks: {},
         scripts: {
@@ -21,27 +28,44 @@ export class ReCAPTCHA {
 
     private _activityEvent = new SimpleEvent<ReCaptchaActivity>();
 
+    /** Expose the activity event. */
     get activity() {
         return this._activityEvent.expose();
+    }
+
+    /** Return the reCAPTCHA options. */
+    get options() {
+        return OPTIONS;
     }
 
     /**
      * Configure the reCAPTCHA for the specified form identifier.
      * @param formId The form identifier.
      * @param reCaptcha The configuration options.
+     * @param isReconfiguring Indicates whether the configuration is being repeated.
      */
-    configure(formId: string, reCaptcha: ReCaptchaOptions) {
+    configure(formId: string, reCaptcha: ReCaptchaOptions, isReconfiguring = false) {
         const { scripts } = this._greCAPTCHA;
+        isReconfiguring || (isReconfiguring = !reCaptcha);
+
+        reCaptcha
+            ? (OPTIONS[reCaptcha.siteKey] = reCaptcha)
+            : (reCaptcha = this.getFirstOption() || { siteKey: '', version: '' });
+
+        if (!reCaptcha) {
+            logError(formId, 'Cannot configure reCAPTCHA when the options are missing.');
+            return false;
+        }
+
+        logDebug(formId, 'Configuring reCAPTCHA with options', reCaptcha);
 
         const {
-            siteKey,
             version,
             verificationTokenName,
-            invisible
+            invisible,
         } = reCaptcha;
 
         const ver = (version || '').toLowerCase();
-
         let url = scripts[ver] + '';
         let success = false;
 
@@ -67,9 +91,8 @@ export class ReCAPTCHA {
 
                         if (xhr && formData) {
                             this.reportActivity(formId);
-                            formData.set(verificationTokenName, token);
-                            formData.set('g-recaptcha-version', ver);
-                            xhr.send(formData);
+                            const obj = this.getData(formId, formData, verificationTokenName, token, ver);
+                            xhr.send(obj);
                         } else {
                             const message = 'reCAPTCHA: xhr and formData properties not set.';
                             logError(formId, message);
@@ -94,44 +117,123 @@ export class ReCAPTCHA {
                 }
             }
 
-            if (!(scripts.inserted || scripts.inserting)) {
-                scripts.inserting = true;
-                if (ver === 'v3') url += siteKey;
-                logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
-
-                const s = document.createElement('script');
-                const heads = document.getElementsByTagName('head');
-
-                s.async = true;
-                s.defer = true;
-                s.src = url;
-
-                s.onload = () => {
-                    scripts.inserted = true;
-                    scripts.inserting = false;
-                };
-
-                s.onerror = () => {
-                    heads[0].removeChild(s);
-                    scripts.inserted = false;
-                    scripts.inserting = false;
-                };
-
-                if (heads.length === 0) {
-                    const h = document.createElement('head');
-                    document.appendChild(h);
-                    h.appendChild(s);
-                } else {
-                    heads[0].appendChild(s);
-                }
-
-                logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+            if (isReconfiguring) {
+                scripts.inserted = !this.requiresReCaptcha(formId);
+                scripts.inserting = false;
             }
 
+            this.insertScript(formId, reCaptcha);
             success = true;
         }
 
         return success;
+
+    }
+
+    /**
+     * Attempt to insert a Google reCAPTCHA script into the document.
+     * @param formId The form identifier.
+     * @param reCaptcha The reCAPTCHA configuration options.
+     * @returns {boolean} true if reCAPTCHA is required; otherwise, false.
+     */
+    insertScript(formId?: string, reCaptcha?: ReCaptchaOptions) {
+        logDebug(formId, 'Attempting reCAPTCHA script tag insertion...');
+
+        const { scripts, } = this._greCAPTCHA;
+        const shouldInsert = !scripts.inserted && !scripts.inserting && this.requiresReCaptcha(formId);
+
+        if (shouldInsert) {
+            scripts.inserting = true;
+
+            reCaptcha
+                ? (OPTIONS[reCaptcha.siteKey] = reCaptcha)
+                : (reCaptcha = this.getFirstOption() || { siteKey: '', version: '' });
+
+            const {
+                siteKey,
+                version,
+            } = reCaptcha;
+
+            const ver = (version || '').toLowerCase();
+            let url = scripts[ver] + '';
+
+            if (ver === 'v3') url += siteKey;
+            logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
+
+            const s = document.createElement('script');
+            const heads = document.getElementsByTagName('head');
+
+            s.async = true;
+            s.defer = true;
+            s.src = url;
+
+            s.onload = () => {
+                scripts.inserted = true;
+                scripts.inserting = false;
+                this.reportActivity(formId, { formId, message: 'reCAPTCHA script loaded.', type: 'scriptload' });
+            };
+
+            s.onerror = () => {
+                heads[0].removeChild(s);
+                scripts.inserted = false;
+                scripts.inserting = false;
+                this.reportActivity(formId, { formId, message: 'Failed to load reCAPTCHA script.', type: 'scriptloaderror' });
+            };
+
+            if (heads.length === 0) {
+                const h = document.createElement('head');
+                document.appendChild(h);
+                h.appendChild(s);
+            } else {
+                heads[0].appendChild(s);
+            }
+
+            logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+            return true;
+        } else if (scripts.inserted) {
+            logDebug(formId, 'reCAPTCHA script has already been inserted.');
+        } else if (scripts.inserting) {
+            logDebug(formId, 'reCAPTCHA script is being inserted.');
+        }
+        return false;
+    }
+
+    /**
+     * Check if the document requires reCAPTCHA.
+     * @param formId The form identifier.
+     * @returns {boolean} true if reCAPTCHA is required; otherwise, false.
+     */
+    requiresReCaptcha(formId?: string) {
+        const requires = (
+            // check if there's any form in the document
+            document.querySelectorAll('form').length &&
+
+            // make sure there's no script starting with the reCAPTCHA source
+            document.querySelectorAll(`script[src^="${RECAPTCHA_SCRIPT_BASE_URL}"]`).length === 0
+        );
+        formId && logDebug(formId, 'Is reCAPTCHA required?', requires);
+        return requires;
+    }
+
+    /**
+     * Return the reCAPTCHA options for the specified site key.
+     * @param siteKey The reCAPTCHA site key identifier.
+     * @returns {ReCaptchaOptions | undefined}
+     */
+    getOptions(siteKey: string) : ReCaptchaOptions | undefined {
+        return OPTIONS[siteKey];
+    }
+
+    /**
+     * Return the first reCAPTCHA options, if any.
+     * @returns
+     */
+    getFirstOption() {
+        const keys = Object.keys(OPTIONS);
+        for (let i = 0; i < keys.length; i++) {
+            if (OPTIONS[keys[i]]) return OPTIONS[keys[i]];
+        }
+        return undefined;
     }
 
     /**
@@ -140,6 +242,8 @@ export class ReCAPTCHA {
      * @param reCaptcha The configuration options.
      */
     reset(formId: string, reCaptcha: ReCaptchaOptions) {
+        reCaptcha || (reCaptcha = this.getFirstOption());
+
         if (!reCaptcha) {
             logError(formId, 'reCAPTCHA argument to reset is not defined!');
             return;
@@ -155,8 +259,10 @@ export class ReCAPTCHA {
         const { version } = reCaptcha;
         const ver = version.toLowerCase();
 
-        // version 3 is executed when the form is submitted
-        if (ver === 'v3') return;
+        if (ver === 'v3') {
+            logDebug(formId, 'Google reCAPTCHA version 3 is executed when the form is submitted.');
+            return;
+        }
 
         // get the widget identifers that have been rendered
         const { widgets } = this.getCallback(formId);
@@ -195,26 +301,30 @@ export class ReCAPTCHA {
      * Execute a reCAPTCHA challenge to obtain a token, and submit the identified form with it.
      * @param formId The form identifier.
      * @param xhr The object used to send the form.
-     * @param formData The form data to send.
+     * @param data The form data to send.
      * @param reCaptcha The reCAPTCHA configuration options.
      */
-    submitForm(formId: string, xhr: XMLHttpRequest, formData: FormData, reCaptcha: ReCaptchaOptions) {
+    submitForm(formId: string, xhr: XMLHttpRequest, data: FormData | string, reCaptcha: ReCaptchaOptions) {
         const grecaptcha = global.grecaptcha;
-        if (!grecaptcha) return false;
+
+        if (!grecaptcha) {
+            logError(formId, "Google reCAPTCHA is not globally available.");
+            xhr.send(data);
+            return false;
+        }
 
         const { siteKey, version, verificationTokenName, allowLocalHost, invisible, size } = reCaptcha || {};
         let success = false;
 
         if (_isString(siteKey)) {
             if (!allowLocalHost && global.location.hostname.toLowerCase().indexOf('localhost') > -1) {
-                const message = "reCAPTCHA not allowed on localhost; sending form with XHR.";
+                const message = "reCAPTCHA not allowed on localhost; sending form using XHR.";
                 logWarning(formId, message);
                 this.reportActivity(formId, { formId, message, type: 'warning' });
-                xhr.send(formData);
-                success = true;
+                xhr.send(data);
             } else {
                 let ver = version.toLowerCase();
-                logDebug(formId, "Trying to submit form with reCAPTCHA version " + ver);
+                logDebug(formId, "Trying to submit form using reCAPTCHA version " + ver);
 
                 if (ver === 'v2') {
                     const cbConfig = this.getCallback(formId);
@@ -225,14 +335,13 @@ export class ReCAPTCHA {
 
                         logWarning(formId, message);
                         this.reportActivity(formId, { formId, message, type: 'warning' });
-                        xhr.send(formData);
-                        success = true;
+                        xhr.send(data);
                     } else {
                         if (invisible || size === 'invisible') {
                             // set these properties so that the reCAPTCHA 
                             // callback may use them to send the request
                             cbConfig.xhr = xhr;
-                            cbConfig.formData = formData;
+                            cbConfig.formData = data;
 
                             // execution, if successful, will delegate the form submission
                             grecaptcha.execute();
@@ -243,9 +352,8 @@ export class ReCAPTCHA {
                                 logError(formId, message);
                                 this.reportActivity(formId, { formId, message, type: 'danger' });
                             } else {
-                                formData.set(verificationTokenName, token);
-                                formData.set('g-recaptcha-version', ver);
-                                xhr.send(formData);
+                                const obj = this.getData(formId, data, verificationTokenName, token, ver);
+                                xhr.send(obj);
                                 success = true;
                             }
                         }
@@ -256,9 +364,8 @@ export class ReCAPTCHA {
                             const message = "reCAPTCHA token received.";
                             logDebug(formId, message);
                             this.reportActivity(formId, { formId, message, type: 'info', data: token });
-                            formData.set(verificationTokenName, token);
-                            formData.set('g-recaptcha-version', ver);
-                            xhr.send(formData);
+                            const obj = this.getData(formId, data, verificationTokenName, token, ver);
+                            xhr.send(obj);
                             success = true;
                         });
                     });
@@ -266,13 +373,31 @@ export class ReCAPTCHA {
                     const message = 'Unsupported reCAPTCHA version: ' + ver;
                     logWarning(formId, message);
                     this.reportActivity(formId, { formId, message, type: 'warning', data: ver });
-                    xhr.send(formData);
-                    success = true;
+                    xhr.send(data);
                 }
             }
+        } else {
+            logWarning(formId, "reCAPTCHA form key not defined; sending form using XHR.");
+            xhr.send(data);
         }
 
         return success;
+
+    }
+
+    private getData(formId: string, data: FormData | string, verificationTokenName: string, token: string, ver: string) {
+        if (data instanceof FormData) {
+            logDebug(formId, 'Setting form data values.')
+            data.set(verificationTokenName, token);
+            data.set('g-recaptcha-version', ver);
+            return data;
+        } else {
+            const json = JSON.parse(data);
+            logDebug(formId, 'Converted data to JSON prior to setting the verification token name and version.', json);
+            json[verificationTokenName] = token;
+            json['g-recaptcha-version'] = ver;
+            return JSON.stringify(json);
+        }
     }
 
     private onload(formId: string, reCaptcha: ReCaptchaOptions) {

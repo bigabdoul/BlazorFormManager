@@ -398,41 +398,104 @@ System.register("Utils", ["Shared", "ConsoleLogger"], function (exports_3, conte
                     return target;
                 };
                 /**
-                 * Insert one or more stylesheets into the DOM.
+                 * Uniquely insert one or more stylesheets into the DOM.
                  * @param sources A URL or array of URL of the stylesheets to load.
                  * @param onload The event handler to fire when the browser loads a stylesheet.
+                 * @param formId The form identifier.
                  */
-                Utils.insertStyles = function (sources, onload) {
-                    if (!(sources instanceof Array))
-                        sources = [sources];
-                    var head = Utils.getOrCreateHead();
-                    for (var i = 0; i < sources.length; i++) {
-                        var s = document.createElement("link");
-                        if (onload)
-                            s.onload = onload;
-                        s.href = sources[i];
-                        s.rel = "stylesheet";
-                        head.appendChild(s);
-                    }
+                Utils.insertStyles = function (sources, onload, formId) {
+                    return new Promise(function (resolve, reject) {
+                        if (!(sources instanceof Array))
+                            sources = [sources];
+                        var head = Utils.getOrCreateHead();
+                        var count = sources.length;
+                        var _loop_1 = function (i) {
+                            var src = sources[i];
+                            var link = document.querySelector("link[href=\"".concat(src, "\"]"));
+                            if (link) {
+                                var rel = link.attributes["rel"];
+                                if (!rel || rel.value === "stylesheet") {
+                                    count--;
+                                    ConsoleLogger_1.logDebug(formId, "The CSS style ".concat(src, " is already in the DOM."));
+                                    if (count <= 0) {
+                                        resolve(true);
+                                        return { value: void 0 };
+                                    }
+                                    return "continue";
+                                }
+                            }
+                            var s = document.createElement("link");
+                            s.onload = function (e) {
+                                if (onload)
+                                    onload.call(s, e);
+                                if (--count <= 0)
+                                    resolve(true);
+                            };
+                            s.onerror = function (e) { return reject(e); };
+                            s.href = src;
+                            s.rel = "stylesheet";
+                            head.appendChild(s);
+                        };
+                        for (var i = 0; i < sources.length; i++) {
+                            var state_1 = _loop_1(i);
+                            if (typeof state_1 === "object")
+                                return state_1.value;
+                        }
+                    });
                 };
                 /**
-                 * Insert one or more scripts into the DOM.
+                 * Uniquely insert one or more scripts into the DOM.
                  * @param sources A URL or array of URL of the scripts to load.
                  * @param onload The event handler to fire when the browser loads a script.
+                 * @param formId The form identifier.
+                 * @param isAsync Sets the script's async property.
+                 * @param isDeferred Sets the scripts defer property.
                  */
-                Utils.insertScripts = function (sources, onload) {
-                    if (!(sources instanceof Array))
-                        sources = [sources];
-                    var head = Utils.getOrCreateHead();
-                    for (var i = 0; i < sources.length; i++) {
-                        var s = document.createElement("script");
-                        if (onload)
-                            s.onload = onload;
-                        s.src = sources[i];
-                        s.async = true;
-                        s.defer = true;
-                        head.appendChild(s);
-                    }
+                Utils.insertScripts = function (sources, onload, formId, isAsync, isDeferred) {
+                    return new Promise(function (resolve, reject) {
+                        if (!(sources instanceof Array))
+                            sources = [sources];
+                        var head = Utils.getOrCreateHead();
+                        var count = sources.length;
+                        var _loop_2 = function (i) {
+                            var src = (sources[i] || '').trim();
+                            if (!src || src.length === 0) {
+                                var msg = 'Cannot load an empty script source.';
+                                ConsoleLogger_1.logDebug(formId, msg);
+                                reject(new Error(msg));
+                                return { value: void 0 };
+                            }
+                            var existing = document.querySelector("script[src=\"".concat(src, "\"]"));
+                            if (existing) {
+                                count--;
+                                //logDebug(formId, `The script ${src} has already been loaded into the DOM.`);
+                                if (onload)
+                                    onload.call(existing, new Event('load'));
+                                if (count <= 0) {
+                                    resolve(true);
+                                    return { value: void 0 };
+                                }
+                                return "continue";
+                            }
+                            var s = document.createElement("script");
+                            s.onload = function (e) {
+                                if (onload)
+                                    onload.call(s, e);
+                                if (--count <= 0)
+                                    resolve(true);
+                            };
+                            s.onerror = function (e) { return reject(e); };
+                            s.src = src;
+                            s.async = isAsync || false;
+                            s.defer = isDeferred || false;
+                            head.appendChild(s);
+                        };
+                        for (var i = 0; i < sources.length; i++) {
+                            var state_2 = _loop_2(i);
+                            if (typeof state_2 === "object")
+                                return state_2.value;
+                        }
+                    });
                 };
                 /** Get, or create and insert, the 'head' DOM element. */
                 Utils.getOrCreateHead = function () {
@@ -1365,7 +1428,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                  */
                 FileReaderManager.prototype.readFileList = function (files, options, processedFileListCallback, storeOnly) {
                     return __awaiter(this, void 0, void 0, function () {
-                        var ERROR_CODE_BASE, fileList, fileCount, formId, accept, acceptType, multiple, inputId, createObjectUrl_1, hasAccept, hasAcceptType, acceptAllFiles, supportedFiles, processedFileList, onReadFileList, hasCallback, hasOnReadFileList, abortedByUser, notAllowed, dimensions_1, _loop_1, this_1, i, state_1, filesRead, error;
+                        var ERROR_CODE_BASE, fileList, fileCount, formId, accept, acceptType, multiple, inputId, createObjectUrl_1, hasAccept, hasAcceptType, acceptAllFiles, supportedFiles, processedFileList, onReadFileList, hasCallback, hasOnReadFileList, abortedByUser, notAllowed, dimensions_1, _loop_3, this_1, i, state_3, filesRead, error;
                         var _this = this;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -1400,7 +1463,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                     _a.sent();
                                     _a.label = 2;
                                 case 2:
-                                    _loop_1 = function (i) {
+                                    _loop_3 = function (i) {
                                         var file, evArgs, cancel, evArgs, cancel, result, evArgs, cancel, evArgs;
                                         return __generator(this, function (_b) {
                                             switch (_b.label) {
@@ -1527,10 +1590,10 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                                     _a.label = 3;
                                 case 3:
                                     if (!(i < fileCount)) return [3 /*break*/, 6];
-                                    return [5 /*yield**/, _loop_1(i)];
+                                    return [5 /*yield**/, _loop_3(i)];
                                 case 4:
-                                    state_1 = _a.sent();
-                                    if (state_1 === "break")
+                                    state_3 = _a.sent();
+                                    if (state_3 === "break")
                                         return [3 /*break*/, 6];
                                     _a.label = 5;
                                 case 5:
@@ -1661,10 +1724,10 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                  * @param {{formId: string; inputId?: string}} options
                  */
                 FileReaderManager.prototype.deleteProcessedFileList = function (options) {
-                    ConsoleLogger_4.logDebug("Deleting processed files with options: ", options);
                     var _a = options || {}, formId = _a.formId, inputId = _a.inputId;
                     var config = this._processedFileStorage[formId];
                     if (config) {
+                        ConsoleLogger_4.logDebug("Deleting processed files with options: ", options);
                         var inputs = config.inputs;
                         if (inputId && inputs) {
                             var input = inputs.find(function (inp) { return inp.id === inputId; });
@@ -1680,7 +1743,7 @@ System.register("FileReaderManager", ["ConsoleLogger", "DomEventManager", "Image
                         return true;
                     }
                     else {
-                        ConsoleLogger_4.logDebug("No processed files associated with form #" + formId);
+                        //logDebug("No processed files associated with form #" + formId);
                     }
                     return false;
                 };
@@ -2243,7 +2306,7 @@ System.register("DragDropManager", ["ConsoleLogger", "DomEventManager", "Shared"
 });
 System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"], function (exports_10, context_10) {
     "use strict";
-    var Shared_7, ConsoleLogger_6, Utils_5, SimpleEvent_2, global, RECAPTCHA_SCRIPT_BASE_URL, ReCAPTCHA;
+    var Shared_7, ConsoleLogger_6, Utils_5, SimpleEvent_2, global, RECAPTCHA_SCRIPT_BASE_URL, OPTIONS, ReCAPTCHA;
     var __moduleName = context_10 && context_10.id;
     return {
         setters: [
@@ -2263,8 +2326,12 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
         execute: function () {
             global = globalThis;
             RECAPTCHA_SCRIPT_BASE_URL = 'https://www.google.com/recaptcha/api.js';
+            OPTIONS = {};
             /** Seamlessly integrates Google's reCAPTCHA technology. */
             ReCAPTCHA = /** @class */ (function () {
+                /**
+                 * Initialize a new instance of the ReCAPTCHA class.
+                 */
                 function ReCAPTCHA() {
                     this._greCAPTCHA = {
                         callbacks: {},
@@ -2279,8 +2346,17 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                     this._activityEvent = new SimpleEvent_2.SimpleEvent();
                 }
                 Object.defineProperty(ReCAPTCHA.prototype, "activity", {
+                    /** Expose the activity event. */
                     get: function () {
                         return this._activityEvent.expose();
+                    },
+                    enumerable: false,
+                    configurable: true
+                });
+                Object.defineProperty(ReCAPTCHA.prototype, "options", {
+                    /** Return the reCAPTCHA options. */
+                    get: function () {
+                        return OPTIONS;
                     },
                     enumerable: false,
                     configurable: true
@@ -2289,11 +2365,22 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                  * Configure the reCAPTCHA for the specified form identifier.
                  * @param formId The form identifier.
                  * @param reCaptcha The configuration options.
+                 * @param isReconfiguring Indicates whether the configuration is being repeated.
                  */
-                ReCAPTCHA.prototype.configure = function (formId, reCaptcha) {
+                ReCAPTCHA.prototype.configure = function (formId, reCaptcha, isReconfiguring) {
                     var _this = this;
+                    if (isReconfiguring === void 0) { isReconfiguring = false; }
                     var scripts = this._greCAPTCHA.scripts;
-                    var siteKey = reCaptcha.siteKey, version = reCaptcha.version, verificationTokenName = reCaptcha.verificationTokenName, invisible = reCaptcha.invisible;
+                    isReconfiguring || (isReconfiguring = !reCaptcha);
+                    reCaptcha
+                        ? (OPTIONS[reCaptcha.siteKey] = reCaptcha)
+                        : (reCaptcha = this.getFirstOption() || { siteKey: '', version: '' });
+                    if (!reCaptcha) {
+                        ConsoleLogger_6.logError(formId, 'Cannot configure reCAPTCHA when the options are missing.');
+                        return false;
+                    }
+                    ConsoleLogger_6.logDebug(formId, 'Configuring reCAPTCHA with options', reCaptcha);
+                    var version = reCaptcha.version, verificationTokenName = reCaptcha.verificationTokenName, invisible = reCaptcha.invisible;
                     var ver = (version || '').toLowerCase();
                     var url = scripts[ver] + '';
                     var success = false;
@@ -2317,9 +2404,8 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                     var xhr = cbConfig_1.xhr, formData = cbConfig_1.formData;
                                     if (xhr && formData) {
                                         _this.reportActivity(formId);
-                                        formData.set(verificationTokenName, token);
-                                        formData.set('g-recaptcha-version', ver);
-                                        xhr.send(formData);
+                                        var obj = _this.getData(formId, formData, verificationTokenName, token, ver);
+                                        xhr.send(obj);
                                     }
                                     else {
                                         var message = 'reCAPTCHA: xhr and formData properties not set.';
@@ -2343,38 +2429,105 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                 this.onload(formId, reCaptcha);
                             }
                         }
-                        if (!(scripts.inserted || scripts.inserting)) {
-                            scripts.inserting = true;
-                            if (ver === 'v3')
-                                url += siteKey;
-                            ConsoleLogger_6.logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
-                            var s_1 = document.createElement('script');
-                            var heads_1 = document.getElementsByTagName('head');
-                            s_1.async = true;
-                            s_1.defer = true;
-                            s_1.src = url;
-                            s_1.onload = function () {
-                                scripts.inserted = true;
-                                scripts.inserting = false;
-                            };
-                            s_1.onerror = function () {
-                                heads_1[0].removeChild(s_1);
-                                scripts.inserted = false;
-                                scripts.inserting = false;
-                            };
-                            if (heads_1.length === 0) {
-                                var h = document.createElement('head');
-                                document.appendChild(h);
-                                h.appendChild(s_1);
-                            }
-                            else {
-                                heads_1[0].appendChild(s_1);
-                            }
-                            ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+                        if (isReconfiguring) {
+                            scripts.inserted = !this.requiresReCaptcha(formId);
+                            scripts.inserting = false;
                         }
+                        this.insertScript(formId, reCaptcha);
                         success = true;
                     }
                     return success;
+                };
+                /**
+                 * Attempt to insert a Google reCAPTCHA script into the document.
+                 * @param formId The form identifier.
+                 * @param reCaptcha The reCAPTCHA configuration options.
+                 * @returns {boolean} true if reCAPTCHA is required; otherwise, false.
+                 */
+                ReCAPTCHA.prototype.insertScript = function (formId, reCaptcha) {
+                    var _this = this;
+                    ConsoleLogger_6.logDebug(formId, 'Attempting reCAPTCHA script tag insertion...');
+                    var scripts = this._greCAPTCHA.scripts;
+                    var shouldInsert = !scripts.inserted && !scripts.inserting && this.requiresReCaptcha(formId);
+                    if (shouldInsert) {
+                        scripts.inserting = true;
+                        reCaptcha
+                            ? (OPTIONS[reCaptcha.siteKey] = reCaptcha)
+                            : (reCaptcha = this.getFirstOption() || { siteKey: '', version: '' });
+                        var siteKey = reCaptcha.siteKey, version = reCaptcha.version;
+                        var ver = (version || '').toLowerCase();
+                        var url = scripts[ver] + '';
+                        if (ver === 'v3')
+                            url += siteKey;
+                        ConsoleLogger_6.logDebug(formId, 'Inserting reCAPTCHA script tag...', url);
+                        var s_1 = document.createElement('script');
+                        var heads_1 = document.getElementsByTagName('head');
+                        s_1.async = true;
+                        s_1.defer = true;
+                        s_1.src = url;
+                        s_1.onload = function () {
+                            scripts.inserted = true;
+                            scripts.inserting = false;
+                            _this.reportActivity(formId, { formId: formId, message: 'reCAPTCHA script loaded.', type: 'scriptload' });
+                        };
+                        s_1.onerror = function () {
+                            heads_1[0].removeChild(s_1);
+                            scripts.inserted = false;
+                            scripts.inserting = false;
+                            _this.reportActivity(formId, { formId: formId, message: 'Failed to load reCAPTCHA script.', type: 'scriptloaderror' });
+                        };
+                        if (heads_1.length === 0) {
+                            var h = document.createElement('head');
+                            document.appendChild(h);
+                            h.appendChild(s_1);
+                        }
+                        else {
+                            heads_1[0].appendChild(s_1);
+                        }
+                        ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script tag inserted successfully!');
+                        return true;
+                    }
+                    else if (scripts.inserted) {
+                        ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script has already been inserted.');
+                    }
+                    else if (scripts.inserting) {
+                        ConsoleLogger_6.logDebug(formId, 'reCAPTCHA script is being inserted.');
+                    }
+                    return false;
+                };
+                /**
+                 * Check if the document requires reCAPTCHA.
+                 * @param formId The form identifier.
+                 * @returns {boolean} true if reCAPTCHA is required; otherwise, false.
+                 */
+                ReCAPTCHA.prototype.requiresReCaptcha = function (formId) {
+                    var requires = (
+                    // check if there's any form in the document
+                    document.querySelectorAll('form').length &&
+                        // make sure there's no script starting with the reCAPTCHA source
+                        document.querySelectorAll("script[src^=\"".concat(RECAPTCHA_SCRIPT_BASE_URL, "\"]")).length === 0);
+                    formId && ConsoleLogger_6.logDebug(formId, 'Is reCAPTCHA required?', requires);
+                    return requires;
+                };
+                /**
+                 * Return the reCAPTCHA options for the specified site key.
+                 * @param siteKey The reCAPTCHA site key identifier.
+                 * @returns {ReCaptchaOptions | undefined}
+                 */
+                ReCAPTCHA.prototype.getOptions = function (siteKey) {
+                    return OPTIONS[siteKey];
+                };
+                /**
+                 * Return the first reCAPTCHA options, if any.
+                 * @returns
+                 */
+                ReCAPTCHA.prototype.getFirstOption = function () {
+                    var keys = Object.keys(OPTIONS);
+                    for (var i = 0; i < keys.length; i++) {
+                        if (OPTIONS[keys[i]])
+                            return OPTIONS[keys[i]];
+                    }
+                    return undefined;
                 };
                 /**
                  * Reset previously created reCAPTCHA widgets.
@@ -2382,6 +2535,7 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                  * @param reCaptcha The configuration options.
                  */
                 ReCAPTCHA.prototype.reset = function (formId, reCaptcha) {
+                    reCaptcha || (reCaptcha = this.getFirstOption());
                     if (!reCaptcha) {
                         ConsoleLogger_6.logError(formId, 'reCAPTCHA argument to reset is not defined!');
                         return;
@@ -2393,9 +2547,10 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                     }
                     var version = reCaptcha.version;
                     var ver = version.toLowerCase();
-                    // version 3 is executed when the form is submitted
-                    if (ver === 'v3')
+                    if (ver === 'v3') {
+                        ConsoleLogger_6.logDebug(formId, 'Google reCAPTCHA version 3 is executed when the form is submitted.');
                         return;
+                    }
                     // get the widget identifers that have been rendered
                     var widgets = this.getCallback(formId).widgets;
                     if (widgets && widgets.length) {
@@ -2428,27 +2583,29 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                  * Execute a reCAPTCHA challenge to obtain a token, and submit the identified form with it.
                  * @param formId The form identifier.
                  * @param xhr The object used to send the form.
-                 * @param formData The form data to send.
+                 * @param data The form data to send.
                  * @param reCaptcha The reCAPTCHA configuration options.
                  */
-                ReCAPTCHA.prototype.submitForm = function (formId, xhr, formData, reCaptcha) {
+                ReCAPTCHA.prototype.submitForm = function (formId, xhr, data, reCaptcha) {
                     var _this = this;
                     var grecaptcha = global.grecaptcha;
-                    if (!grecaptcha)
+                    if (!grecaptcha) {
+                        ConsoleLogger_6.logError(formId, "Google reCAPTCHA is not globally available.");
+                        xhr.send(data);
                         return false;
+                    }
                     var _a = reCaptcha || {}, siteKey = _a.siteKey, version = _a.version, verificationTokenName = _a.verificationTokenName, allowLocalHost = _a.allowLocalHost, invisible = _a.invisible, size = _a.size;
                     var success = false;
                     if (Utils_5._isString(siteKey)) {
                         if (!allowLocalHost && global.location.hostname.toLowerCase().indexOf('localhost') > -1) {
-                            var message = "reCAPTCHA not allowed on localhost; sending form with XHR.";
+                            var message = "reCAPTCHA not allowed on localhost; sending form using XHR.";
                             ConsoleLogger_6.logWarning(formId, message);
                             this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
-                            xhr.send(formData);
-                            success = true;
+                            xhr.send(data);
                         }
                         else {
                             var ver_1 = version.toLowerCase();
-                            ConsoleLogger_6.logDebug(formId, "Trying to submit form with reCAPTCHA version " + ver_1);
+                            ConsoleLogger_6.logDebug(formId, "Trying to submit form using reCAPTCHA version " + ver_1);
                             if (ver_1 === 'v2') {
                                 var cbConfig = this.getCallback(formId);
                                 if (!cbConfig) {
@@ -2456,15 +2613,14 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                         'configured for this form; submitting without the challenge.';
                                     ConsoleLogger_6.logWarning(formId, message);
                                     this.reportActivity(formId, { formId: formId, message: message, type: 'warning' });
-                                    xhr.send(formData);
-                                    success = true;
+                                    xhr.send(data);
                                 }
                                 else {
                                     if (invisible || size === 'invisible') {
                                         // set these properties so that the reCAPTCHA 
                                         // callback may use them to send the request
                                         cbConfig.xhr = xhr;
-                                        cbConfig.formData = formData;
+                                        cbConfig.formData = data;
                                         // execution, if successful, will delegate the form submission
                                         grecaptcha.execute();
                                     }
@@ -2476,9 +2632,8 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                             this.reportActivity(formId, { formId: formId, message: message, type: 'danger' });
                                         }
                                         else {
-                                            formData.set(verificationTokenName, token);
-                                            formData.set('g-recaptcha-version', ver_1);
-                                            xhr.send(formData);
+                                            var obj = this.getData(formId, data, verificationTokenName, token, ver_1);
+                                            xhr.send(obj);
                                             success = true;
                                         }
                                     }
@@ -2490,9 +2645,8 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                         var message = "reCAPTCHA token received.";
                                         ConsoleLogger_6.logDebug(formId, message);
                                         _this.reportActivity(formId, { formId: formId, message: message, type: 'info', data: token });
-                                        formData.set(verificationTokenName, token);
-                                        formData.set('g-recaptcha-version', ver_1);
-                                        xhr.send(formData);
+                                        var obj = _this.getData(formId, data, verificationTokenName, token, ver_1);
+                                        xhr.send(obj);
                                         success = true;
                                     });
                                 });
@@ -2501,12 +2655,30 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
                                 var message = 'Unsupported reCAPTCHA version: ' + ver_1;
                                 ConsoleLogger_6.logWarning(formId, message);
                                 this.reportActivity(formId, { formId: formId, message: message, type: 'warning', data: ver_1 });
-                                xhr.send(formData);
-                                success = true;
+                                xhr.send(data);
                             }
                         }
                     }
+                    else {
+                        ConsoleLogger_6.logWarning(formId, "reCAPTCHA form key not defined; sending form using XHR.");
+                        xhr.send(data);
+                    }
                     return success;
+                };
+                ReCAPTCHA.prototype.getData = function (formId, data, verificationTokenName, token, ver) {
+                    if (data instanceof FormData) {
+                        ConsoleLogger_6.logDebug(formId, 'Setting form data values.');
+                        data.set(verificationTokenName, token);
+                        data.set('g-recaptcha-version', ver);
+                        return data;
+                    }
+                    else {
+                        var json = JSON.parse(data);
+                        ConsoleLogger_6.logDebug(formId, 'Converted data to JSON prior to setting the verification token name and version.', json);
+                        json[verificationTokenName] = token;
+                        json['g-recaptcha-version'] = ver;
+                        return JSON.stringify(json);
+                    }
                 };
                 ReCAPTCHA.prototype.onload = function (formId, reCaptcha) {
                     var siteKey = reCaptcha.siteKey, them = reCaptcha.theme, languageCode = reCaptcha.languageCode, invisible = reCaptcha.invisible, sz = reCaptcha.size, cssSelector = reCaptcha.cssSelector;
@@ -2556,12 +2728,15 @@ System.register("ReCAPTCHA", ["Shared", "ConsoleLogger", "Utils", "SimpleEvent"]
         }
     };
 });
-System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
+System.register("QuillEditor", ["ConsoleLogger", "Utils"], function (exports_11, context_11) {
     "use strict";
-    var Utils_6, global, throwDependenciesMissing, parseDelta, Quill, _installed, _installing, _pendingResolvers, QuillEditor;
+    var ConsoleLogger_7, Utils_6, global, throwDependenciesMissing, parseDelta, Quill, _installed, _installing, _pendingResolvers, QuillEditor;
     var __moduleName = context_11 && context_11.id;
     return {
         setters: [
+            function (ConsoleLogger_7_1) {
+                ConsoleLogger_7 = ConsoleLogger_7_1;
+            },
             function (Utils_6_1) {
                 Utils_6 = Utils_6_1;
             }
@@ -2591,12 +2766,22 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
                     this.installOptions = installOptions;
                     this.instance = null;
                     var _a = this.options = Object.assign({ theme: 'snow' }, options), noinit = _a.noinit, onready = _a.onready;
+                    if (!this.options.modules) {
+                        ConsoleLogger_7.logDebug(this.options.formId, 'Setting default Quill modules!');
+                        this.options.modules = {
+                            'toolbar': [[{ 'font': [] }, { 'size': [] }], ['bold', 'italic', 'underline', 'strike'], [{ 'color': [] }, { 'background': [] }], [{ 'script': 'super' }, { 'script': 'sub' }], [{ 'header': [false, 1, 2, 3, 4, 5, 6] }, 'blockquote', 'code-block'], [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }], ['direction', { 'align': [] }], ['link', 'image', 'video'], ['clean']]
+                        };
+                    }
+                    // simple security token for invoking a method on the dotnet object reference
+                    var changeToken = this.options['changeToken'];
+                    // don't leave it in an easily accessible memory location
+                    delete this.options['changeToken'];
                     if (!this.installOptions)
                         this.installOptions = Object.assign({}, this.options);
                     if (!noinit)
                         this.init().then(function (success) {
                             if (success) {
-                                _this.setupChangeHandler();
+                                _this.setupChangeHandler(changeToken);
                                 if (onready)
                                     onready(_this);
                             }
@@ -2715,19 +2900,46 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
                     this.quill.enable(enabled);
                 };
                 /** This function is called when the editor's dependencies have been successfully loaded. */
-                QuillEditor.prototype.setupChangeHandler = function () {
+                QuillEditor.prototype.setupChangeHandler = function (changeToken) {
                     var _this = this;
+                    var _a;
                     var selector = this.selector;
-                    if (typeof selector === 'string' && selector.startsWith('#')) {
+                    // the dotnet object reference used to report back edit changes
+                    var dotnetObj = this.options['dotNetObjectReference'];
+                    if (dotnetObj || (typeof selector === 'string' && selector.startsWith('#'))) {
                         // the selector is an element identifier;
                         // the C# class AutoInputBase adds a hidden input for
                         // every rich text-enabled textarea; we'll use that
                         // input to store the changes made through the editor; this
                         // way, the value will be included during the form submission
-                        var inputId = selector.substring(1) + '_hidden';
-                        var hiddenInput_1 = document.getElementById(inputId);
-                        if (hiddenInput_1)
-                            this.quill.on('text-change', function () { return hiddenInput_1.value = _this.getInnerHTML(); });
+                        var hiddenInput_1;
+                        if (typeof selector === 'string') {
+                            var inputId = selector.substring(1) + '_hidden';
+                            hiddenInput_1 = document.getElementById(inputId);
+                        }
+                        if (hiddenInput_1 || dotnetObj) {
+                            // the dotnet method to invoke upon change detection
+                            var onValueChanged_1 = (_a = this.options['onValueChanged']) !== null && _a !== void 0 ? _a : 'OnValueChanged';
+                            this.quill.on('text-change', function () { return __awaiter(_this, void 0, void 0, function () {
+                                var value;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            value = this.getInnerHTML();
+                                            if (hiddenInput_1)
+                                                hiddenInput_1.value = value;
+                                            if (!dotnetObj) return [3 /*break*/, 2];
+                                            // invoke the dotnet method with the changed value
+                                            return [4 /*yield*/, dotnetObj.invokeMethodAsync(onValueChanged_1, value, changeToken)];
+                                        case 1:
+                                            // invoke the dotnet method with the changed value
+                                            _a.sent();
+                                            _a.label = 2;
+                                        case 2: return [2 /*return*/];
+                                    }
+                                });
+                            }); });
+                        }
                     }
                 };
                 /**
@@ -2803,14 +3015,78 @@ System.register("QuillEditor", ["Utils"], function (exports_11, context_11) {
         }
     };
 });
-System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "Shared", "Utils"], function (exports_12, context_12) {
+System.register("ChartjsHelper", ["Utils"], function (exports_12, context_12) {
     "use strict";
-    var ConsoleLogger_7, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, Shared_8, Utils_7, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
+    var Utils_7, Chart, ChartjsHelper;
     var __moduleName = context_12 && context_12.id;
     return {
         setters: [
-            function (ConsoleLogger_7_1) {
-                ConsoleLogger_7 = ConsoleLogger_7_1;
+            function (Utils_7_1) {
+                Utils_7 = Utils_7_1;
+            }
+        ],
+        execute: function () {
+            Chart = window["Chart"];
+            ChartjsHelper = /** @class */ (function () {
+                function ChartjsHelper() {
+                }
+                ChartjsHelper.install = function (scriptSource, onload) {
+                    return new Promise(function (resolve, reject) {
+                        if (Chart) {
+                            resolve(true);
+                        }
+                        else {
+                            scriptSource || (scriptSource = 'https://cdn.jsdelivr.net/npm/chart.js');
+                            return Utils_7.insertScripts(scriptSource, function (e) {
+                                if (onload)
+                                    onload.call(e);
+                                resolve(true);
+                            });
+                        }
+                    });
+                };
+                ChartjsHelper.createChart = function (selector, config) {
+                    if (!(Chart || (Chart = window["Chart"]))) {
+                        throw new Error('Chart is not defined! Please install the Chartjs library first.');
+                    }
+                    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+                    Chart.defaults.global.defaultFontColor = '#858796';
+                    var ctx = document.querySelector(selector);
+                    if (!ctx)
+                        throw new Error("Could not find any DOM element matching the selector ".concat(selector, "."));
+                    config.data || (config.data = {
+                        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                        datasets: [{
+                                label: '# of Votes',
+                                data: [12, 19, 3, 5, 2, 3],
+                                borderWidth: 1
+                            }]
+                    });
+                    config.options || (config.options = {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    });
+                    console.log('Creating new chart for selector, and config:', selector, config);
+                    var chart = new Chart(ctx, config);
+                    return chart;
+                };
+                return ChartjsHelper;
+            }());
+            exports_12("ChartjsHelper", ChartjsHelper);
+        }
+    };
+});
+System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "ChartjsHelper", "Shared", "Utils"], function (exports_13, context_13) {
+    "use strict";
+    var ConsoleLogger_8, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, ChartjsHelper_1, Shared_8, Utils_8, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
+    var __moduleName = context_13 && context_13.id;
+    return {
+        setters: [
+            function (ConsoleLogger_8_1) {
+                ConsoleLogger_8 = ConsoleLogger_8_1;
             },
             function (DomEventManager_3_1) {
                 DomEventManager_3 = DomEventManager_3_1;
@@ -2827,11 +3103,14 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
             function (QuillEditor_1_1) {
                 QuillEditor_1 = QuillEditor_1_1;
             },
+            function (ChartjsHelper_1_1) {
+                ChartjsHelper_1 = ChartjsHelper_1_1;
+            },
             function (Shared_8_1) {
                 Shared_8 = Shared_8_1;
             },
-            function (Utils_7_1) {
-                Utils_7 = Utils_7_1;
+            function (Utils_8_1) {
+                Utils_8 = Utils_8_1;
             }
         ],
         execute: function () {
@@ -2843,6 +3122,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 /** Construct a new instance of the form manager class. */
                 function BlazorFormManager() {
                     this.processedFileStorage = {};
+                    this._enhancedLoadEventEnabled = false;
                     this.fileManager = new FileReaderManager_1.FileReaderManager(this);
                     this.dragdropManager = new DragDropManager_1.DragDropManager(this.fileManager, this);
                 }
@@ -2854,16 +3134,16 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     if (!this.updateOptions(options))
                         return BlazorFormManager.showOptionsUsage(false);
                     var dotNetObjectReference = options.dotNetObjectReference, formId = options.formId;
-                    ConsoleLogger_7.logDebug(formId, "Initializing with options:", options);
+                    ConsoleLogger_8.logDebug(formId, "Initializing with options:", options);
                     if (!this.validateFormAttributes(formId))
                         return false;
                     if (!dotNetObjectReference) {
-                        ConsoleLogger_7.logWarning(formId, "Invokable object instance reference not received. " +
+                        ConsoleLogger_8.logWarning(formId, "Invokable object instance reference not received. " +
                             "This is the preferred way of invoking.NET methods from within " +
                             "Blazor components.");
                     }
                     if (this.registerSubmitHandler(options)) {
-                        ConsoleLogger_7.logInfo(formId, "Initialized successfully!");
+                        ConsoleLogger_8.logInfo(formId, "BlazorFormManager initialized successfully!");
                         return true;
                     }
                     return false;
@@ -2874,7 +3154,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.destroy = function (formId) {
                     if (Shared_8.Forms[formId]) {
-                        ConsoleLogger_7.logDebug(formId, "Deleting form manager options...");
+                        ConsoleLogger_8.logDebug(formId, "Deleting form manager options...");
                         delete Shared_8.Forms[formId];
                     }
                 };
@@ -2884,12 +3164,12 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.updateOptions = function (options) {
                     // fail early
-                    if (!Utils_7._isObject(options))
+                    if (!Utils_8._isObject(options))
                         return BlazorFormManager.showOptionsUsage(true);
                     var formId = options.formId;
                     if (!Shared_8.Forms[formId]) {
                         Shared_8.Forms[formId] = options;
-                        ConsoleLogger_7.logDebug(formId, "Script options stored.", options);
+                        ConsoleLogger_8.logDebug(formId, "Script options stored.", options);
                     }
                     else {
                         var storedOptions = Shared_8.Forms[formId];
@@ -2900,7 +3180,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                 count++;
                             }
                         }
-                        ConsoleLogger_7.logDebug(formId, "".concat(count, " script properties updated."));
+                        ConsoleLogger_8.logDebug(formId, "".concat(count, " script properties updated."));
                     }
                     return true;
                 };
@@ -2909,19 +3189,98 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  * @param formId The identifier of the form to submit.
                  */
                 BlazorFormManager.prototype.submitForm = function (formId) {
-                    ConsoleLogger_7.logDebug(formId, "Form submit requested.", formId);
+                    ConsoleLogger_8.logDebug(formId, "Form submit requested.", formId);
                     var form = document.getElementById(formId);
                     if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form #".concat(formId, " not defined"));
+                        ConsoleLogger_8.logError(formId, "Form #".concat(formId, " not defined"));
                         return false;
                     }
                     if (form.onsubmit) {
                         form.onsubmit(new SubmitEvent('submit'));
-                        ConsoleLogger_7.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
+                        ConsoleLogger_8.logInfo(formId, "Form submitted via 'BlazorFormManager.submitForm'.");
                         return true;
                     }
-                    ConsoleLogger_7.logError(formId, "'onsubmit' event handler not defined for form #".concat(formId, "."));
+                    ConsoleLogger_8.logError(formId, "'onsubmit' event handler not defined for form #".concat(formId, "."));
                     return false;
+                };
+                /**
+                 * Dynamically initialize MDBootstrap 5 inputs matching the specified CSS query selector.
+                 * @param options Initialization options.
+                 */
+                BlazorFormManager.prototype.initMdbInput = function (options) {
+                    var formId = options.formId, inputSelector = options.selector, scoped = options.scoped;
+                    var selector = inputSelector || '.form-outline';
+                    if (scoped)
+                        selector = "#".concat(formId, " ").concat(selector);
+                    ConsoleLogger_8.logDebug(formId, "Initializing \"MDBootstrap 5\" inputs with query selector '".concat(selector, "'..."));
+                    var query = document.querySelectorAll(selector);
+                    if (query.length) {
+                        var win_1 = window;
+                        if (win_1.mdb && win_1.mdb.Input) {
+                            ConsoleLogger_8.logDebug(formId, "\"MDBootstrap 5\" UMD module: ".concat(query.length, " input.s found."));
+                            query.forEach(function (formOutline) {
+                                if (!formOutline.classList.contains('select')) {
+                                    new win_1.mdb.Input(formOutline).init();
+                                }
+                                else {
+                                    //new win.mdb.Dropdown(formOutline, {});
+                                }
+                            });
+                        }
+                        else if (win_1.Input) {
+                            ConsoleLogger_8.logDebug(formId, "\"MDBootstrap 5\" ES module: ".concat(query.length, " input.s found."));
+                            query.forEach(function (formOutline) {
+                                if (!formOutline.classList.contains('select')) {
+                                    new win_1.Input(formOutline).init();
+                                }
+                                else {
+                                }
+                            });
+                        }
+                        else {
+                            ConsoleLogger_8.logDebug(formId, "No \"MDBootstrap 5\" module: ".concat(query.length, " input.s found."));
+                        }
+                    }
+                    else {
+                        ConsoleLogger_8.logDebug(formId, "No input found matching the specified CSS query selector.");
+                    }
+                    selector = scoped ? "#".concat(formId, " .form-floating>label") : '.form-floating>label';
+                    query = document.querySelectorAll(selector);
+                    if (query.length) {
+                        ConsoleLogger_8.logDebug(formId, "Found ".concat(query.length, " input.s with query selector '").concat(selector, "'."));
+                        /** Mimick form-outline effect for 'select' elements. */
+                        var maybeSetActive_1 = function (select, label, focused) {
+                            if (focused === void 0) { focused = false; }
+                            var selectIsNumber = label.parentElement.classList.contains('number');
+                            var active = focused;
+                            if (!focused) {
+                                var invalid = selectIsNumber && (select.value === '0' || select.value === '') ||
+                                    (!selectIsNumber && select.value === '');
+                                active = !invalid;
+                            }
+                            active ? select.classList.add('active') : select.classList.remove('active');
+                        };
+                        query.forEach(function (label) {
+                            var select = label.previousElementSibling;
+                            if (select instanceof HTMLSelectElement) {
+                                var _a = select.style, initialBorder_1 = _a.border, initialColor_1 = _a.color;
+                                // the free version of MDBootstrap 5 doesn't allow specifying 
+                                // '.form-outline' on a 'select' element when initializing inputs
+                                label.parentElement.classList.replace('form-floating', 'form-outline');
+                                maybeSetActive_1(select, label);
+                                select.addEventListener('focus', function () {
+                                    maybeSetActive_1(select, label, true);
+                                    label.style.color = 'var(--mdb-picker-header-bg)';
+                                    select.style.border = '2px solid var(--mdb-picker-header-bg)';
+                                });
+                                select.addEventListener('blur', function () {
+                                    maybeSetActive_1(select, label);
+                                    label.style.color = initialColor_1;
+                                    select.style.border = initialBorder_1;
+                                });
+                            }
+                        });
+                    }
                 };
                 /**
                  * Sets the value of the pair identified by key to value, creating
@@ -2954,51 +3313,57 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.registerSubmitHandler = function (options) {
                     var _this_1 = this;
-                    var formId = options.formId, onGetModel = options.onGetModel, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
+                    var formId = options.formId, onGetModel = options.onGetModel, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha, enhancedLoad = options.enhancedLoad, onEnhancedLoad = options.onEnhancedLoad;
                     var _this = this;
                     var recaptcha = _this.initReCaptcha(formId, reCaptcha, onReCaptchaActivity);
+                    if (enhancedLoad && Utils_8._isString(onEnhancedLoad)) {
+                        this._enableEnhancedLoad(formId, true, onEnhancedLoad);
+                    }
                     return this.handleFormSubmission({
                         formId: formId,
                         requireModel: requireModel,
                         reCaptcha: reCaptcha,
                         getFormData: function () { return __awaiter(_this_1, void 0, void 0, function () {
-                            var model, form, enctype, hasFiles, formData;
+                            var model, form, enctype, hasFiles, obj, json, formData;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        if (!Utils_7._isString(onGetModel)) return [3 /*break*/, 2];
+                                        if (!Utils_8._isString(onGetModel)) return [3 /*break*/, 2];
                                         return [4 /*yield*/, this.invokeDotNet(formId, onGetModel)];
                                     case 1:
                                         model = _a.sent();
-                                        ConsoleLogger_7.logDebug(formId, "Model", model);
+                                        ConsoleLogger_8.logDebug(formId, "Model", model);
                                         _a.label = 2;
                                     case 2:
                                         if (model === null) {
                                             if (requireModel) {
-                                                ConsoleLogger_7.logError(formId, "A model is required.");
+                                                ConsoleLogger_8.logError(formId, "A model is required.");
                                             }
                                             else {
-                                                ConsoleLogger_7.logDebug(formId, "Model not defined. FormData will be collected by caller.");
+                                                ConsoleLogger_8.logDebug(formId, "Model not defined. Caller will collect FormData.");
                                             }
                                             return [2 /*return*/, { hasFiles: false }];
                                         }
                                         form = document.getElementById(formId);
                                         enctype = form.getAttribute("enctype") || 'multipart/form-data';
-                                        hasFiles = Utils_7.containsFiles(form);
+                                        hasFiles = Utils_8.containsFiles(form);
                                         if (enctype.toLowerCase().indexOf('json') > -1) {
                                             if (hasFiles)
-                                                ConsoleLogger_7.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
+                                                ConsoleLogger_8.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
                                             else
-                                                ConsoleLogger_7.logDebug(formId, "Collecting form model data as JSON...");
-                                            // send as JSON
-                                            return [2 /*return*/, { json: JSON.stringify(model), hasFiles: hasFiles }];
+                                                ConsoleLogger_8.logDebug(formId, "Collecting form model data as JSON...");
+                                            obj = Object;
+                                            json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
+                                                .replace('"true"', 'true')
+                                                .replace('"false"', 'false');
+                                            return [2 /*return*/, { json: json, hasFiles: hasFiles }];
                                         }
                                         else {
-                                            ConsoleLogger_7.logDebug(formId, "Collecting form model data...");
+                                            ConsoleLogger_8.logDebug(formId, "Collecting form model data...");
                                             formData = new FormData();
                                             // add additional form data values using the model...
                                             this.collectModelData(model, formData);
-                                            Utils_7.formDataMerge(formData, new FormData(form));
+                                            Utils_8.formDataMerge(formData, new FormData(form));
                                             return [2 /*return*/, { hasFiles: hasFiles, formData: formData }];
                                         }
                                         return [2 /*return*/];
@@ -3012,7 +3377,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     switch (_a.label) {
                                         case 0:
                                             cancel = false;
-                                            if (!Utils_7._isString(onBeforeSubmit)) return [3 /*break*/, 2];
+                                            if (!Utils_8._isString(onBeforeSubmit)) return [3 /*break*/, 2];
                                             return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSubmit)];
                                         case 1:
                                             cancel = _a.sent();
@@ -3029,7 +3394,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     switch (_a.label) {
                                         case 0:
                                             cancel = false;
-                                            if (!Utils_7._isString(onBeforeSend)) return [3 /*break*/, 2];
+                                            if (!Utils_8._isString(onBeforeSend)) return [3 /*break*/, 2];
                                             return [4 /*yield*/, _this.invokeDotNet(formId, onBeforeSend, getXhrResult.call(this, true))];
                                         case 1:
                                             cancel = _a.sent();
@@ -3040,16 +3405,16 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                             });
                         },
                         done: function () {
-                            ConsoleLogger_7.logInfo(formId, "Form data successfully uploaded.", this);
-                            if (Utils_7._isString(onSendSucceeded))
+                            ConsoleLogger_8.logInfo(formId, "Form data successfully uploaded.", this);
+                            if (Utils_8._isString(onSendSucceeded))
                                 _this.invokeDotNet(formId, onSendSucceeded, getXhrResult.call(this, false));
                             // eventually free up the processed file storage for this form
                             _this.fileManager.deleteProcessedFileList({ formId: formId });
                             _this.raiseFormSubmitted(formId);
                         },
                         fail: function (error) {
-                            ConsoleLogger_7.logError(formId, "Form upload failed.", this);
-                            if (Utils_7._isString(onSendFailed))
+                            ConsoleLogger_8.logError(formId, "Form upload failed.", this);
+                            if (Utils_8._isString(onSendFailed))
                                 _this.invokeDotNet(formId, onSendFailed, getXhrResult.call(this, false, error));
                             recaptcha && recaptcha.reset(formId, reCaptcha);
                         }
@@ -3099,18 +3464,18 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var formId = config.formId, level = config.logLevel;
                     var options = Shared_8.Forms[formId];
                     if (!options) {
-                        ConsoleLogger_7.logError(formId, "The form #".concat(formId, " has not been initialized yet."));
+                        ConsoleLogger_8.logError(formId, "The form #".concat(formId, " has not been initialized yet."));
                     }
                     else if (options.logLevel !== level) {
                         if (typeof level === "number") {
                             var validLevel = 0 | level; // force the number to be an integer
                             if (validLevel > -1 && validLevel < 5) {
                                 options.logLevel = validLevel;
-                                ConsoleLogger_7.logInfo(formId, "Log level changed to", validLevel);
+                                ConsoleLogger_8.logInfo(formId, "Log level changed to", validLevel);
                                 return true;
                             }
                         }
-                        ConsoleLogger_7.logError(formId, "Log level must be an integer between 0 and 4 inclusive.");
+                        ConsoleLogger_8.logError(formId, "Log level must be an integer between 0 and 4 inclusive.");
                     }
                     return false;
                 };
@@ -3120,44 +3485,44 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.handleFormSubmission = function (options) {
                     var _this_1 = this;
-                    if (!Utils_7._isObject(options))
+                    if (!Utils_8._isObject(options))
                         return false;
                     var formId = options.formId, requireModel = options.requireModel, reCaptcha = options.reCaptcha;
-                    if (!Utils_7._isString(formId)) {
-                        ConsoleLogger_7.logError(formId, "No form identified!");
+                    if (!Utils_8._isString(formId)) {
+                        ConsoleLogger_8.logError(formId, "No form identified!");
                         return false;
                     }
                     var form = document.getElementById(formId);
                     if (!form) {
-                        ConsoleLogger_7.logError(formId, "Form with id #".concat(formId, " not found!"));
+                        ConsoleLogger_8.logError(formId, "Form with id #".concat(formId, " not found!"));
                         return false;
                     }
                     form.onsubmit = function () { return __awaiter(_this_1, void 0, void 0, function () {
-                        var cancel, beforeSubmit, beforeSend, done, fail, getFormData, _a, formData, hasFiles, json, xhr, url, method, headersSet, xhrResult;
+                        var cancel, beforeSubmit, beforeSend, done, fail, getFormData, _a, formData, hasFiles, json, isJson, xhr, url, method, headersSet, xhrResult, objData;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
-                                    ConsoleLogger_7.logDebug(formId, "Submitting form...");
+                                    ConsoleLogger_8.logDebug(formId, "Submitting form...");
                                     cancel = false;
                                     beforeSubmit = options.beforeSubmit;
-                                    if (!Utils_7._isFunction(beforeSubmit)) return [3 /*break*/, 2];
+                                    if (!Utils_8._isFunction(beforeSubmit)) return [3 /*break*/, 2];
                                     return [4 /*yield*/, beforeSubmit.call(form)];
                                 case 1:
                                     cancel = _b.sent();
                                     _b.label = 2;
                                 case 2:
                                     if (cancel) {
-                                        ConsoleLogger_7.logInfo(formId, "Form submission was cancelled.");
+                                        ConsoleLogger_8.logInfo(formId, "Form submission was cancelled.");
                                         return [2 /*return*/, false];
                                     }
                                     if (!!BlazorFormManager._supportsAJAXwithUpload) return [3 /*break*/, 4];
-                                    ConsoleLogger_7.logWarning(formId, "AJAX upload with progress report not supported.");
+                                    ConsoleLogger_8.logWarning(formId, "AJAX upload with progress report not supported.");
                                     return [4 /*yield*/, this.raiseAjaxUploadWithProgressNotSupported(formId)];
                                 case 3:
                                     cancel = _b.sent();
                                     if (cancel) {
                                         // do not allow full page refresh
-                                        ConsoleLogger_7.logInfo(formId, "Blocked submitting form with full-page refresh.");
+                                        ConsoleLogger_8.logInfo(formId, "Blocked submitting form with full-page refresh.");
                                         return [2 /*return*/, false];
                                     }
                                     // allow normal form submission (post back with full page refresh)
@@ -3167,27 +3532,28 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     return [4 /*yield*/, getFormData()];
                                 case 5:
                                     _a = _b.sent(), formData = _a.formData, hasFiles = _a.hasFiles, json = _a.json;
-                                    if (!formData) {
+                                    isJson = !!json;
+                                    if (!formData && !isJson) {
                                         if (requireModel) {
-                                            ConsoleLogger_7.logError(formId, "Form submission cancelled because a model is required to continue.");
+                                            ConsoleLogger_8.logError(formId, "Form submission cancelled because a model is required to continue.");
                                             return [2 /*return*/, false];
                                         }
                                         else {
                                             formData = new FormData(form);
-                                            hasFiles = Utils_7.containsFiles(form);
+                                            hasFiles = Utils_8.containsFiles(form);
                                         }
                                     }
-                                    if (!json && this.clearFilesAppendProcessed(formId, formData))
+                                    if (!isJson && this.clearFilesAppendProcessed(formId, formData))
                                         hasFiles = true;
                                     xhr = new XMLHttpRequest();
                                     xhr.onreadystatechange = function () {
                                         if (this.readyState === XHRSTATE.DONE) {
                                             // any status code between 200 and 299 inclusive is success
                                             if (this.status > 199 && this.status < 300) {
-                                                if (Utils_7._isFunction(done))
+                                                if (Utils_8._isFunction(done))
                                                     done.call(this);
                                             }
-                                            else if (Utils_7._isFunction(fail)) {
+                                            else if (Utils_8._isFunction(fail)) {
                                                 fail.call(this);
                                             }
                                         }
@@ -3195,27 +3561,27 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     this.addXHRUploadEventListeners(formId, xhr, hasFiles);
                                     url = form.getAttribute("action") || global.location.href;
                                     method = (form.getAttribute("method") || "POST").toUpperCase();
-                                    ConsoleLogger_7.logDebug(formId, "Form action URL and method are:", url, method);
+                                    ConsoleLogger_8.logDebug(formId, "Form action URL and method are:", url, method);
                                     xhr.open(method, url, true);
                                     headersSet = false;
-                                    if (!Utils_7._isFunction(beforeSend)) return [3 /*break*/, 7];
+                                    if (!Utils_8._isFunction(beforeSend)) return [3 /*break*/, 7];
                                     return [4 /*yield*/, beforeSend.call(xhr)];
                                 case 6:
                                     xhrResult = _b.sent();
-                                    ConsoleLogger_7.logDebug(formId, "beforeSend was called:", xhrResult);
-                                    if (Utils_7._isObject(xhrResult)) {
+                                    ConsoleLogger_8.logDebug(formId, "beforeSend was called:", xhrResult);
+                                    if (Utils_8._isObject(xhrResult)) {
                                         if (xhrResult.cancel) {
-                                            ConsoleLogger_7.logDebug(formId, "XMLHttpRequest.send was cancelled.");
+                                            ConsoleLogger_8.logDebug(formId, "XMLHttpRequest.send was cancelled.");
                                             return [2 /*return*/, false];
                                         }
-                                        ConsoleLogger_7.logDebug(formId, "Trying to set XMLHttpRequest (XHR) properties...");
+                                        ConsoleLogger_8.logDebug(formId, "Trying to set XMLHttpRequest (XHR) properties...");
                                         try {
                                             headersSet = this.setRequestHeaders(formId, xhr, xhrResult.requestHeaders);
                                             xhr.withCredentials = xhrResult.withCredentials;
                                         }
                                         catch (e) {
-                                            ConsoleLogger_7.logError(formId, "Error setting XHR properties.", e);
-                                            if (Utils_7._isFunction(fail))
+                                            ConsoleLogger_8.logError(formId, "Error setting XHR properties.", e);
+                                            if (Utils_8._isFunction(fail))
                                                 fail.call(xhr, e.message);
                                             return [2 /*return*/, false];
                                         }
@@ -3224,15 +3590,21 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                 case 7:
                                     if (!headersSet && Shared_8.Forms[formId])
                                         this.setRequestHeaders(formId, xhr, Shared_8.Forms[formId].requestHeaders);
-                                    if (json) {
+                                    if (isJson) {
                                         this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
                                     }
-                                    this.adjustBadFormDataKeys(formData);
+                                    if (!isJson) {
+                                        ConsoleLogger_8.logDebug(formId, "Adjusting bad form data keys.");
+                                        this.adjustBadFormDataKeys(formData);
+                                    }
+                                    objData = isJson ? json : formData;
                                     if (this.reCaptcha) {
-                                        this.reCaptcha.submitForm(formId, xhr, formData, reCaptcha);
+                                        ConsoleLogger_8.logDebug(formId, "Submitting form using reCAPTCHA.");
+                                        this.reCaptcha.submitForm(formId, xhr, objData, reCaptcha);
                                     }
                                     else {
-                                        xhr.send(formData);
+                                        ConsoleLogger_8.logDebug(formId, "Submitting form using XMLHttpRequest.");
+                                        xhr.send(objData);
                                     }
                                     return [2 /*return*/, false]; // To avoid actual submission of the form
                             }
@@ -3250,7 +3622,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     return this.dragdropManager.disable(options);
                 };
                 BlazorFormManager.prototype.dragDropRemoveFileList = function (options) {
-                    return Utils_7.removeFileList(options);
+                    return Utils_8.removeFileList(options);
                 };
                 BlazorFormManager.prototype.dragDropInputFilesOnTarget = function (options) {
                     return this.dragdropManager.dragDropInputFilesOnTarget(options);
@@ -3276,13 +3648,13 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  * @param headers A collection of key=value pairs.
                  */
                 BlazorFormManager.prototype.setRequestHeaders = function (formId, xhr, headers) {
-                    if (!Utils_7._isDictionary(headers))
+                    if (!Utils_8._isDictionary(headers))
                         return false;
-                    ConsoleLogger_7.logDebug(formId, "Setting request headers...");
+                    ConsoleLogger_8.logDebug(formId, "Setting request headers...");
                     for (var name_1 in headers) {
                         if (headers.hasOwnProperty(name_1)) {
                             var value = headers[name_1];
-                            ConsoleLogger_7.logDebug(formId, "Header:", { name: name_1, value: value });
+                            ConsoleLogger_8.logDebug(formId, "Header:", { name: name_1, value: value });
                             xhr.setRequestHeader(name_1, value);
                         }
                     }
@@ -3310,10 +3682,10 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     cancel = false;
                                     if (!Shared_8.Forms[formId]) return [3 /*break*/, 2];
                                     onAjaxUploadWithProgressNotSupported = Shared_8.Forms[formId].onAjaxUploadWithProgressNotSupported;
-                                    if (!Utils_7._isString(onAjaxUploadWithProgressNotSupported)) return [3 /*break*/, 2];
+                                    if (!Utils_8._isString(onAjaxUploadWithProgressNotSupported)) return [3 /*break*/, 2];
                                     navigatorInfo = {};
-                                    Utils_7.populateDictionary(navigatorInfo, global.navigator);
-                                    ConsoleLogger_7.logDebug(formId, "Navigator properties collected", navigatorInfo);
+                                    Utils_8.populateDictionary(navigatorInfo, global.navigator);
+                                    ConsoleLogger_8.logDebug(formId, "Navigator properties collected", navigatorInfo);
                                     return [4 /*yield*/, this.invokeDotNet(formId, onAjaxUploadWithProgressNotSupported, { extraProperties: navigatorInfo })];
                                 case 1:
                                     cancel = _a.sent();
@@ -3331,9 +3703,9 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var _this_1 = this;
                     return this.fileManager.readInputFiles(options, function (processedFiles) {
                         var formId = options.formId, inputId = options.inputId, inputName = options.inputName;
-                        ConsoleLogger_7.logDebug(formId, "Received processed files.");
+                        ConsoleLogger_8.logDebug(formId, "Received processed files.");
                         if (processedFiles && processedFiles.length > 0) {
-                            ConsoleLogger_7.logDebug(formId, "Storing processed files...");
+                            ConsoleLogger_8.logDebug(formId, "Storing processed files...");
                             // store files that have been processed so that they can be 
                             // used later to validate when the form is being submitted
                             var config = _this_1.processedFileStorage[formId];
@@ -3352,15 +3724,15 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     name: inputName,
                                     files: processedFiles
                                 });
-                                ConsoleLogger_7.logDebug(formId, "Created processed files configuration.");
+                                ConsoleLogger_8.logDebug(formId, "Created processed files configuration.");
                             }
                             else {
                                 input.files = processedFiles;
-                                ConsoleLogger_7.logDebug(formId, "Updated processed files configuration.");
+                                ConsoleLogger_8.logDebug(formId, "Updated processed files configuration.");
                             }
                         }
                         else {
-                            ConsoleLogger_7.logDebug(formId, "No files processed!");
+                            ConsoleLogger_8.logDebug(formId, "No files processed!");
                         }
                     });
                 };
@@ -3373,7 +3745,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager.prototype.invokeDotNet = function (formId, method, arg) {
                     if (arg === undefined)
                         arg = null;
-                    var obj = Shared_8.Forms[formId].dotNetObjectReference;
+                    var obj = (Shared_8.Forms[formId] || {}).dotNetObjectReference;
                     if (obj) {
                         //logDebug(formId, `Invoking .NET method "${method}" using object instance.`, arg);
                         return obj.invokeMethodAsync(method, arg);
@@ -3382,7 +3754,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         //logDebug(formId, `Invoking .NET method "${method}" using static type`, arg);
                         return dotNet.invokeMethodAsync(Shared_8.AssemblyName, method, arg);
                     }
-                    ConsoleLogger_7.logWarning(formId, 'No DotNetObjectReference nor static .NET interop reference defined!');
+                    ConsoleLogger_8.logWarning(formId, 'No DotNetObjectReference nor static .NET interop reference defined!');
                     return _resolvedPromise;
                 };
                 /**
@@ -3391,9 +3763,104 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  * @param options The reCAPTCHA options.
                  */
                 BlazorFormManager.prototype.resetRecaptcha = function (formId, options) {
-                    ConsoleLogger_7.logDebug(formId, 'resetting reCAPTCHA', options);
+                    ConsoleLogger_8.logDebug(formId, 'resetting reCAPTCHA', options);
                     var recap = this.reCaptcha;
                     recap && recap.reset(formId, options);
+                };
+                /**
+                 *
+                 * Reconfigure the reCAPTCHA for the specified form identifier.
+                 * @param formId The form identifier.
+                 * @param options The configuration options.
+                 */
+                BlazorFormManager.prototype.reConfigureRecaptcha = function (formId, options) {
+                    ConsoleLogger_8.logDebug(formId, 'Reconfiguring reCAPTCHA', options);
+                    var recap = this.reCaptcha;
+                    recap && recap.configure(formId, options, true);
+                };
+                /**
+                 * Uniquely insert one or more CSS styles into the DOM.
+                 * @param formId The form identifier.
+                 * @param styles A string or array of styles to insert.
+                 */
+                BlazorFormManager.prototype.insertDomStyles = function (formId, styles) {
+                    return Utils_8.insertStyles(styles, null, formId);
+                };
+                /**
+                 * Uniquely insert one or more scripts into the DOM.
+                 * @param formId The form identifier.
+                 * @param scripts A string or array of scripts to insert.
+                 * @param isAsync Sets the script's async property.
+                 * @param isDeferred Sets the scripts defer property.
+                 */
+                BlazorFormManager.prototype.insertDomScripts = function (formId, scripts, isAsync, isDeferred) {
+                    return Utils_8.insertScripts(scripts, null, formId, isAsync, isDeferred);
+                };
+                BlazorFormManager.prototype.initQRCode = function (formId, script, onload) {
+                    ConsoleLogger_8.logDebug(formId, 'Loading QRCode script...', script);
+                    script || (script = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js");
+                    onload || (onload = function () { return ConsoleLogger_8.logDebug(formId, 'Done.'); });
+                    return Utils_8.insertScripts(script, onload, formId);
+                };
+                BlazorFormManager.prototype.generateQRCode = function (formId, selector, value) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var qrCode, elm_1, QRCode_1, loadQRCode, success;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    qrCode = (Shared_8.Forms[formId] || (Shared_8.Forms[formId] = { formId: formId })).qrCode;
+                                    if (!qrCode) return [3 /*break*/, 1];
+                                    qrCode.delegate.clear();
+                                    ConsoleLogger_8.logDebug(formId, 'QRCode cleared.');
+                                    if (value) {
+                                        qrCode.delegate.makeCode(value);
+                                        ConsoleLogger_8.logDebug(formId, 'Generated new QRCode.');
+                                    }
+                                    return [2 /*return*/, true];
+                                case 1:
+                                    if (!value) return [3 /*break*/, 6];
+                                    elm_1 = document.querySelector(selector);
+                                    if (!elm_1) return [3 /*break*/, 5];
+                                    QRCode_1 = window["QRCode"];
+                                    loadQRCode = function () {
+                                        qrCode = { delegate: new QRCode_1(elm_1, value), selector: selector };
+                                        Shared_8.Forms[formId].qrCode = qrCode;
+                                        ConsoleLogger_8.logDebug(formId, "QRCode generated successfully for text ".concat(value, "."));
+                                    };
+                                    if (!!QRCode_1) return [3 /*break*/, 3];
+                                    ConsoleLogger_8.logDebug(formId, 'QRCode not initialized, loading default script...');
+                                    return [4 /*yield*/, this.initQRCode(formId)];
+                                case 2:
+                                    success = _a.sent();
+                                    if (success) {
+                                        ConsoleLogger_8.logDebug(formId, 'Done.');
+                                        QRCode_1 = window["QRCode"];
+                                        loadQRCode();
+                                    }
+                                    else {
+                                        ConsoleLogger_8.logError(formId, 'Could not initialize the default QRCode script.');
+                                    }
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    loadQRCode();
+                                    _a.label = 4;
+                                case 4: return [2 /*return*/, true];
+                                case 5:
+                                    ConsoleLogger_8.logError(formId, "generateQRCode: No DOM element matches the selector '".concat(selector, "'."));
+                                    _a.label = 6;
+                                case 6: return [2 /*return*/, false];
+                            }
+                        });
+                    });
+                };
+                BlazorFormManager.prototype.destroyQrCode = function (formId) {
+                    var qrCode = Shared_8.Forms[formId].qrCode;
+                    if (qrCode) {
+                        var delegate = qrCode.delegate, selector = qrCode.selector;
+                        delegate.clear();
+                        delete Shared_8.Forms[formId].qrCode;
+                        ConsoleLogger_8.logDebug(formId, "The QRCode identified by ".concat(selector, " has been destroyed!"));
+                    }
                 };
                 /** Determines whether an environment supports asynchronous form submissions with file upload progress events. */
                 BlazorFormManager.supportsAjaxUploadWithProgress = function () {
@@ -3418,21 +3885,21 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager.prototype.validateFormAttributes = function (formId) {
                     var frm = document.getElementById(formId);
                     if (!frm) {
-                        ConsoleLogger_7.logError(formId, "The form element identified by '".concat(formId, "' does not exist in the DOM."));
+                        ConsoleLogger_8.logWarning(formId, "The form element identified by '".concat(formId, "' does not exist in the DOM."));
                         return false;
                     }
                     return true;
                 };
                 BlazorFormManager.prototype.addXHRUploadEventListeners = function (formId, xhr, hasFiles) {
                     var onUploadChanged = Shared_8.Forms[formId].onUploadChanged;
-                    if (!Utils_7._isString(onUploadChanged))
+                    if (!Utils_8._isString(onUploadChanged))
                         return;
-                    ConsoleLogger_7.logDebug(formId, "Setting up upload event handlers...");
+                    ConsoleLogger_8.logDebug(formId, "Setting up upload event handlers...");
                     this.fileManager.addFileReaderOrUploadEventListeners(formId, xhr, xhr.upload, onUploadChanged, hasFiles, null);
                 };
                 BlazorFormManager.prototype.initReCaptcha = function (formId, reCaptcha, onReCaptchaActivity) {
                     var _this_1 = this;
-                    if (Utils_7._isObject(reCaptcha)) {
+                    if (Utils_8._isObject(reCaptcha)) {
                         var recap = this.reCaptcha;
                         if (!recap) {
                             recap = new ReCAPTCHA_1.ReCAPTCHA();
@@ -3452,6 +3919,8 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         requireModel: "boolean (optional): Gets or sets a value that indicates whether specifying a " +
                             "non-null reference model is required when the 'onGetModel' event is invoked. If this value is " +
                             "true and no valid model is provided after that event, the form submission will be cancelled.",
+                        enhancedLoad: "boolean (optional): Gets or sets a value that indicates whether to react to a Blazor Server App's 'enhanceload' event. This parameter allows resetting up specific aspects of the form, such as reinitializing the reCaptcha options.",
+                        onEnhancedLoad: optionalNameOfMethodWhen + "a Blazor Server App's 'enhancedLoad' event occurs.",
                         assembly: "string (optional): The name of the .NET assembly on which " +
                             "to invoke static methods. Required if any of the 'onXXX' static " +
                             "method names are set.",
@@ -3474,9 +3943,9 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var message = "Initialization options must be a variation of the following format:";
                     var formId = undefined;
                     if (isError)
-                        ConsoleLogger_7.logError(formId, message, options);
+                        ConsoleLogger_8.logError(formId, message, options);
                     else
-                        ConsoleLogger_7.logInfo(formId, message, options);
+                        ConsoleLogger_8.logInfo(formId, message, options);
                     return false;
                 };
                 /**
@@ -3493,7 +3962,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager.prototype.collectInputFiles = function (formId) {
                     var config = this.processedFileStorage[formId];
                     if (!config) {
-                        ConsoleLogger_7.logDebug(formId, "No processed files found for form #" + formId);
+                        ConsoleLogger_8.logDebug(formId, "No processed files found for form #" + formId);
                         return [];
                     }
                     var inputs = config.inputs;
@@ -3516,10 +3985,10 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.clearFilesAppendProcessed = function (formId, formData) {
                     if (!formId || !formData) {
-                        ConsoleLogger_7.logError(formId, "formId and formData parameters must be set when validating processed files.");
+                        ConsoleLogger_8.logError(formId, "formId and formData parameters must be set when validating processed files.");
                         return false;
                     }
-                    ConsoleLogger_7.logDebug(formId, "Validating processed files on form submit");
+                    ConsoleLogger_8.logDebug(formId, "Validating processed files on form submit");
                     // get processed files...
                     var processedFiles = this.collectFilesOnFormSubmit(formId);
                     var hasFiles = processedFiles.length > 0;
@@ -3543,8 +4012,8 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         return false;
                     // first, grab the keys to avoid deleting 
                     // entries from the formData while enumerating
-                    var keys = Utils_7.formDataKeys(formData);
-                    ConsoleLogger_7.logDebug(formId, "Removing all files from form data; keys are: ", keys);
+                    var keys = Utils_8.formDataKeys(formData);
+                    ConsoleLogger_8.logDebug(formId, "Removing all files from form data; keys are: ", keys);
                     var success = false;
                     // delete all files
                     for (var i = 0; i < keys.length; i++) {
@@ -3565,7 +4034,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     var RVT_KEY2 = 'requestVerificationToken';
                     var rvt1 = formData.get(RVT_KEY1);
                     var rvt2 = formData.get(RVT_KEY2);
-                    if (!Utils_7._isString(rvt1))
+                    if (!Utils_8._isString(rvt1))
                         formData.set(RVT_KEY1, rvt2);
                     formData.delete(RVT_KEY2);
                 };
@@ -3577,23 +4046,53 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.collectModelData = function (model, formData, path) {
                     var _this_1 = this;
-                    if (Utils_7._isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
+                    if (Utils_8._isObject(model) && !(model instanceof Date) && !(model instanceof File) && !(model instanceof Blob)) {
                         Object.keys(model).forEach(function (key) {
                             _this_1.collectModelData(model[key], formData, path ? "".concat(path, "[").concat(key, "]") : key);
                         });
                     }
                     else {
-                        var value = (model === null || model === undefined) ? '' : model;
-                        formData.append(path, value);
+                        var value = (model === null || model === undefined) ? null : model;
+                        if (model !== null)
+                            formData.append(path, value);
                     }
                 };
                 BlazorFormManager.prototype.raiseFormSubmitted = function (formId) {
-                    ConsoleLogger_7.logWarning(formId, 'raiseFormSubmitted not implemented!');
+                    ConsoleLogger_8.logWarning(formId, 'raiseFormSubmitted not implemented!');
+                };
+                BlazorFormManager.prototype._enableEnhancedLoad = function (formId, enabled, dotnetMethodName) {
+                    var _this_1 = this;
+                    var Blazor = global['Blazor'];
+                    if (Blazor && Blazor.addEventListener) {
+                        if (enabled) {
+                            if (!this._enhancedLoadEventEnabled) {
+                                Blazor.addEventListener('enhancedload', function () {
+                                    // the method must be static
+                                    // dotNet.invokeMethodAsync(AssemblyName, dotnetMethodName, window.location.href);
+                                    setTimeout(function () {
+                                        _this_1.reCaptcha && _this_1.reCaptcha.configure(formId, null, true);
+                                    }, 1000);
+                                });
+                                this._enhancedLoadEventEnabled = true;
+                                ConsoleLogger_8.logDebug(formId, 'Blazor enhancedload event enabled.');
+                            }
+                        }
+                        else {
+                            if (Blazor.removeEventListener) {
+                                Blazor.removeEventListener('enhancedload');
+                                ConsoleLogger_8.logDebug(formId, 'Blazor enhancedload event disabled.');
+                            }
+                            this._enhancedLoadEventEnabled = false;
+                        }
+                    }
+                    else {
+                        ConsoleLogger_8.logWarning(formId, '"enhanceload" event not supported: No global Blazor object found.');
+                    }
                 };
                 BlazorFormManager._supportsAJAXwithUpload = BlazorFormManager.supportsAjaxUploadWithProgress();
                 return BlazorFormManager;
             }());
-            exports_12("BlazorFormManager", BlazorFormManager);
+            exports_13("BlazorFormManager", BlazorFormManager);
             (function () {
                 var blazorFormManager = new BlazorFormManager();
                 Object.defineProperty(global, 'BlazorFormManager', { value: blazorFormManager });
@@ -3611,6 +4110,12 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         return editor;
                     }
                 });
+                Object.defineProperty(blazorFormManager['Quill'], 'getInnerHTML', {
+                    value: function (editor) {
+                        return editor.getInnerHTML();
+                    }
+                });
+                Object.defineProperty(blazorFormManager, 'ChartjsHelper', { value: ChartjsHelper_1.ChartjsHelper });
             })();
         }
     };

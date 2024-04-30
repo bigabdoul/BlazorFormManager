@@ -1,0 +1,58 @@
+﻿@typeparam TModel
+@inherits AutoEditFormBase<TModel>
+
+@if (EditContext != null)
+{
+	<div class="auto-view-form">
+		<EditForm EditContext="EditContext" id="@FormId" @attributes="AdditionalAttributes">
+			<CascadingValue Value="this">
+				@if (FormHeader != null)
+				{
+					<div class="form-header">@FormHeader</div>
+				}
+				<div class="form-body">
+					<div class="form-display-group">
+						@if (BeforeDisplayGroups != null)
+						{
+							<div class="before-display-groups">@BeforeDisplayGroups</div>
+						}
+						@if (DisplayGroups?.Count > 0)
+						{
+							<div class="display-groups">
+								@foreach (FormDisplayGroupMetadata group in DisplayGroups)
+								{
+									<AutoDynamicGroupView Metadata="group" Model="Model" />
+								}
+							</div>
+						}
+						@if (AfterDisplayGroups != null)
+						{
+							<div class="after-display-groups">@AfterDisplayGroups</div>
+						}
+					</div>
+					@if (ChildContent != null)
+					{
+						<div class="child-content">
+							@ChildContent
+						</div>
+					}
+				</div>
+				@if (FormFooter != null)
+				{
+					<div class="form-footer">@FormFooter</div>
+				}
+			</CascadingValue>
+		</EditForm>
+	</div>
+}
+else
+{
+	<div class="alert alert-danger">
+		<h1 class="lead">
+			The parameter <code>BlazorFormManager.Components.Forms.FormManagerBase.EditContext</code> is undefined!
+		</h1>
+		<code>
+			Source: BlazorFormManager.Components.Forms.AutoEditForm&lt;TModel&gt;
+		</code>
+	</div>
+}

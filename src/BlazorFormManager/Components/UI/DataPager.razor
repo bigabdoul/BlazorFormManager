@@ -4,8 +4,10 @@
 {
     <em class="small text-danger">@_error</em>
 }
-else if (_pagination.IsMultiPage)
-{
+@*else if (_pagination.IsMultiPage)*@
+@{
+    var hasOptions = PageSizeOptions != null;
+    var cls = hasOptions ? "col-md-4" : "col-md-6";
     if (true == SearchOptions?.CanSearch)
     {
         if (Alignment == JustifyContent.Start)
@@ -14,14 +16,14 @@ else if (_pagination.IsMultiPage)
                 <div class="col-md-6">
                     <DataPaginationNav Pagination="_pagination" Alignment="Alignment" Size="Size" />
                 </div>
-                @if (PageSizeOptions != null)
+                @if (hasOptions)
                 {
                     <div class="col-md-2">
                         <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
                             OnPageSizeChange="HandlePageSizeChange"/>
                     </div>
                 }
-                <div class="col-md-4">
+                <div class="@cls">
                     <InputSearch SearchOptions="SearchOptions"/>
                 </div>
             </div>
@@ -29,10 +31,10 @@ else if (_pagination.IsMultiPage)
         else
         {
             <div class="row">
-                <div class="col-md-4">
+                <div class="@cls">
                     <InputSearch SearchOptions="SearchOptions"/>
                 </div>
-                @if (PageSizeOptions != null)
+                @if (hasOptions)
                 {
                     <div class="col-md-2">
                         <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
@@ -48,7 +50,7 @@ else if (_pagination.IsMultiPage)
     else
     {
         <div class="row">
-            @if (PageSizeOptions != null)
+            @if (hasOptions)
             {
                 <div class="col-md-2">
                     <PageOptionSelect Options="PageSizeOptions" CurrentValue="PageSize"
@@ -61,10 +63,10 @@ else if (_pagination.IsMultiPage)
         </div>
     }
 }
-else if (true == SearchOptions?.CanSearch)
+@*else if (true == SearchOptions?.CanSearch)
 {
     <InputSearch SearchOptions="SearchOptions"/>
-}
+}*@
 
 @code {
     #region private

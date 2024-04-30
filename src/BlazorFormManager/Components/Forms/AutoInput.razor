@@ -4,7 +4,6 @@
     bool rendered = false;
     var metadata = Metadata;
     var attr = metadata.Attribute;
-    var (id, name) = Metadata.GenerateIdAndName(Form?.RenderOptions, PropertyNavigationPath, null/*Id*/, Form?.GenerateInputNameAttribute);
     var hasIcon = attr.Icon.IsNotBlank();
     
     if (attr.InputName.IsNotBlank())
@@ -16,9 +15,7 @@
     if (attr.EditorType != null)
     {
         if (!typeof(IComponent).IsAssignableFrom(attr.EditorType))
-        throw new ArgumentException(
-        $"{nameof(FormDisplayAttribute.EditorType)} must implement {nameof(IComponent)}.");
-
+            throw new ArgumentException($"{nameof(FormDisplayAttribute.EditorType)} ({attr.EditorType.FullName}) must implement {typeof(IComponent).FullName}.");
         var parameters = new Dictionary<string, object?>()
         {
             { "Id", id },
@@ -37,7 +34,7 @@
     {
         if (attr.IsInputFile)
         {
-            <AutoFileInput Id="@id" Model="Model" Metadata="Metadata" />
+            <AutoInputFile Id="@id" Name="@name" Model="Model" Metadata="Metadata" />
         }
         else if (attr.Tag.EqualsIgnoreCase("button"))
         {
@@ -78,7 +75,8 @@
             var descr = metadata.GetDisplayString(attr.Description, culture);
             if (attr.IsInputRadio || metadata.IsInputCheckbox)
             {
-                var wrapperClass = $"form-group mb-3 {element} {elementType}";
+                var marginbottom = descr.IsNotBlank() ? "mb-1" : "mb-3";
+                var wrapperClass = $"form-group {marginbottom} {element} {elementType}";
                 var placeholder = metadata.GetDisplayString(attr.Placeholder, culture);
                 if (placeholder.IsBlank()) placeholder = metadata.GetDisplayName(culture);
                 <div class="@wrapperClass">
@@ -91,21 +89,30 @@
             }
             else
             {
-                var editor = attr.RichText || true == Form?.EnableRichText && element.EqualsIgnoreCase("textarea");
+                var editor = attr.RichText || (true == Form?.EnableRichText) && element.EqualsIgnoreCase("textarea");
                 if (editor)
                 {
                     <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
                 }
                 else
                 {
-                    <InputGroupEntry Icon="@attr.Icon" HelpText="@descr">
-                        <ChildContent>
-                            <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
-                        </ChildContent>
-                        <ValidationContent>
-                            <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
-                        </ValidationContent>
-                    </InputGroupEntry>
+                    if (Form?.FloatingIcon == true)
+                    {
+                        <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                        <HelpText Description="@descr"/>
+                        <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
+                    }
+                    else
+                    {
+                        <InputGroupEntry Icon="@attr.Icon" HelpText="@descr">
+                            <ChildContent>
+                                <AutoFormEntry Id="@id" Name="@name" Model="Model" Metadata="metadata" PropertyNavigationPath="@PropertyNavigationPath"/>
+                            </ChildContent>
+                            <ValidationContent>
+                                <AutoValidationContainer Model="Model" Property="@propertyName" Indented="hasIcon"/>
+                            </ValidationContent>
+                        </InputGroupEntry>
+                    }
                 }
             }
         }
@@ -114,12 +121,15 @@
 @code {
     [CascadingParameter] private FormManagerBase? Form { get; set; }
 
+    private string id = string.Empty;
+    private string name = string.Empty;
+
     /*
     /// <summary>
     /// Gets or sets the unique identifier of the generated HTML input / element.
     /// </summary>
     [Parameter] public string? Id { get; set; }
-*/
+    */
     /// <summary>
     /// Gets or  sets the metadata information for the auto-generated component.
     /// </summary>
@@ -151,6 +161,15 @@
         {
             // AutoInputBase<object?> has already set the model's value like the following:
             // Metadata?.SetValue(Model, value);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        if (id.IsBlank())
+        {
+            (id, name) = Metadata.GenerateIdAndName(Form?.RenderOptions, PropertyNavigationPath, null/*Id*/, Form?.GenerateInputNameAttribute);
         }
     }
 }

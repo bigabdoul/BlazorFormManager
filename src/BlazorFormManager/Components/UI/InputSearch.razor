@@ -10,13 +10,20 @@
         ("aria-controls", "Search"),
         ("pattern", _searchOptions?.KeyFilters?.Pattern)
     );
-
-    <InputGroupEntry Icon="fas fa-search">
+    //<InputGroupEntry Icon="fas fa-search">
+    //    <div class="form-floating input-@(_searchOptions?.InputSizeString ?? "md")">
+    //        <input @attributes="AdditionalAttributes.Merge(attrs)" @bind-value="Value">
+    //        <label for="@Id">@(_searchOptions?.Label ?? _searchOptions?.Placeholder ?? "Search")</label>
+    //    </div>
+    //</InputGroupEntry>
+    <div class="input-group mb-3">
         <div class="form-floating input-@(_searchOptions?.InputSizeString ?? "md")">
             <input @attributes="AdditionalAttributes.Merge(attrs)" @bind-value="Value">
-            <label for="@Id">@(_searchOptions?.Label ?? _searchOptions?.Placeholder ?? "Search")</label>
+            <label for="@Id">
+                <ContentIconText Text="@(_searchOptions?.Label ?? _searchOptions?.Placeholder ?? "Search")" Icon="fas fa-search" />
+            </label>
         </div>
-    </InputGroupEntry>
+    </div>
 }
 
 @code {
@@ -46,7 +53,7 @@
             await RemoveEventHandlersAsync();
 
             _searchOptions = SearchOptions;
-            
+
             if (_renderedOnce)
             {
                 await SetupEventListenersAsync();
@@ -105,10 +112,10 @@
         {
             if (OnKeyDown.HasDelegate)
                 await JS.FilterKeysAsync(Id, DomEventType.KeyDown, HandleKeyDown);
-            
+
             if (OnKeyPress.HasDelegate)
                 await JS.FilterKeysAsync(Id, DomEventType.KeyPress, HandleKeyPress);
-            
+
             if (OnKeyUp.HasDelegate)
                 await JS.FilterKeysAsync(Id, DomEventType.KeyUp, HandleKeyUp);
         }
@@ -122,7 +129,7 @@
 
             if (!keyEvent)
                 await JS.AddEventListenerAsync(Id, EventType, HandleCallback);
-            
+
             if (keyEvent || options.KeyFilters != null)
             {
                 if (!keyEvent)
@@ -136,7 +143,7 @@
         if (options == null || options.ChangeDetection != DomEventType.Input)
             // always add the "input" event so that we can capture the value of the input
             _autoInputEvent = await JS.AddEventListenerAsync(Id, "input", HandleCallback);
-        
+
         _settingUp = false;
     }
 
@@ -153,7 +160,7 @@
         {
             if (_searchOptions != null)
                 _searchOptions.Text = e.Value;
-            
+
             Value = e.Value;
         }
         if (!_autoInputEvent && _searchOptions != null)

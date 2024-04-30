@@ -1,0 +1,55 @@
+﻿@typeparam TModel
+
+@if (!Parent.ContentHidden)
+{
+	if (Parent.FormHeader != null)
+	{
+		<div class="form-header">@Parent.FormHeader</div>
+	}
+	<div class="form-body">
+		<div class="form-display-group">
+			@if (Parent.BeforeDisplayGroups != null)
+			{
+				<div class="before-display-groups">@Parent.BeforeDisplayGroups</div>
+			}
+			@if (DisplayGroups?.Count > 0)
+			{
+				<div class="display-groups">
+					@foreach (FormDisplayGroupMetadata group in DisplayGroups)
+					{
+						<FormDisplayGroup Metadata="group" Model="Parent.Model" />
+					}
+				</div>
+			}
+			<ReCaptcha />
+			@if (Parent.AfterDisplayGroups != null)
+			{
+				<div class="after-display-groups">@Parent.AfterDisplayGroups</div>
+			}
+			@if (Parent.SubmitButton != null)
+			{
+				<SubmitButton Options="Parent.SubmitButton" />
+			}
+		</div>
+		@if (Parent.ChildContent != null)
+		{
+			<div class="child-content">
+				@Parent.ChildContent
+			</div>
+		}
+	</div>
+	if (Parent.FormFooter != null)
+	{
+		<div class="form-footer">@Parent.FormFooter</div>
+	}
+}
+else
+{
+	@Parent.NotHiddenContent
+}
+<FormSubmitResultView />
+
+@code {
+	[CascadingParameter] private AutoEditForm<TModel> Parent { get; set; } = default!;
+	[Parameter] public IReadOnlyCollection<FormDisplayGroupMetadata>? DisplayGroups { get; set; }
+}

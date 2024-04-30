@@ -38,5 +38,15 @@ namespace Carfamsoft.Model2View.Annotations
         /// Gets or sets the icon for the group.
         /// </summary>
         public string Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that describes the group.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Indicates whether to display the section's description.
+        /// </summary>
+        public bool ShowDescription { get; set; }
     }
 }

@@ -55,6 +55,11 @@ namespace Carfamsoft.Model2View.Annotations
         public virtual string GroupIcon { get; set; }
 
         /// <summary>
+        /// Gets or sets a value that describes the group.
+        /// </summary>
+        public virtual string GroupDescription { get; set; }
+
+        /// <summary>
         /// Gets or sets a value that is used for display in the UI.
         /// Set to an empty string (value of <see cref="string.Empty"/>, not null) to omit the label.
         /// </summary>

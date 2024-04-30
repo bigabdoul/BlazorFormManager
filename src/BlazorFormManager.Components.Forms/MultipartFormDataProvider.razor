@@ -1,0 +1,34 @@
+﻿@using System.ComponentModel;
+@inherits MultipartFormDataProviderBase
+@implements IDisposable
+
+<CascadingValue Value="this" ChildContent="ChildContent" />
+
+@if (ShowError && Error is not null)
+{
+    <div class="alert alert-danger p-2">
+        <p class="mb-0">@Error.ToString()</p>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback<PropertyChangedEventArgs> OnPropertyHasChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        PropertyChanged += HandlePropertyChanged;
+        base.OnInitialized();
+    }
+
+    protected virtual void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (OnPropertyHasChanged.HasDelegate)
+            _ = OnPropertyHasChanged.InvokeAsync(e);
+    }
+
+    void IDisposable.Dispose()
+    {
+        PropertyChanged -= HandlePropertyChanged;
+    }
+}

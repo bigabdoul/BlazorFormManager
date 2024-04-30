@@ -58,12 +58,17 @@ namespace Carfamsoft.Model2View.Annotations
 
                 foreach (var attributes in attrList)
                 {
+                    var groupDescription = attributes.FirstOrDefault(a => a.GroupDescription.IsNotBlank())?.GroupDescription;
+                    groupDescription = resourceManager?.GetDisplayString(groupDescription) ?? groupDescription;
+                    var showDescr = defaultDisplay == null || defaultDisplay.ShowGroupDescription;
                     var groupData = new FormDisplayGroupMetadata
                     {
                         Name = resourceManager?.GetDisplayString(attributes.Key) ?? attributes.Key,
                         CssClass = defaultDisplay?.GroupCssClass,
                         ShowName = !string.IsNullOrWhiteSpace(attributes.Key) && true == defaultDisplay?.ShowGroupName,
                         Icon = attributes.FirstOrDefault(a => a.GroupIcon.IsNotBlank())?.GroupIcon ?? defaultDisplay?.GroupIcon,
+                        Description = groupDescription,
+                        ShowDescription = showDescr && groupDescription.IsNotBlank(),
                     };
 
                     groups.Add(groupData);

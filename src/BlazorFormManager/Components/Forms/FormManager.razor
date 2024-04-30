@@ -21,9 +21,16 @@
 				{
 					<SubmitButton Options="SubmitButton" />
 				}
-                @if (AntiForgeryToken.IsNotBlank())
+                @if (EnableAntiforgeryToken)
                 {
-                    @((MarkupString)AntiForgeryToken!)
+                    if (Net8OrGreater)
+                    {
+					    <Microsoft.AspNetCore.Components.Forms.AntiforgeryToken />
+                    }
+                    else if (AntiForgeryToken.IsNotBlank())
+                    {
+                        @((MarkupString)AntiForgeryToken!)
+                    }
                 }
                 <FormSubmitResultView />
             </CascadingValue>

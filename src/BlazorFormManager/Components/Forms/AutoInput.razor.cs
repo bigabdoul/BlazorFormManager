@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 #if NET5_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -15,6 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 
 namespace BlazorFormManager.Components.Forms
@@ -204,6 +206,8 @@ namespace BlazorFormManager.Components.Forms
                 builder.AddAttribute(sequence++, "class", $"{CssClass} {_formDisplayAttribute.InputCssClass}".Trim());
                 
                 sequence = CheckDisabled(builder, sequence);
+                sequence = CheckReadonly(builder, sequence);
+
                 var isstring = _propertyType.IsString();
 
                 if (!isRichText)
@@ -217,15 +221,64 @@ namespace BlazorFormManager.Components.Forms
                     builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string?>(this, 
                         __value => CurrentValueAsString = __value, CurrentValueAsString));
                 }
+                
+                if (!isRichText)
+                {
+                    if (_formDisplayAttribute.Placeholder.IsNotBlank())
+                        builder.AddAttribute(sequence++, "placeholder", _formDisplayAttribute.Placeholder);
+
+                    if (Metadata.IsRequired)
+                        builder.AddAttribute(sequence++, "required", true);
+
+                    if (Metadata.HasStringLength)
+                    {
+                        var sl = Metadata.StringLength;
+
+                        try
+                        {
+                            var seq = sequence;
+                            if (sl.MinimumLength > 0)
+                            {
+                                builder.AddAttribute(seq, "minlength", sl.MinimumLength);
+                                seq++;
+                            }
+                            if (sl.MaximumLength > 0)
+                            {
+                                builder.AddAttribute(seq, "maxlength", sl.MaximumLength);
+                                seq++;
+                            }
+                            sequence = seq;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // Original (not helpful) message: "Attributes may only be added immediately after frames of type Element or Component."
+                            // Throw an exception with a more meaningful message.
+                            throw new InvalidOperationException(
+                                $"Cannot add attribute minlength or maxlength to element \"{elementName}\". " + 
+                                $"Remove the custom attribute " +
+                                $"[{nameof(System.ComponentModel.DataAnnotations.StringLengthAttribute)}] " +
+                                $"from the property \"{PropertyNavigationPath ?? Metadata.PropertyInfo.Name}\".");
+                        }
+
+                        if (sl.ErrorMessage.IsNotBlank())
+                            builder.AddAttribute(sequence++, "data-length-error-message", sl.ErrorMessage);
+                        else if (sl.ErrorMessageResourceType != null && sl.ErrorMessageResourceName.IsNotBlank())
+                        {
+                            if (TryGetResourceManager(sl.ErrorMessageResourceType, out var res))
+                            {
+                                var message = res!.GetString(sl.ErrorMessageResourceName!);
+                                if (message.IsNotBlank())
+                                {
+                                    message = sl.FormatErrorMessage(message!);
+                                    builder.AddAttribute(sequence++, "data-length-error-message", message!);
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if (elementName.EqualsIgnoreCase("select"))
                     sequence = RenderSelectOptions(builder, sequence);
-                
-                if (!isRichText && _formDisplayAttribute.Placeholder.IsNotBlank())
-                    builder.AddAttribute(sequence++, "placeholder", _formDisplayAttribute.Placeholder);
-
-                if (!isRichText && Metadata.IsRequired)
-                    builder.AddAttribute(sequence++, "required", true);
 
                 if (isRichText)
                 {
@@ -249,6 +302,10 @@ namespace BlazorFormManager.Components.Forms
                         builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValue));
                     else
                         builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(CurrentValueAsString));
+
+                    sequence = CheckDisabled(builder, sequence);
+                    sequence = CheckReadonly(builder, sequence);
+
                     builder.CloseElement();
                 }
             }
@@ -331,7 +388,8 @@ namespace BlazorFormManager.Components.Forms
                         <input type="radio" class="form-check-input" name="@propertyName" value="@item.Id" @onchange="HandleChange" checked="@IsChecked" />
                          <label>@item.Value</label>
                          */
-                        sequence = RenderInputRadio(builder, sequence, propertyName, item.Id, label: item.Value);
+                        string? id = InputId.IsNotBlank() ? $"{InputId}_{sequence}" : null;
+                        sequence = RenderInputRadioWithId(builder, sequence, id, propertyName, item.Id, label: item.Value);
                     }
                 }
             }
@@ -357,15 +415,25 @@ namespace BlazorFormManager.Components.Forms
             if (InputId.IsNotBlank())
                 builder.AddAttribute(sequence++, "id", InputId);
 
+            if (InputName.IsNotBlank())
+            {
+                builder.AddAttribute(sequence++, "name", InputName);
+                builder.AddAttribute(sequence++, "value", "true");
+            }
+
             sequence = CheckDisabled(builder, sequence);
+            sequence = CheckReadonly(builder, sequence);
 
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue((bool?)CurrentValue));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<bool?>(this, __value => CurrentValue = __value, (bool?)CurrentValue));
             builder.CloseElement();
 
-            if (!_formDisplayAttribute!.CheckNoLabel && !string.IsNullOrWhiteSpace(label))
+            var attr = _formDisplayAttribute!;
+
+            if (!attr.CheckNoLabel && !string.IsNullOrWhiteSpace(label))
             {
                 builder.OpenElement(sequence++, "label");
+                sequence = RenderIcon(builder, sequence, attr.Icon);
                 builder.AddContent(sequence++, label);
                 builder.CloseElement();
             }
@@ -384,22 +452,48 @@ namespace BlazorFormManager.Components.Forms
         /// <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
         /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
         protected virtual int RenderInputRadio(RenderTreeBuilder builder, int sequence, string? propertyName, string? value, string? additionalCssClass = null, string? label = null)
+            => RenderInputRadioWithId(builder, sequence, null, propertyName, value, additionalCssClass, label);
+
+        /// <summary>
+        /// Renders an input radio to the supplied <see cref="RenderTreeBuilder"/>, and optionally 
+        /// generates an 'id' attribute that is the target of a corresponding label for it.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <param name="id"></param>
+        /// <param name="propertyName">The name of the input radio.</param>
+        /// <param name="value">The value of the radio input.</param>
+        /// <param name="additionalCssClass">The custom CSS class to add to the existing <see cref="InputBase{TValue}.CssClass"/>.</param>
+        /// <param name="label">The text of the associated label. Should be null if you already wrapped the input inside a label.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int RenderInputRadioWithId(RenderTreeBuilder builder, int sequence, string? id, string? propertyName, string? value, string? additionalCssClass = null, string? label = null)
         {
             builder.OpenElement(sequence++, "input");
+            if (id.IsNotBlank())
+            {
+                builder.AddAttribute(sequence++, "id", id);
+            }
             builder.AddAttribute(sequence++, "type", "radio");
             builder.AddAttribute(sequence++, "class", $"{additionalCssClass} {CssClass}".Trim());
             builder.AddAttribute(sequence++, "name", propertyName);
             builder.AddAttribute(sequence++, "value", BindConverter.FormatValue(value));
 
             sequence = CheckDisabled(builder, sequence);
+            sequence = CheckReadonly(builder, sequence);
 
             builder.AddAttribute(sequence++, "checked", BindConverter.FormatValue(string.Equals(CurrentValueAsString, value)));
             builder.AddAttribute(sequence++, "onchange", EventCallback.Factory.CreateBinder<string?>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.CloseElement();
 
-            if (!_formDisplayAttribute!.CheckNoLabel && !string.IsNullOrWhiteSpace(label))
+            var attr = _formDisplayAttribute!;
+
+            if (!attr.CheckNoLabel && !string.IsNullOrWhiteSpace(label))
             {
                 builder.OpenElement(sequence++, "label");
+                if (id.IsNotBlank())
+                {
+                    builder.AddAttribute(sequence++, "for", id);
+                }
                 builder.AddContent(sequence++, label);
                 builder.CloseElement();
             }
@@ -443,6 +537,7 @@ namespace BlazorFormManager.Components.Forms
             if (_formDisplayAttribute!.FileAttribute != null)
                 sequence = AddInputFileAttributes(builder, sequence, _formDisplayAttribute.FileAttribute);
 
+            sequence = CheckReadonly(builder, sequence);
             builder.CloseElement(); // /> (input)
             
             return sequence;
@@ -544,7 +639,7 @@ namespace BlazorFormManager.Components.Forms
               <label class="form-check-label" for="flexSwitchCheckDefault">Default switch checkbox input</label>
             </div>
              */
-            FormDisplayAttribute attr = _formDisplayAttribute!;
+            var attr = _formDisplayAttribute!;
             builder.OpenElement(sequence++, "div");
 
 
@@ -564,8 +659,10 @@ namespace BlazorFormManager.Components.Forms
                 builder.AddAttribute(sequence++, "class", $"{classList} {extraClassList}".Trim());
             }
 
+            string? id = InputId.IsNotBlank() ? $"{InputId}_{sequence}" : null;
+
             if (radio)
-                sequence = RenderInputRadio(builder, sequence, name, value, FORM_CHECK_INPUT);
+                sequence = RenderInputRadioWithId(builder, sequence, id, name, value, FORM_CHECK_INPUT);
             else
                 sequence = RenderInputCheckbox(builder, sequence, FORM_CHECK_INPUT);
             
@@ -574,15 +671,31 @@ namespace BlazorFormManager.Components.Forms
                 builder.OpenElement(sequence++, "label");
                 builder.AddAttribute(sequence++, "class", "form-check-label");
                 
-                if (InputId.IsNotBlank())
+                if (radio)
+                {
+                    if (id.IsNotBlank())
+                        builder.AddAttribute(sequence++, "for", id);
+                }
+                else if (InputId.IsNotBlank())
                     builder.AddAttribute(sequence++, "for", InputId);
-                
+
+                sequence = RenderIcon(builder, sequence, attr.Icon);
+
                 builder.AddContent(sequence++, label);
                 builder.CloseElement();
             }
 
             builder.CloseElement(); // </div>
 
+            return sequence;
+        }
+
+        private int RenderIcon(RenderTreeBuilder builder, int sequence, string? icon)
+        {
+            if (icon.IsNotBlank())
+            {
+                builder.AddContent(sequence++, (MarkupString)$"<i class=\"{icon}\"></i>");
+            }
             return sequence;
         }
 
@@ -602,6 +715,40 @@ namespace BlazorFormManager.Components.Forms
                 if (!state.HasValue) 
                     state = true;
                 builder.AddAttribute(sequence++, "disabled", BindConverter.FormatValue(state.Value));
+            }
+            return sequence;
+        }
+
+        /// <summary>
+        /// Determines whether input is read-only.
+        /// </summary>
+        /// <param name="builder">A <see cref="RenderTreeBuilder"/> that will receive the render output.</param>
+        /// <param name="sequence">An integer that represents the position of the instruction in the source code.</param>
+        /// <returns>An integer that represents the next position of the instruction in the source code.</returns>
+        protected virtual int CheckReadonly(RenderTreeBuilder builder, int sequence)
+        {
+            if (_formDisplayAttribute!.Readonly)
+            {
+                try
+                {
+                    builder.AddAttribute(sequence, "readonly", BindConverter.FormatValue(true));
+                    sequence++;
+                }
+                catch (InvalidOperationException)
+                {
+                    var elementName = _formDisplayAttribute!.GetElement(out var elementType);
+                    var message = $"Cannot add readonly attribute to element \"{elementName}\" (type={elementType})";
+                    Console.WriteLine(message);
+                    try
+                    {
+                        builder.AddAttribute(sequence, "disabled", BindConverter.FormatValue(true));
+                        sequence++;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        //throw new InvalidOperationException(message);
+                    }
+                }
             }
             return sequence;
         }
@@ -831,7 +978,7 @@ namespace BlazorFormManager.Components.Forms
                     InputName = name;
             }
 
-            return InputName;
+            return InputName!;
         }
 
         internal static bool GetNotifyFieldChangedArgs(out FormFieldChangedEventArgs? result, 
@@ -840,12 +987,6 @@ namespace BlazorFormManager.Components.Forms
         {
             if (Metadata != null && !EqualityComparer<object?>.Default.Equals(curentValue, newValue))
             {
-                if (Metadata.Attribute.IsInputFile)
-                {
-                    var svalue = $"{newValue}";
-                    newValue = string.IsNullOrEmpty(svalue) ? svalue : Path.GetFileName(svalue);
-                }
-
                 result = new FormFieldChangedEventArgs(newValue,
                     fieldIdentifier,
                     isFile: Metadata.Attribute.IsInputFile,
@@ -860,6 +1001,32 @@ namespace BlazorFormManager.Components.Forms
             return false;
         }
 
-#endregion
+        static readonly ConcurrentDictionary<Type, ResourceManager> resManagers;
+
+        static AutoInputBase()
+        {
+            resManagers = new();
+        }
+
+        private static ResourceManager? GetResourceManager(Type type)
+        {
+            return resManagers.TryGetValue(type, out var manager) ||
+                resManagers.TryAdd(type, manager = new(type))
+                ? manager
+                : null;
+        }
+
+        private static bool TryGetResourceManager(Type type,
+#if NET6_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ResourceManager? manager
+        )
+        {
+            manager = GetResourceManager(type);
+            return manager != null;
+        }
+
+        #endregion
     }
 }

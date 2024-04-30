@@ -1,0 +1,56 @@
+﻿@if (Model != null && Metadata != null)
+{
+    var items = Metadata.Items
+        .Where(g => !g.Attribute.IsIgnored() && !g.Attribute.Is("hidden"))
+        .ToArray();
+
+    if (items.Length == 0)
+    {
+        return;
+    }
+
+    var group = Metadata;
+    var showGroupName = group.ShowName || group.Icon.IsNotBlank();
+    var fieldsetClass = $"display-group {group.Name.SanitizedName()}";
+
+    <fieldset class="@fieldsetClass">
+        @if (showGroupName)
+        {
+            <legend class="display-group-title">
+                <ContentIconText Icon="@group.Icon" Text="@group.Name" />
+            </legend>
+        }
+        @if (group.ShowDescription)
+        {
+            <HelpText Description="@group.Description" Class="@Class" />
+        }
+        <div class="dynamic-group-view-body row">
+            @foreach (var inputMetadata in items)
+            {
+                var css = inputMetadata.Attribute.ColumnCssClass ?? "col-md-3";
+                css += " border-bottom pt-3 dynmaic-group-view-column";
+                <AutoInputView Model="Model" Metadata="inputMetadata" CssClass="@css" />
+            }
+        </div>
+    </fieldset>
+}
+
+@code {
+
+    /// <summary>
+    /// Gets or sets the model for which the component is being rendered.
+    /// </summary>
+    [Parameter] public object? Model { get; set; }
+
+    /// <summary>
+    /// Gets or  sets the metadata information for the auto-generated component.
+    /// </summary>
+    [Parameter] public FormDisplayGroupMetadata? Metadata { get; set; }
+
+    /// <summary>
+    /// Gets the associated <see cref="FormManagerBase"/>.
+    /// </summary>
+    [CascadingParameter] protected FormManagerBase? Form { get; set; }
+
+    const string Class = "form-text text-muted d-block form-display-group-description";
+}
