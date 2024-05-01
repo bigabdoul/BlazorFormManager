@@ -523,12 +523,8 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                 this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
             }
 
-            if (!isJson) {
-                logDebug(formId, "Adjusting bad form data keys.");
-                this.adjustBadFormDataKeys(formData);
-            }
-
-            const objData = isJson ? json : formData;
+            logDebug(formId, "Adjusting bad form data keys.");
+            const objData = this.adjustBadFormDataKeys(formData || json);
 
             if (this.reCaptcha) {
                 logDebug(formId, "Submitting form using reCAPTCHA.");
@@ -997,20 +993,33 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     }
 
     /**
-     * Remove inappropriate form data keys.
-     * @param formData The form data to clean up.
+     * Remove inappropriate data keys.
+     * @param data The data to clean up.
      */
-    private adjustBadFormDataKeys(formData: FormData) {
+    private adjustBadFormDataKeys(data: FormData | string) {
         const RVT_KEY1 = '__RequestVerificationToken';
         const RVT_KEY2 = 'requestVerificationToken';
 
-        const rvt1 = formData.get(RVT_KEY1);
-        const rvt2 = formData.get(RVT_KEY2);
+        if (data instanceof FormData) {
+            const rvt1 = data.get(RVT_KEY1);
+            const rvt2 = data.get(RVT_KEY2);
 
-        if (!_isString(rvt1))
-            formData.set(RVT_KEY1, rvt2);
+            if (!_isString(rvt1))
+                data.set(RVT_KEY1, rvt2);
 
-        formData.delete(RVT_KEY2);
+            data.delete(RVT_KEY2);
+            return data;
+        } else {
+            const json = JSON.parse(data);
+            const rvt1 = json[RVT_KEY1];
+            const rvt2 = json[RVT_KEY2];
+
+            if (!_isString(rvt1))
+                json[RVT_KEY1] = rvt2;
+
+            delete json[RVT_KEY2];
+            return JSON.stringify(json);
+        }
     }
 
     /**
