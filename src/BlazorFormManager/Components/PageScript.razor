@@ -1,0 +1,12 @@
+﻿<page-script src="@Src"></page-script>
+
+@code {
+    /// <summary>
+    /// Gets or sets the script's source.
+    /// </summary>
+    [Parameter]
+#if NET7_0_OR_GREATER
+    [EditorRequired]
+#endif
+    public string Src { get; set; } = default!;
+}
