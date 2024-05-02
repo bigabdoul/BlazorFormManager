@@ -117,6 +117,12 @@ namespace BlazorFormManager.Components.Forms
         public string FormId { get; set; } = typeof(FormManagerBase).Name.GenerateId();
 
         /// <summary>
+        /// Gets or sets the predictable identifier when saving 
+        /// and retrieving the form in the browser's session storage.
+        /// </summary>
+        [Parameter] public string? SessionStorageKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the form 'action' attribute.
         /// </summary>
         [Parameter]
@@ -460,7 +466,7 @@ namespace BlazorFormManager.Components.Forms
         [Parameter] public bool Enhance { get; set; }
 
         /// <summary>
-        /// Determines whether to react to a Blazor Server App's "enhanceload" event.
+        /// Determines whether to react to a Blazor Server App's "enhancedload" event.
         /// This parameter allows resetting up specific aspects of the form, such as 
         /// reinitializing the <see cref="ReCaptcha"/> options.
         /// </summary>
@@ -636,6 +642,7 @@ namespace BlazorFormManager.Components.Forms
                     var options = new
                     {
                         FormId,
+                        SessionStorageKey,
                         LogLevel,
                         RequireModel,
                         ReCaptcha,
@@ -964,7 +971,7 @@ namespace BlazorFormManager.Components.Forms
         /// cause the component to be re-rendered. This method should only be called from
         /// a child component that modifies state that lies higher up in the hierarchy.
         /// </summary>
-        public virtual Task NotifyStateChanged() => InvokeAsync(() => StateHasChanged());
+        public virtual Task NotifyStateChanged() => InvokeAsync(StateHasChanged);
 
         /// <summary>
         /// Sets the <see cref="OnFieldChanged"/> event callback.
@@ -1031,7 +1038,7 @@ namespace BlazorFormManager.Components.Forms
         #region FormManagerBaseJSInvokable accessibility
 
         /// <summary>
-        /// When the task completes one of the following things can happen:
+        /// When the task completes, one of the following things can happen:
         /// <para>
         /// The <see cref="OnBeforeSubmit"/> event callback has a delegate:
         /// Returns a boolean value determined by the property value of an instance of the
