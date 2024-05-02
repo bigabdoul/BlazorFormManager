@@ -1,5 +1,4 @@
 ﻿using Carfamsoft.Model2View.Shared;
-using Carfamsoft.Model2View.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +7,7 @@ using System.Linq;
 
 namespace BlazorFormManager
 {
-    internal static class InternalTypeExtensions
+	internal static class InternalTypeExtensions
     {
         private const string DateFormat = "yyyy-MM-dd"; // Compatible with HTML date inputs
 

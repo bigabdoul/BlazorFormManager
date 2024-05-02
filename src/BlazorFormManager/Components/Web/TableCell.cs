@@ -1,15 +1,14 @@
-﻿using Carfamsoft.Model2View.Shared.Collections;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using System.Collections.Generic;
 using CollectionExtensions = Carfamsoft.Model2View.Shared.Collections.CollectionExtensions;
 
 namespace BlazorFormManager.Components.Web
 {
-    /// <summary>
-    /// Represents an object that encapsulates information about a table header or data cell.
-    /// </summary>
-    public class TableCell
+	/// <summary>
+	/// Represents an object that encapsulates information about a table header or data cell.
+	/// </summary>
+	public class TableCell
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableCell"/> class.
