@@ -46,6 +46,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFormManager.Extension
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFormManager.Components.Forms", "src\BlazorFormManager.Components.Forms\BlazorFormManager.Components.Forms.csproj", "{11720E96-285A-4B52-B084-8A36CC5EE5BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorFormManager.Abstractions", "src\BlazorFormManager.Abstractions\BlazorFormManager.Abstractions.csproj", "{29D589D1-AD63-4536-BD1F-791B88CB6800}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,10 @@ Global
 		{11720E96-285A-4B52-B084-8A36CC5EE5BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11720E96-285A-4B52-B084-8A36CC5EE5BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11720E96-285A-4B52-B084-8A36CC5EE5BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D589D1-AD63-4536-BD1F-791B88CB6800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D589D1-AD63-4536-BD1F-791B88CB6800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D589D1-AD63-4536-BD1F-791B88CB6800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D589D1-AD63-4536-BD1F-791B88CB6800}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

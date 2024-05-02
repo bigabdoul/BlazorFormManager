@@ -4111,33 +4111,41 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                 BlazorFormManager.prototype._enableEnhancedLoad = function (formId, enabled, dotnetMethodName) {
                     var _this_1 = this;
                     var Blazor = global['Blazor'];
-                    if (Blazor && Blazor.addEventListener) {
+                    if (Blazor === null || Blazor === void 0 ? void 0 : Blazor.addEventListener) {
                         if (enabled) {
                             if (!this._enhancedLoadEventEnabled) {
                                 Blazor.addEventListener('enhancedload', function () {
-                                    ConsoleLogger_8.logDebug(formId, 'enhancedload occurred!');
+                                    ConsoleLogger_8.logDebug(formId, 'Blazor.enhancedload event occurred!');
                                     // the method must be static
                                     // dotNet.invokeMethodAsync(AssemblyName, dotnetMethodName, window.location.href);
                                     setTimeout(function () { return __awaiter(_this_1, void 0, void 0, function () {
                                         var sessionStorageKey, stored;
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
+                                        var _a, _b;
+                                        return __generator(this, function (_c) {
+                                            switch (_c.label) {
                                                 case 0:
-                                                    if (!(this.reCaptcha && this.reCaptcha.requiresReCaptcha())) return [3 /*break*/, 3];
+                                                    if (!((_a = this.reCaptcha) === null || _a === void 0 ? void 0 : _a.requiresReCaptcha())) return [3 /*break*/, 4];
+                                                    if (!(((_b = this.reCaptcha.getFirstOption()) === null || _b === void 0 ? void 0 : _b.version) === 'v3')) return [3 /*break*/, 3];
                                                     sessionStorageKey = (Shared_8.Forms[formId] || {}).sessionStorageKey;
                                                     if (!Utils_8._isString(sessionStorageKey)) return [3 /*break*/, 2];
                                                     return [4 /*yield*/, this.storeFormData(formId, sessionStorageKey)];
                                                 case 1:
-                                                    stored = _a.sent();
+                                                    stored = _c.sent();
                                                     ConsoleLogger_8.logDebug(formId, 'Storing form data', stored);
-                                                    _a.label = 2;
+                                                    _c.label = 2;
                                                 case 2:
+                                                    // reCAPTCHA version 3 doesn't tolerate dynamic script insertion
+                                                    // it should be safe to reload the entire page since
+                                                    // this routine is executed after an enhanced navigation
                                                     window.location.reload();
-                                                    _a.label = 3;
-                                                case 3: return [2 /*return*/];
+                                                    return [3 /*break*/, 4];
+                                                case 3:
+                                                    this.reCaptcha.configure(formId, null, true);
+                                                    _c.label = 4;
+                                                case 4: return [2 /*return*/];
                                             }
                                         });
-                                    }); }, 1000);
+                                    }); }, 500);
                                 });
                                 this._enhancedLoadEventEnabled = true;
                                 ConsoleLogger_8.logDebug(formId, 'Blazor enhancedload event enabled.');

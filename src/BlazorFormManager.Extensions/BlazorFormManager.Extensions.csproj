@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
+		<LangVersion>12.0</LangVersion>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Description>Extensions for BlazorFormManager</Description>
 		<Copyright>© 2022 Karfamsoft. All rights reserved.</Copyright>
@@ -37,7 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\BlazorFormManager\BlazorFormManager.csproj" />
+	  <ProjectReference Include="..\BlazorFormManager.Abstractions\BlazorFormManager.Abstractions.csproj" />
 	</ItemGroup>
 
 </Project>

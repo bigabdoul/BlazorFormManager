@@ -14,29 +14,29 @@ namespace BlazorFormManager.Extensions.Configuration
         
         private const string ReCAPTCHA = "BlazorFormManager:ReCaptcha:";
         private const string Versions = ReCAPTCHA + "Versions";
-        private const string VerificationTokenName = nameof(ReCaptchaOptions.VerificationTokenName);
-        private const string AllowLocalHost = nameof(ReCaptchaOptions.AllowLocalHost);
-        private const string Invisible = nameof(ReCaptchaOptions.Invisible);
-        private const string LanguageCode = nameof(ReCaptchaOptions.LanguageCode);
+        private const string VerificationTokenName = nameof(IReCaptchaOptions.VerificationTokenName);
+        private const string AllowLocalHost = nameof(IReCaptchaOptions.AllowLocalHost);
+        private const string Invisible = nameof(IReCaptchaOptions.Invisible);
+        private const string LanguageCode = nameof(IReCaptchaOptions.LanguageCode);
 
         #endregion
 
         /// <summary>
-        /// Reads all reCAPTCHA configuration settings except the <see cref="ReCaptchaOptions.SecretKey"/> value.
+        /// Reads all reCAPTCHA configuration settings except the <see cref="IReCaptchaOptions.SecretKey"/> value.
         /// </summary>
         /// <param name="config">The configuration.</param>
         /// <returns>
         /// An initialized instance of the <see cref="Dictionary{TKey, TValue}"/>
-        /// containing <see cref="ReCaptchaOptions"/> values.
+        /// containing <see cref="IReCaptchaOptions"/> values.
         /// </returns>
         /// <exception cref="ReCaptchaConfigurationException">No reCAPTCHA versions found.</exception>
-        public static IDictionary<string, ReCaptchaOptions> ReadReCaptcha(this IConfiguration config)
+        public static IDictionary<string, IReCaptchaOptions> ReadReCaptcha(this IConfiguration config)
         {
             var versions = config[Versions]?.Split(',', ';');
 
             if (versions.Any())
             {
-                var dic = new Dictionary<string, ReCaptchaOptions>();
+                var dic = new Dictionary<string, IReCaptchaOptions>();
                 
                 // default values
                 var defaultTokenName = config[ReCAPTCHA + VerificationTokenName];
@@ -51,7 +51,7 @@ namespace BlazorFormManager.Extensions.Configuration
                 {
                     var v = ver.Trim();
                     var key = $"{ReCAPTCHA}{v}:";
-                    var size = config.GetValue(key + nameof(ReCaptchaOptions.Size), "normal");
+                    var size = config.GetValue(key + nameof(IReCaptchaOptions.Size), "normal");
                     var isInvisible = config.GetValue(key + Invisible, defaultIsInvisible);
 
                     if (isInvisible)
@@ -62,9 +62,9 @@ namespace BlazorFormManager.Extensions.Configuration
                         Version = v,
                         Size = size,
                         Invisible = isInvisible,
-                        SiteKey = config[key + nameof(ReCaptchaOptions.SiteKey)],
-                        Theme = config.GetValue(key + nameof(ReCaptchaOptions.Theme), "light"),
-                        CssSelector = config.GetValue(key + nameof(ReCaptchaOptions.CssSelector), ".g-recaptcha"),
+                        SiteKey = config[key + nameof(IReCaptchaOptions.SiteKey)],
+                        Theme = config.GetValue(key + nameof(IReCaptchaOptions.Theme), "light"),
+                        CssSelector = config.GetValue(key + nameof(IReCaptchaOptions.CssSelector), ".g-recaptcha"),
                         LanguageCode = config.GetValue(key + LanguageCode, defaultLanguageCode),
                         VerificationTokenName = config.GetValue(key + VerificationTokenName, defaultTokenName),
                         AllowLocalHost = config.GetValue(key + AllowLocalHost, defaultAllowLocalhost),
@@ -83,7 +83,7 @@ namespace BlazorFormManager.Extensions.Configuration
         /// <param name="config">The configuration.</param>
         /// <returns>
         /// An initialized instance of the <see cref="Dictionary{TKey, TValue}"/>
-        /// containing <see cref="ReCaptchaOptions"/> values.
+        /// containing <see cref="IReCaptchaOptions"/> values.
         /// </returns>
         /// <exception cref="ReCaptchaConfigurationException">No reCAPTCHA versions found.</exception>
         public static IDictionary<string, string> ReadReCaptchaSecrets(this IConfiguration config)

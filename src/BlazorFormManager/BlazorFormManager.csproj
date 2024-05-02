@@ -41,7 +41,7 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DocumentationFile>$(ProjectDir)\src\BlazorFormManager\bin\Debug\$(TargetFramework)\BlazorFormManager.xml</DocumentationFile>
+		<DocumentationFile>$(ProjectDir)\src\BlazorFormManager\bin\$(Configuration)\$(TargetFramework)\BlazorFormManager.xml</DocumentationFile>
 		<DefineConstants>TRACE</DefineConstants>
 	</PropertyGroup>
 
@@ -74,6 +74,7 @@ For quick usage, read https://github.com/bigabdoul/BlazorFormManager/blob/master
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\BlazorFormManager.Abstractions\BlazorFormManager.Abstractions.csproj" />
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations.Core\Carfamsoft.Model2View.Annotations.Core.csproj" />
 		<ProjectReference Include="..\Carfamsoft.Model2View\src\Carfamsoft.Model2View.Annotations\Carfamsoft.Model2View.Annotations.csproj" />
 		<ProjectReference Include="..\Carfamsoft.JSInterop\Carfamsoft.JSInterop.csproj" />

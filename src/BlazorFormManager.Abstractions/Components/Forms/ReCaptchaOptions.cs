@@ -3,7 +3,7 @@
     /// <summary>
     /// Encapsulates configuration properties for Google's reCAPTCHA.
     /// </summary>
-    public class ReCaptchaOptions
+    public class ReCaptchaOptions : IReCaptchaOptions
     {
         /// <summary>
         /// Gets or sets the reCAPTCHA (public) site key.

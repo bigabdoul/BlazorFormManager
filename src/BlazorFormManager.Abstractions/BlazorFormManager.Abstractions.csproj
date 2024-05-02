@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
+	<LangVersion>12.0</LangVersion>
+	<Nullable>enable</Nullable>
+	<RootNamespace>BlazorFormManager</RootNamespace>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<DocumentationFile>$(ProjectDir)\src\BlazorFormManager.Abstractions\bin\$(Configuration)\$(TargetFramework)\BlazorFormManager.Abstractions.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

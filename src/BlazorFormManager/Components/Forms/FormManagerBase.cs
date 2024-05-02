@@ -416,7 +416,7 @@ namespace BlazorFormManager.Components.Forms
         /// <summary>
         /// If set, enables Google's reCAPTCHA technology.
         /// </summary>
-        [Parameter] public ReCaptchaOptions? ReCaptcha { get; set; }
+        [Parameter] public IReCaptchaOptions? ReCaptcha { get; set; }
 
         /// <summary>
         /// Whether to enable the Quill rich text editor (https://quilljs.com).
