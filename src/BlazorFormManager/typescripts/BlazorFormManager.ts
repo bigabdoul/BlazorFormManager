@@ -14,6 +14,7 @@ const dotNet: DotNetStaticReference = global.DotNet;
 const XHRSTATE = { UNSENT: 0, OPENED: 1, HEADERS_RECEIVED: 2, LOADING: 3, DONE: 4 };
 
 const _resolvedPromise: Promise<boolean> = new Promise((resolve, _) => resolve(false));
+const SESSION_FORMDATA_KEY = 'BlazorFormManager.Session.FormData';
 
 /** Represents an object that manages forms' interactions and submissions. */
 export class BlazorFormManager implements IBlazorFormManager, FormManagerInteropRef {
@@ -243,7 +244,6 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
     registerSubmitHandler(options: FormManagerOptions) {
         const {
             formId,
-            onGetModel,
             onBeforeSubmit,
             onBeforeSend,
             onSendFailed,
@@ -253,6 +253,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             reCaptcha,
             enhancedLoad,
             onEnhancedLoad,
+            sessionStorageKey,
         } = options;
 
         const _this = this;
@@ -266,55 +267,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             formId,
             requireModel,
             reCaptcha,
-            getFormData: async () => {
-                // custom routine for retrieving form data defined with models
-                let model;
-
-                if (_isString(onGetModel)) {
-                    model = await this.invokeDotNet(formId, onGetModel);
-                    logDebug(formId, "Model", model);
-                }
-
-                if (model === null) {
-                    if (requireModel) {
-                        logError(formId, "A model is required.");
-                    } else {
-                        logDebug(formId, "Model not defined. Caller will collect FormData.");
-                    }
-                    return { hasFiles: false };
-                }
-
-                // collect existing inputs from the form
-                const form = document.getElementById(formId) as HTMLFormElement;
-                const enctype = form.getAttribute("enctype") || 'multipart/form-data';
-
-                // check if the form contains any files;
-                // determines whether file upload progress events are monitored
-                const hasFiles = containsFiles(form);
-
-                if (enctype.toLowerCase().indexOf('json') > -1) {
-                    if (hasFiles)
-                        logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
-                    else
-                        logDebug(formId, "Collecting form model data as JSON...");
-                    // send as JSON
-                    const obj: any = Object;
-                    const json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
-                        .replace('"true"', 'true')
-                        .replace('"false"', 'false');
-                    return { json, hasFiles };
-                } else {
-                    logDebug(formId, "Collecting form model data...");
-
-                    const formData = new FormData();
-
-                    // add additional form data values using the model...
-                    this.collectModelData(model, formData);
-                    formDataMerge(formData, new FormData(form));
-
-                    return { hasFiles, formData };
-                }
-            },
+            getFormData: () => this.getFormData(formId),
             beforeSubmit: async function () {
                 let cancel = false;
                 if (_isString(onBeforeSubmit))
@@ -378,6 +331,74 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
                 extraProperties,
             };
         }
+    }
+
+    async getFormData(formId: string) {
+        const { onGetModel, requireModel } = Forms[formId] || {};
+
+        // custom routine for retrieving form data defined with models
+        let model;
+
+        if (_isString(onGetModel)) {
+            model = await this.invokeDotNet(formId, onGetModel);
+            logDebug(formId, "Model", model);
+        }
+
+        if (model === null) {
+            if (requireModel) {
+                logError(formId, "A model is required.");
+            } else {
+                logDebug(formId, "Model not defined. Caller will collect FormData.");
+            }
+            return { hasFiles: false, formData: undefined, json: '' };
+        }
+
+        // collect existing inputs from the form
+        const form = document.getElementById(formId) as HTMLFormElement;
+        const enctype = form.getAttribute("enctype") || 'multipart/form-data';
+
+        // check if the form contains any files;
+        // determines whether file upload progress events are monitored
+        const hasFiles = containsFiles(form);
+
+        if (enctype.toLowerCase().indexOf('json') > -1) {
+            if (hasFiles)
+                logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
+            else
+                logDebug(formId, "Collecting form model data as JSON...");
+            // send as JSON
+            const json = BlazorFormManager.objectFromEntries(new FormData(form), model);
+            return { hasFiles, formData: undefined, json };
+        } else {
+            logDebug(formId, "Collecting form model data...");
+
+            const formData = new FormData();
+
+            // add additional form data values using the model...
+            this.collectModelData(model, formData);
+            formDataMerge(formData, new FormData(form));
+
+            return { hasFiles, formData, json: '' };
+        }
+    }
+
+    async storeFormData(formId: string, sessionStorageKey: string) {
+        const { formData, json } = await this.getFormData(formId);
+        const itemKey = `${SESSION_FORMDATA_KEY}:${sessionStorageKey}`;
+        if (json) {
+            sessionStorage.setItem(itemKey, json);
+            return json;
+        }
+        else if (formData) {
+            const data = BlazorFormManager.objectFromEntries(formData);
+            sessionStorage.setItem(itemKey, data);
+            return data;
+        }
+    }
+
+    retrieveFormData(sessionStorageKey: string) {
+        const itemKey = `${SESSION_FORMDATA_KEY}:${sessionStorageKey}`;
+        return sessionStorage.getItem(itemKey);
     }
 
     /**
@@ -529,8 +550,7 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
             if (this.reCaptcha) {
                 logDebug(formId, "Submitting form using reCAPTCHA.");
                 this.reCaptcha.submitForm(formId, xhr, objData, reCaptcha);
-            } else
-            {
+            } else {
                 logDebug(formId, "Submitting form using XMLHttpRequest.");
                 xhr.send(objData);
             }
@@ -898,6 +918,17 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
         return false;
     }
 
+    private static objectFromEntries(data: any, fallback?: undefined) {
+        //const obj: any = Object;
+        //const json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
+        //    .replace('"true"', 'true')
+        //    .replace('"false"', 'false');
+
+        const obj: any = Object;
+        return JSON.stringify(obj.fromEntries && obj.fromEntries(data) || fallback || {})
+            .replace('"true"', 'true')
+            .replace('"false"', 'false');
+    }
 
     /**
      * Collect all processed (approved) files before submitting the form.
@@ -1046,15 +1077,31 @@ export class BlazorFormManager implements IBlazorFormManager, FormManagerInterop
 
     private _enableEnhancedLoad(formId: string, enabled: boolean, dotnetMethodName: string) {
         const Blazor: any = global['Blazor'];
-        if (Blazor && Blazor.addEventListener) {
+        if (Blazor?.addEventListener) {
             if (enabled) {
                 if (!this._enhancedLoadEventEnabled) {
                     Blazor.addEventListener('enhancedload', () => {
+                        logDebug(formId, 'Blazor.enhancedload event occurred!');
                         // the method must be static
                         // dotNet.invokeMethodAsync(AssemblyName, dotnetMethodName, window.location.href);
-                        setTimeout(() => {
-                            this.reCaptcha && this.reCaptcha.configure(formId, null, true);
-                        }, 1000);
+                        setTimeout(async () => {
+                            // if reCAPTCHA is required, force a full refresh to make it work correctly
+                            if (this.reCaptcha?.requiresReCaptcha()) {
+                                if (this.reCaptcha.getFirstOption()?.version === 'v3') {
+                                    const { sessionStorageKey } = Forms[formId] || {};
+                                    if (_isString(sessionStorageKey)) {
+                                        const stored = await this.storeFormData(formId, sessionStorageKey);
+                                        logDebug(formId, 'Storing form data', stored);
+                                    }
+                                    // reCAPTCHA version 3 doesn't tolerate dynamic script insertion
+                                    // it should be safe to reload the entire page since
+                                    // this routine is executed after an enhanced navigation
+                                    window.location.reload();
+                                } else {
+                                    this.reCaptcha.configure(formId, null, true);
+                                }
+                            }
+                        }, 500);
                     });
                     this._enhancedLoadEventEnabled = true;
                     logDebug(formId, 'Blazor enhancedload event enabled.');

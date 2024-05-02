@@ -3081,7 +3081,7 @@ System.register("ChartjsHelper", ["Utils"], function (exports_12, context_12) {
 });
 System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragDropManager", "FileReaderManager", "ReCAPTCHA", "QuillEditor", "ChartjsHelper", "Shared", "Utils"], function (exports_13, context_13) {
     "use strict";
-    var ConsoleLogger_8, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, ChartjsHelper_1, Shared_8, Utils_8, global, dotNet, XHRSTATE, _resolvedPromise, BlazorFormManager;
+    var ConsoleLogger_8, DomEventManager_3, DragDropManager_1, FileReaderManager_1, ReCAPTCHA_1, QuillEditor_1, ChartjsHelper_1, Shared_8, Utils_8, global, dotNet, XHRSTATE, _resolvedPromise, SESSION_FORMDATA_KEY, BlazorFormManager;
     var __moduleName = context_13 && context_13.id;
     return {
         setters: [
@@ -3118,6 +3118,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
             dotNet = global.DotNet;
             XHRSTATE = { UNSENT: 0, OPENED: 1, HEADERS_RECEIVED: 2, LOADING: 3, DONE: 4 };
             _resolvedPromise = new Promise(function (resolve, _) { return resolve(false); });
+            SESSION_FORMDATA_KEY = 'BlazorFormManager.Session.FormData';
             BlazorFormManager = /** @class */ (function () {
                 /** Construct a new instance of the form manager class. */
                 function BlazorFormManager() {
@@ -3313,7 +3314,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                  */
                 BlazorFormManager.prototype.registerSubmitHandler = function (options) {
                     var _this_1 = this;
-                    var formId = options.formId, onGetModel = options.onGetModel, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha, enhancedLoad = options.enhancedLoad, onEnhancedLoad = options.onEnhancedLoad;
+                    var formId = options.formId, onBeforeSubmit = options.onBeforeSubmit, onBeforeSend = options.onBeforeSend, onSendFailed = options.onSendFailed, onSendSucceeded = options.onSendSucceeded, onReCaptchaActivity = options.onReCaptchaActivity, requireModel = options.requireModel, reCaptcha = options.reCaptcha, enhancedLoad = options.enhancedLoad, onEnhancedLoad = options.onEnhancedLoad, sessionStorageKey = options.sessionStorageKey;
                     var _this = this;
                     var recaptcha = _this.initReCaptcha(formId, reCaptcha, onReCaptchaActivity);
                     if (enhancedLoad && Utils_8._isString(onEnhancedLoad)) {
@@ -3323,53 +3324,7 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         formId: formId,
                         requireModel: requireModel,
                         reCaptcha: reCaptcha,
-                        getFormData: function () { return __awaiter(_this_1, void 0, void 0, function () {
-                            var model, form, enctype, hasFiles, obj, json, formData;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (!Utils_8._isString(onGetModel)) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, this.invokeDotNet(formId, onGetModel)];
-                                    case 1:
-                                        model = _a.sent();
-                                        ConsoleLogger_8.logDebug(formId, "Model", model);
-                                        _a.label = 2;
-                                    case 2:
-                                        if (model === null) {
-                                            if (requireModel) {
-                                                ConsoleLogger_8.logError(formId, "A model is required.");
-                                            }
-                                            else {
-                                                ConsoleLogger_8.logDebug(formId, "Model not defined. Caller will collect FormData.");
-                                            }
-                                            return [2 /*return*/, { hasFiles: false }];
-                                        }
-                                        form = document.getElementById(formId);
-                                        enctype = form.getAttribute("enctype") || 'multipart/form-data';
-                                        hasFiles = Utils_8.containsFiles(form);
-                                        if (enctype.toLowerCase().indexOf('json') > -1) {
-                                            if (hasFiles)
-                                                ConsoleLogger_8.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
-                                            else
-                                                ConsoleLogger_8.logDebug(formId, "Collecting form model data as JSON...");
-                                            obj = Object;
-                                            json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
-                                                .replace('"true"', 'true')
-                                                .replace('"false"', 'false');
-                                            return [2 /*return*/, { json: json, hasFiles: hasFiles }];
-                                        }
-                                        else {
-                                            ConsoleLogger_8.logDebug(formId, "Collecting form model data...");
-                                            formData = new FormData();
-                                            // add additional form data values using the model...
-                                            this.collectModelData(model, formData);
-                                            Utils_8.formDataMerge(formData, new FormData(form));
-                                            return [2 /*return*/, { hasFiles: hasFiles, formData: formData }];
-                                        }
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); },
+                        getFormData: function () { return _this_1.getFormData(formId); },
                         beforeSubmit: function () {
                             return __awaiter(this, void 0, void 0, function () {
                                 var cancel;
@@ -3455,6 +3410,80 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                             extraProperties: extraProperties,
                         };
                     }
+                };
+                BlazorFormManager.prototype.getFormData = function (formId) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var _a, onGetModel, requireModel, model, form, enctype, hasFiles, json, formData;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = Shared_8.Forms[formId] || {}, onGetModel = _a.onGetModel, requireModel = _a.requireModel;
+                                    if (!Utils_8._isString(onGetModel)) return [3 /*break*/, 2];
+                                    return [4 /*yield*/, this.invokeDotNet(formId, onGetModel)];
+                                case 1:
+                                    model = _b.sent();
+                                    ConsoleLogger_8.logDebug(formId, "Model", model);
+                                    _b.label = 2;
+                                case 2:
+                                    if (model === null) {
+                                        if (requireModel) {
+                                            ConsoleLogger_8.logError(formId, "A model is required.");
+                                        }
+                                        else {
+                                            ConsoleLogger_8.logDebug(formId, "Model not defined. Caller will collect FormData.");
+                                        }
+                                        return [2 /*return*/, { hasFiles: false, formData: undefined, json: '' }];
+                                    }
+                                    form = document.getElementById(formId);
+                                    enctype = form.getAttribute("enctype") || 'multipart/form-data';
+                                    hasFiles = Utils_8.containsFiles(form);
+                                    if (enctype.toLowerCase().indexOf('json') > -1) {
+                                        if (hasFiles)
+                                            ConsoleLogger_8.logWarning(formId, "The form contains files which cannot be sent using the JSON format.");
+                                        else
+                                            ConsoleLogger_8.logDebug(formId, "Collecting form model data as JSON...");
+                                        json = BlazorFormManager.objectFromEntries(new FormData(form), model);
+                                        return [2 /*return*/, { hasFiles: hasFiles, formData: undefined, json: json }];
+                                    }
+                                    else {
+                                        ConsoleLogger_8.logDebug(formId, "Collecting form model data...");
+                                        formData = new FormData();
+                                        // add additional form data values using the model...
+                                        this.collectModelData(model, formData);
+                                        Utils_8.formDataMerge(formData, new FormData(form));
+                                        return [2 /*return*/, { hasFiles: hasFiles, formData: formData, json: '' }];
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                };
+                BlazorFormManager.prototype.storeFormData = function (formId, sessionStorageKey) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var _a, formData, json, itemKey, data;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0: return [4 /*yield*/, this.getFormData(formId)];
+                                case 1:
+                                    _a = _b.sent(), formData = _a.formData, json = _a.json;
+                                    itemKey = "".concat(SESSION_FORMDATA_KEY, ":").concat(sessionStorageKey);
+                                    if (json) {
+                                        sessionStorage.setItem(itemKey, json);
+                                        return [2 /*return*/, json];
+                                    }
+                                    else if (formData) {
+                                        data = BlazorFormManager.objectFromEntries(formData);
+                                        sessionStorage.setItem(itemKey, data);
+                                        return [2 /*return*/, data];
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    });
+                };
+                BlazorFormManager.prototype.retrieveFormData = function (sessionStorageKey) {
+                    var itemKey = "".concat(SESSION_FORMDATA_KEY, ":").concat(sessionStorageKey);
+                    return sessionStorage.getItem(itemKey);
                 };
                 /**
                  * Set the log level.
@@ -3593,11 +3622,8 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                                     if (isJson) {
                                         this.setRequestHeaders(formId, xhr, { 'content-type': 'application/json', accept: 'application/json; text/plain' });
                                     }
-                                    if (!isJson) {
-                                        ConsoleLogger_8.logDebug(formId, "Adjusting bad form data keys.");
-                                        this.adjustBadFormDataKeys(formData);
-                                    }
-                                    objData = isJson ? json : formData;
+                                    ConsoleLogger_8.logDebug(formId, "Adjusting bad form data keys.");
+                                    objData = this.adjustBadFormDataKeys(formData || json);
                                     if (this.reCaptcha) {
                                         ConsoleLogger_8.logDebug(formId, "Submitting form using reCAPTCHA.");
                                         this.reCaptcha.submitForm(formId, xhr, objData, reCaptcha);
@@ -3948,6 +3974,16 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         ConsoleLogger_8.logInfo(formId, message, options);
                     return false;
                 };
+                BlazorFormManager.objectFromEntries = function (data, fallback) {
+                    //const obj: any = Object;
+                    //const json = JSON.stringify(obj.fromEntries && obj.fromEntries(new FormData(form)) || model)
+                    //    .replace('"true"', 'true')
+                    //    .replace('"false"', 'false');
+                    var obj = Object;
+                    return JSON.stringify(obj.fromEntries && obj.fromEntries(data) || fallback || {})
+                        .replace('"true"', 'true')
+                        .replace('"false"', 'false');
+                };
                 /**
                  * Collect all processed (approved) files before submitting the form.
                  * @param formId The form identifier.
@@ -4026,17 +4062,29 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                     return success;
                 };
                 /**
-                 * Remove inappropriate form data keys.
-                 * @param formData The form data to clean up.
+                 * Remove inappropriate data keys.
+                 * @param data The data to clean up.
                  */
-                BlazorFormManager.prototype.adjustBadFormDataKeys = function (formData) {
+                BlazorFormManager.prototype.adjustBadFormDataKeys = function (data) {
                     var RVT_KEY1 = '__RequestVerificationToken';
                     var RVT_KEY2 = 'requestVerificationToken';
-                    var rvt1 = formData.get(RVT_KEY1);
-                    var rvt2 = formData.get(RVT_KEY2);
-                    if (!Utils_8._isString(rvt1))
-                        formData.set(RVT_KEY1, rvt2);
-                    formData.delete(RVT_KEY2);
+                    if (data instanceof FormData) {
+                        var rvt1 = data.get(RVT_KEY1);
+                        var rvt2 = data.get(RVT_KEY2);
+                        if (!Utils_8._isString(rvt1))
+                            data.set(RVT_KEY1, rvt2);
+                        data.delete(RVT_KEY2);
+                        return data;
+                    }
+                    else {
+                        var json = JSON.parse(data);
+                        var rvt1 = json[RVT_KEY1];
+                        var rvt2 = json[RVT_KEY2];
+                        if (!Utils_8._isString(rvt1))
+                            json[RVT_KEY1] = rvt2;
+                        delete json[RVT_KEY2];
+                        return JSON.stringify(json);
+                    }
                 };
                 /**
                  * Recursively append to the specified form data properties and values from the given model.
@@ -4067,11 +4115,29 @@ System.register("BlazorFormManager", ["ConsoleLogger", "DomEventManager", "DragD
                         if (enabled) {
                             if (!this._enhancedLoadEventEnabled) {
                                 Blazor.addEventListener('enhancedload', function () {
+                                    ConsoleLogger_8.logDebug(formId, 'enhancedload occurred!');
                                     // the method must be static
                                     // dotNet.invokeMethodAsync(AssemblyName, dotnetMethodName, window.location.href);
-                                    setTimeout(function () {
-                                        _this_1.reCaptcha && _this_1.reCaptcha.configure(formId, null, true);
-                                    }, 1000);
+                                    setTimeout(function () { return __awaiter(_this_1, void 0, void 0, function () {
+                                        var sessionStorageKey, stored;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    if (!(this.reCaptcha && this.reCaptcha.requiresReCaptcha())) return [3 /*break*/, 3];
+                                                    sessionStorageKey = (Shared_8.Forms[formId] || {}).sessionStorageKey;
+                                                    if (!Utils_8._isString(sessionStorageKey)) return [3 /*break*/, 2];
+                                                    return [4 /*yield*/, this.storeFormData(formId, sessionStorageKey)];
+                                                case 1:
+                                                    stored = _a.sent();
+                                                    ConsoleLogger_8.logDebug(formId, 'Storing form data', stored);
+                                                    _a.label = 2;
+                                                case 2:
+                                                    window.location.reload();
+                                                    _a.label = 3;
+                                                case 3: return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }, 1000);
                                 });
                                 this._enhancedLoadEventEnabled = true;
                                 ConsoleLogger_8.logDebug(formId, 'Blazor enhancedload event enabled.');

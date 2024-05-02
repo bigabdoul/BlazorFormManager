@@ -75,6 +75,7 @@ interface FormManagerOptions extends FormManagerBaseOptions {
     requireModel?: boolean;
     enhancedLoad?: boolean;
     onEnhancedLoad?: string;
+    sessionStorageKey?: string;
     assembly?: string;
     requestHeaders?: IDictionary<string>;
     reCaptcha?: ReCaptchaOptions;
