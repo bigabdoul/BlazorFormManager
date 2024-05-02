@@ -15,12 +15,12 @@ namespace BlazorFormManager.Extensions.Services
         private readonly IDictionary<string, IReCaptchaOptions> _recaptcha = configuration.ReadReCaptcha();
 
         /// <summary>
-        /// Gets or sets the version 2 configuration options.
+        /// Gets the version 2 configuration options.
         /// </summary>
         public IReCaptchaOptions Version2 => GetVersion("v2");
 
         /// <summary>
-        /// Gets or sets the version 3 configuration options.
+        /// Gets the version 3 configuration options.
         /// </summary>
         public IReCaptchaOptions Version3 => GetVersion("v3");
 

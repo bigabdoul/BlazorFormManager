@@ -1,5 +1,4 @@
-﻿using Carfamsoft.Model2View.Shared.Extensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace BlazorFormManager.Components
@@ -58,7 +57,7 @@ namespace BlazorFormManager.Components
         /// with a non-blank <see cref="ComponentImage.Src"/> property value.
         /// </summary>
         /// <returns></returns>
-        public bool HasImage() => Values.Any(v => true == v.Image?.Src.IsNotBlank());
+        public bool HasImage() => Values.Any(v => !string.IsNullOrWhiteSpace(v.Image?.Src));
 
         /// <summary>
         /// Determines whether the collections contains any <see cref="ComponentImage"/>
@@ -68,7 +67,7 @@ namespace BlazorFormManager.Components
         /// <param name="types">The types of the messages to look up.</param>
         /// <returns></returns>
         public bool HasImage(params MessageType[] types) => 
-            Values.Any(v => types.Contains(v.Type) && true == v.Image?.Src.IsNotBlank());
+            Values.Any(v => types.Contains(v.Type) && !string.IsNullOrWhiteSpace(v.Image?.Src));
 
         /// <summary>
         /// Returns the first <see cref="ComponentMessage"/> that 

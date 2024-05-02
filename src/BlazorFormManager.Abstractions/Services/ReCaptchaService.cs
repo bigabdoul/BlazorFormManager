@@ -8,12 +8,12 @@ namespace BlazorFormManager.Services
     public interface IReCaptchaService
     {
         /// <summary>
-        /// Gets or sets the version 2 configuration options.
+        /// Gets the version 2 configuration options.
         /// </summary>
         IReCaptchaOptions Version2 { get; }
 
         /// <summary>
-        /// Gets or sets the version 3 configuration options.
+        /// Gets the version 3 configuration options.
         /// </summary>
         IReCaptchaOptions Version3 { get; }
 
